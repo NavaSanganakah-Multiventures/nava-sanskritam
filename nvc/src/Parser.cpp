@@ -33,7 +33,10 @@ std::string Parser::stripVibhakti(std::string id, std::string* role) {
 }
 
 std::unique_ptr<Statement> Parser::parseStatement() {
-    if (match(TokenType::KEYWORD, "विधिः")) return parseFunctionDeclaration();
+    if (match(TokenType::KEYWORD, "विधिः") || 
+        match(TokenType::KEYWORD, "क्रिया") || 
+        match(TokenType::KEYWORD, "सूत्रम्") || 
+        match(TokenType::KEYWORD, "योगः")) return parseFunctionDeclaration();
     if (match(TokenType::KEYWORD, "फलम्")) return parseReturnStatement();
     if (match(TokenType::KEYWORD, "अस्ति")) return parseVariableDeclaration();
     if (match(TokenType::KEYWORD, "नित्य")) return parseConstantDeclaration();

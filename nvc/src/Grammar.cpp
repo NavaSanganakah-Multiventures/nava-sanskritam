@@ -9,6 +9,7 @@ const std::vector<std::u32string> Grammar::shivaSutras = {
 };
 
 Grammar::VerbMeta Grammar::analyzeTinanta(const std::u32string& word) {
+    // Default to LAT/PRATHAMA/SINGULAR but preserve original word as root
     VerbMeta meta = { word, Lakara::LAT, 1, 1, Pada::PARASMAIPADA, Gana::BHVADI };
     if (word.empty()) return meta;
 
