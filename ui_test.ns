@@ -1,0 +1,30 @@
+// SUL v16.0 - Darshanam UI Verification Script
+// Creating a Native Sanskrit App Window
+
+दर्शनम् मुख्य_पटलः {
+    
+    // 1. Background Container
+    दृश्यम् पटलम्(०, ०) {
+        नाम: "Nava-Sanskritam GUI";
+        रङ्गः: श्वेतवर्णः;
+    }
+
+    // 2. Decorative Text
+    दृश्यम् पाठः(२०, २०) {
+        नाम: "नमस्ते! दर्शनम्-एन्जिनं स्वागतम्।";
+        रङ्गः: कृष्णवर्णः;
+    }
+
+    // 3. Action Buttons
+    दृश्यम् बटनम्(५०, १००) {
+        नाम: "आरम्भः (Start)";
+        रङ्गः: नीलवर्णः;
+    }
+
+    दृश्यम् बटनम्(२००, १००) {
+        नाम: "निरोधः (Exit)";
+        रङ्गः: रक्तवर्णः;
+    }
+}
+
+वद("UI Engine Initiated... Checking Render Buffers.");

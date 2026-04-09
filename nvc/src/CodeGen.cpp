@@ -102,6 +102,8 @@ llvm::Value* CodeGen::generateNode(ASTNode* node) {
             return generateObjectLiteral(static_cast<ObjectLiteral*>(node));
         case ASTNodeType::MemberAccess:
             return generateMemberAccess(static_cast<MemberAccess*>(node));
+        case ASTNodeType::DarshanamBlock:
+            return generateDarshanamBlock(static_cast<DarshanamBlock*>(node));
         default:
             throw std::runtime_error("Unknown AST Node Type");
     }
@@ -442,6 +444,57 @@ llvm::Value* CodeGen::generateFunctionDeclaration(FunctionDeclaration* node) {
     namedValues = oldBindings;
 
     return F;
+}
+
+llvm::Value* CodeGen::generateDarshanamBlock(DarshanamBlock* node) {
+    // SUL UI Factory Call: SUL_UI_CreateWindow(id)
+    llvm::Function* createWin = module->getFunction("SUL_UI_CreateWindow");
+    if (!createWin) {
+        std::vector<llvm::Type*> args = { llvm::PointerType::getUnqual(*context) };
+        llvm::FunctionType* FT = llvm::FunctionType::get(llvm::Type::getVoidTy(*context), args, false);
+        createWin = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "SUL_UI_CreateWindow", module.get());
+    }
+
+    builder->CreateCall(createWin, { builder->CreateGlobalStringPtr(node->id) });
+
+    for (const auto& el : node->elements) {
+        generateDrishyamElement(el.get());
+    }
+
+    return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
+}
+
+llvm::Value* CodeGen::generateDrishyamElement(DrishyamElement* node) {
+    // SUL UI Call: SUL_UI_AddWidget(type, label, x, y, color)
+    llvm::Function* addWidget = module->getFunction("SUL_UI_AddWidget");
+    if (!addWidget) {
+        std::vector<llvm::Type*> args = { 
+            llvm::PointerType::getUnqual(*context), // type
+            llvm::PointerType::getUnqual(*context), // label
+            llvm::Type::getDoubleTy(*context),      // x
+            llvm::Type::getDoubleTy(*context),      // y
+            llvm::PointerType::getUnqual(*context)  // color
+        };
+        llvm::FunctionType* FT = llvm::FunctionType::get(llvm::Type::getVoidTy(*context), args, false);
+        addWidget = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "SUL_UI_AddWidget", module.get());
+    }
+
+    std::vector<llvm::Value*> argsV;
+    argsV.push_back(builder->CreateGlobalStringPtr(node->type));
+    argsV.push_back(builder->CreateGlobalStringPtr(node->label.empty() ? "" : node->label));
+    
+    // Position
+    if (node->pos.size() >= 2) {
+        argsV.push_back(generateNode(node->pos[0].get()));
+        argsV.push_back(generateNode(node->pos[1].get()));
+    } else {
+        argsV.push_back(llvm::ConstantFP::get(*context, llvm::APFloat(0.0)));
+        argsV.push_back(llvm::ConstantFP::get(*context, llvm::APFloat(0.0)));
+    }
+    
+    argsV.push_back(builder->CreateGlobalStringPtr(node->color.empty() ? "None" : node->color));
+
+    return builder->CreateCall(addWidget, argsV);
 }
 
 void CodeGen::writeObject(const std::string& filename) {

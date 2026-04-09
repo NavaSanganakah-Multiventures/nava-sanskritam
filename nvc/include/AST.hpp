@@ -21,7 +21,9 @@ enum class ASTNodeType {
     Assignment,
     FunctionDeclaration,
     ObjectLiteral,
-    MemberAccess
+    MemberAccess,
+    DarshanamBlock,
+    DrishyamElement
 };
 
 class ASTNode {
@@ -142,6 +144,22 @@ public:
     std::string pada;   // "Parasmaipada", "Atmanepada"
     std::string gana;   // "Bhvadi", etc.
     ASTNodeType getType() const override { return ASTNodeType::FunctionDeclaration; }
+};
+
+class DrishyamElement : public ASTNode {
+public:
+    std::string type; // "Button", "Text", etc.
+    std::vector<std::unique_ptr<Expression>> pos; // x, y, w, h
+    std::string label;
+    std::string color;
+    ASTNodeType getType() const override { return ASTNodeType::DrishyamElement; }
+};
+
+class DarshanamBlock : public Statement {
+public:
+    std::string id;
+    std::vector<std::unique_ptr<DrishyamElement>> elements;
+    ASTNodeType getType() const override { return ASTNodeType::DarshanamBlock; }
 };
 
 class ObjectLiteral : public Expression {

@@ -40,6 +40,7 @@ std::unique_ptr<Statement> Parser::parseStatement() {
     if (match(TokenType::KEYWORD, "फलम्")) return parseReturnStatement();
     if (match(TokenType::KEYWORD, "अस्ति")) return parseVariableDeclaration();
     if (match(TokenType::KEYWORD, "नित्य")) return parseConstantDeclaration();
+    if (match(TokenType::KEYWORD, "दर्शनम्")) return parseDarshanamBlock();
     if (match(TokenType::KEYWORD, "वद")) return parsePrintStatement();
     if (match(TokenType::KEYWORD, "यदि")) return parseIfStatement();
     if (match(TokenType::KEYWORD, "चक्र")) return parseLoopStatement();
@@ -376,6 +377,54 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
         return expr;
     }
     throw std::runtime_error("Parser Error: Unexpected token '" + peek().value + "' at line " + std::to_string(peek().line) + ", col " + std::to_string(peek().col));
+}
+
+std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
+    Token idToken = consume(TokenType::IDENTIFIER, "Expected Darshanam name.");
+    consume(TokenType::PUNCTUATION, "Expected '{' after Darshanam name.", "{");
+    
+    auto block = std::make_unique<DarshanamBlock>();
+    block->id = idToken.value;
+
+    while (!check(TokenType::PUNCTUATION, "}")) {
+        if (match(TokenType::KEYWORD, "दृश्यम्")) {
+            block->elements.push_back(parseDrishyamElement());
+        } else {
+            advance(); // Skip unknown for now
+        }
+    }
+    consume(TokenType::PUNCTUATION, "Expected '}' after Darshanam block.", "}");
+    return block;
+}
+
+std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expected widget type (e.g. Button).");
+    auto element = std::make_unique<DrishyamElement>();
+    element->type = typeToken.value;
+
+    if (match(TokenType::PUNCTUATION, "(")) {
+        // Parse x, y coordinates
+        element->pos.push_back(parseExpression());
+        consume(TokenType::PUNCTUATION, "Expected ',' between coordinates.", ",");
+        element->pos.push_back(parseExpression());
+        consume(TokenType::PUNCTUATION, "Expected ')' after coordinates.", ")");
+    }
+
+    if (match(TokenType::PUNCTUATION, "{")) {
+        while (!check(TokenType::PUNCTUATION, "}")) {
+            Token key = consume(TokenType::IDENTIFIER, "Expected attribute name.");
+            consume(TokenType::PUNCTUATION, "Expected ':' after attribute.", ":");
+            
+            if (key.value == "नाम") {
+                element->label = consume(TokenType::LITERAL, "Expected label string.").value;
+            } else if (key.value == "रङ्गः") {
+                element->color = consume(TokenType::IDENTIFIER, "Expected color name.").value;
+            }
+            if (check(TokenType::PUNCTUATION, ";")) advance();
+        }
+        consume(TokenType::PUNCTUATION, "Expected '}' after Drishyam attributes.", "}");
+    }
+    return element;
 }
 
 bool Parser::isAtEnd() const {
