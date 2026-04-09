@@ -494,7 +494,14 @@ llvm::Value* CodeGen::generateDrishyamElement(DrishyamElement* node) {
     
     argsV.push_back(builder->CreateGlobalStringPtr(node->color.empty() ? "None" : node->color));
 
-    return builder->CreateCall(addWidget, argsV);
+    builder->CreateCall(addWidget, argsV);
+
+    // SUL v17.0: Recursive rendering for children
+    for (const auto& child : node->children) {
+        generateDrishyamElement(child.get());
+    }
+
+    return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
 }
 
 void CodeGen::writeObject(const std::string& filename) {

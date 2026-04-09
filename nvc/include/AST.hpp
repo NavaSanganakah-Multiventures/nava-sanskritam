@@ -23,7 +23,11 @@ enum class ASTNodeType {
     ObjectLiteral,
     MemberAccess,
     DarshanamBlock,
-    DrishyamElement
+    DrishyamElement,
+    ManjushaElement,
+    SuchiElement,
+    ChittramElement,
+    PrashtihElement
 };
 
 class ASTNode {
@@ -148,10 +152,12 @@ public:
 
 class DrishyamElement : public ASTNode {
 public:
-    std::string type; // "Button", "Text", etc.
+    std::string type; // "Button", "Text", "Box", "List", "Image", "Input"
     std::vector<std::unique_ptr<Expression>> pos; // x, y, w, h
     std::string label;
     std::string color;
+    std::string source; // For Image/Media
+    std::vector<std::unique_ptr<DrishyamElement>> children; // Recursive nesting
     ASTNodeType getType() const override { return ASTNodeType::DrishyamElement; }
 };
 

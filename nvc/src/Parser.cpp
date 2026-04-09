@@ -41,6 +41,10 @@ std::unique_ptr<Statement> Parser::parseStatement() {
     if (match(TokenType::KEYWORD, "अस्ति")) return parseVariableDeclaration();
     if (match(TokenType::KEYWORD, "नित्य")) return parseConstantDeclaration();
     if (match(TokenType::KEYWORD, "दर्शनम्")) return parseDarshanamBlock();
+    if (match(TokenType::KEYWORD, "मंजूषा")) return parseManjushaElement();
+    if (match(TokenType::KEYWORD, "सूची")) return parseSuchiElement();
+    if (match(TokenType::KEYWORD, "चित्त्रम्")) return parseChittramElement();
+    if (match(TokenType::KEYWORD, "प्रविष्टिः")) return parsePrashtihElement();
     if (match(TokenType::KEYWORD, "वद")) return parsePrintStatement();
     if (match(TokenType::KEYWORD, "यदि")) return parseIfStatement();
     if (match(TokenType::KEYWORD, "चक्र")) return parseLoopStatement();
@@ -405,26 +409,60 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
     if (match(TokenType::PUNCTUATION, "(")) {
         // Parse x, y coordinates
         element->pos.push_back(parseExpression());
-        consume(TokenType::PUNCTUATION, "Expected ',' between coordinates.", ",");
-        element->pos.push_back(parseExpression());
+        if (match(TokenType::PUNCTUATION, ",")) {
+            element->pos.push_back(parseExpression());
+        }
         consume(TokenType::PUNCTUATION, "Expected ')' after coordinates.", ")");
     }
 
     if (match(TokenType::PUNCTUATION, "{")) {
         while (!check(TokenType::PUNCTUATION, "}")) {
-            Token key = consume(TokenType::IDENTIFIER, "Expected attribute name.");
-            consume(TokenType::PUNCTUATION, "Expected ':' after attribute.", ":");
-            
-            if (key.value == "नाम") {
-                element->label = consume(TokenType::LITERAL, "Expected label string.").value;
-            } else if (key.value == "रङ्गः") {
-                element->color = consume(TokenType::IDENTIFIER, "Expected color name.").value;
+            if (match(TokenType::KEYWORD, "दृश्यम्") || 
+                match(TokenType::KEYWORD, "मंजूषा") || 
+                match(TokenType::KEYWORD, "सूची")) {
+                // Recursive nesting of children
+                element->children.push_back(parseDrishyamElement());
+            } else {
+                Token key = consume(TokenType::IDENTIFIER, "Expected attribute name.");
+                consume(TokenType::PUNCTUATION, "Expected ':' after attribute.", ":");
+                
+                if (key.value == "नाम") {
+                    element->label = consume(TokenType::LITERAL, "Expected label string.").value;
+                } else if (key.value == "रङ्गः") {
+                    element->color = consume(TokenType::IDENTIFIER, "Expected color name.").value;
+                } else if (key.value == "स्रोतस") {
+                    element->source = consume(TokenType::LITERAL, "Expected source URL.").value;
+                }
+                if (check(TokenType::PUNCTUATION, ";")) advance();
             }
-            if (check(TokenType::PUNCTUATION, ";")) advance();
         }
         consume(TokenType::PUNCTUATION, "Expected '}' after Drishyam attributes.", "}");
     }
     return element;
+}
+
+std::unique_ptr<DrishyamElement> Parser::parseManjushaElement() {
+    auto element = std::make_unique<DrishyamElement>();
+    element->type = "Box";
+    return parseDrishyamElement(); 
+}
+
+std::unique_ptr<DrishyamElement> Parser::parseSuchiElement() {
+    auto element = std::make_unique<DrishyamElement>();
+    element->type = "List";
+    return parseDrishyamElement();
+}
+
+std::unique_ptr<DrishyamElement> Parser::parseChittramElement() {
+    auto element = std::make_unique<DrishyamElement>();
+    element->type = "Image";
+    return parseDrishyamElement();
+}
+
+std::unique_ptr<DrishyamElement> Parser::parsePrashtihElement() {
+    auto element = std::make_unique<DrishyamElement>();
+    element->type = "Input";
+    return parseDrishyamElement();
 }
 
 bool Parser::isAtEnd() const {
