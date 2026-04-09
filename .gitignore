@@ -1,2 +1,11 @@
 node_modules/
 dist/
+nvc/build/
+*.o
+
+hello
+loop_test*
+test_parser_c*
+time_test*
+vibhakti_test*
+nvc/src/runtime.c
