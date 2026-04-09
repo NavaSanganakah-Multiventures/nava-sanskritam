@@ -293,8 +293,22 @@ std::unique_ptr<Expression> Parser::parseAdditive() {
 }
 
 std::unique_ptr<Expression> Parser::parseMultiplicative() {
-    auto expr = parsePrimary();
+    auto expr = parseExponential();
     while (match(TokenType::OPERATOR, "*") || match(TokenType::OPERATOR, "/")) {
+        std::string op = previous().value;
+        auto right = parseExponential();
+        auto bin = std::make_unique<BinaryExpression>();
+        bin->op = op;
+        bin->left = std::move(expr);
+        bin->right = std::move(right);
+        expr = std::move(bin);
+    }
+    return expr;
+}
+
+std::unique_ptr<Expression> Parser::parseExponential() {
+    auto expr = parsePrimary();
+    while (match(TokenType::OPERATOR, "^")) {
         std::string op = previous().value;
         auto right = parsePrimary();
         auto bin = std::make_unique<BinaryExpression>();

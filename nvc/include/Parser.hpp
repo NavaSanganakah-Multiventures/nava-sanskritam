@@ -41,5 +41,6 @@ private:
     std::unique_ptr<Expression> parseRelational();
     std::unique_ptr<Expression> parseAdditive();
     std::unique_ptr<Expression> parseMultiplicative();
+    std::unique_ptr<Expression> parseExponential();
     std::unique_ptr<Expression> parsePrimary();
 };

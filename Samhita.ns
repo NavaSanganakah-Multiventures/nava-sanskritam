@@ -16,6 +16,17 @@
     फलम् संख्या * संख्या;
 }
 
+// Urdhva-Tiryak (Vedic Cross-Multiplication logic Wrapper)
+विधिः ऊर्ध्व_तिर्यग्भ्याम्(अ, ब) {
+    // Current mapping to native mul, but allows specialized speed passes
+    फलम् अ * ब;
+}
+
+// Ghana-mula (Cube Root) logic using Power operator
+विधिः घनमूलम्(संख्या) {
+    फलम् संख्या ^ (१ / ३);
+}
+
 // 2. Logic Sūtras (Nyaya-Sūtras)
 
 // Niyamah (Assertion)

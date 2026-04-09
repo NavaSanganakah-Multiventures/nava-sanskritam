@@ -65,7 +65,7 @@ bool Lexer::isOperatorChar(const std::string& charStr) {
     if (charStr.length() == 1) {
         char c = charStr[0];
         return c == '=' || c == '+' || c == '-' || c == '*' ||
-               c == '/' || c == '<' || c == '>' || c == '!';
+               c == '/' || c == '<' || c == '>' || c == '!' || c == '^';
     }
     return false;
 }

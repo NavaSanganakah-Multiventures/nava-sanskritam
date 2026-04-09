@@ -290,6 +290,10 @@ llvm::Value* CodeGen::generateBinaryExpression(BinaryExpression* node) {
     if (node->op == ">=") return builder->CreateFCmpUGE(L, R, "cmptmp");
     if (node->op == "==") return builder->CreateFCmpUEQ(L, R, "cmptmp");
     if (node->op == "!=") return builder->CreateFCmpUNE(L, R, "cmptmp");
+    if (node->op == "^") {
+        llvm::Function* powF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
+        return builder->CreateCall(powF, {L, R}, "powtmp");
+    }
 
     throw std::runtime_error("Invalid binary operator");
 }
@@ -406,6 +410,20 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         
         builder->SetInsertPoint(passBB);
         return llvm::ConstantFP::get(*context, llvm::APFloat(1.0)); // True
+    }
+
+    // SUL v18.0: Native Math Intrinsics (Jya, Kojya, Vargamulam)
+    if (mangledName == "ज्या" || mangledName == "jya") {
+        llvm::Function* sinF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
+        return builder->CreateCall(sinF, {argsV[0]}, "sintmp");
+    }
+    if (mangledName == "कोज्या" || mangledName == "kojya") {
+        llvm::Function* cosF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
+        return builder->CreateCall(cosF, {argsV[0]}, "costmp");
+    }
+    if (mangledName == "वर्गमूलम्" || mangledName == "vargamulam") {
+        llvm::Function* sqrtF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
+        return builder->CreateCall(sqrtF, {argsV[0]}, "sqrttmp");
     }
 
     return builder->CreateCall(calleeF, argsV, "calltmp");
