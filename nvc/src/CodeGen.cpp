@@ -350,13 +350,15 @@ llvm::Value* CodeGen::generateObjectLiteral(ObjectLiteral* node) {
 }
 
 llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
-    llvm::Function* calleeF = module->getFunction(node->callee->name);
-    if (!calleeF) {
-        throw std::runtime_error("Unknown function referenced: " + node->callee->name);
-    }
+    // SUL v13.0 Native Tiṅ Call Logic
+    std::string mangledName = node->callee->name;
+    // Map call attempt to available mangled functions (e.g., yoga -> nava_yoga_lat)
+    llvm::Function* calleeF = module->getFunction("nava_" + mangledName + "_lat");
+    if (!calleeF) calleeF = module->getFunction("nava_" + mangledName + "_lrt");
+    if (!calleeF) calleeF = module->getFunction(mangledName); // Fallback to raw
 
-    if (calleeF->arg_size() != node->arguments.size() && !calleeF->isVarArg()) {
-        throw std::runtime_error("Incorrect # arguments passed");
+    if (!calleeF) {
+        throw std::runtime_error("Unknown function referenced: " + mangledName);
     }
 
     std::vector<llvm::Value*> argsV;
@@ -365,13 +367,32 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         if (!argsV.back()) return nullptr;
     }
 
+    // Lṛṭ (Async) Dispatch
+    if (node->lakara == "Lrt") {
+        // Placeholder for Async/Promise spawn
+        // In a real runtime, this would call libns_async_spawn(calleeF, argsV)
+        return builder->CreateCall(calleeF, argsV, "asynctmp");
+    }
+
+    // Bahuvachana (Parallel) Dispatch
+    if (node->vachana == 3) {
+        // Simple Parallel Loop simulation (execute 3 times for now)
+        for(int i=0; i<3; ++i) {
+            builder->CreateCall(calleeF, argsV, "paralleltmp");
+        }
+        return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
+    }
+
     return builder->CreateCall(calleeF, argsV, "calltmp");
 }
 
 llvm::Value* CodeGen::generateFunctionDeclaration(FunctionDeclaration* node) {
     std::vector<llvm::Type*> doubles(node->params.size(), llvm::Type::getDoubleTy(*context));
     llvm::FunctionType* FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), doubles, false);
-    llvm::Function* F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, node->id, module.get());
+    
+    // Mangled Name: nava_[id]_[lakara]
+    std::string mangledName = "nava_" + node->id + "_" + (node->lakara.empty() ? "lat" : node->lakara);
+    llvm::Function* F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, mangledName, module.get());
 
     unsigned idx = 0;
     for (auto& arg : F->args()) {

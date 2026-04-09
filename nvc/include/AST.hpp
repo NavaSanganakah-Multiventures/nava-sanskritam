@@ -128,6 +128,8 @@ class CallExpression : public Expression {
 public:
     std::unique_ptr<Identifier> callee;
     std::vector<std::unique_ptr<Expression>> arguments;
+    std::string lakara; // "Lat", "Lrt" (Async), etc.
+    int vachana;        // 3 for parallel execution
     ASTNodeType getType() const override { return ASTNodeType::CallExpression; }
 };
 
@@ -136,6 +138,9 @@ public:
     std::string id;
     std::vector<std::string> params;
     std::unique_ptr<BlockStatement> body;
+    std::string lakara; // "Lat", "Lrt", etc.
+    std::string pada;   // "Parasmaipada", "Atmanepada"
+    std::string gana;   // "Bhvadi", etc.
     ASTNodeType getType() const override { return ASTNodeType::FunctionDeclaration; }
 };
 

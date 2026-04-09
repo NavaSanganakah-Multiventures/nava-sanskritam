@@ -52,14 +52,23 @@ std::unique_ptr<FunctionDeclaration> Parser::parseFunctionDeclaration() {
             if (!params.empty()) {
                 consume(TokenType::PUNCTUATION, "Expected ',' between parameters.", ",");
             }
-            params.push_back(stripVibhakti(consume(TokenType::IDENTIFIER, "Expected parameter name.").value, nullptr));
+            params.push_back(grammar.toUtf8(grammar.analyzeSubanta(grammar.toUtf32(consume(TokenType::IDENTIFIER, "Expected parameter name.").value)).root));
         } while (check(TokenType::PUNCTUATION, ","));
     }
     consume(TokenType::PUNCTUATION, "Expected ')' after parameters.", ")");
 
+    auto meta = grammar.analyzeTinanta(grammar.toUtf32(idToken.value));
     auto decl = std::make_unique<FunctionDeclaration>();
-    decl->id = stripVibhakti(idToken.value, nullptr);
+    decl->id = grammar.toUtf8(meta.root);
     decl->params = std::move(params);
+    
+    // SUL v13.0: Tag Lakara/Pada/Gana
+    if (meta.lakara == Grammar::Lakara::LAT) decl->lakara = "Lat";
+    else if (meta.lakara == Grammar::Lakara::LRT) decl->lakara = "Lrt";
+    else if (meta.lakara == Grammar::Lakara::VIDHI_LIN) decl->lakara = "Vidhi-Lin";
+    else decl->lakara = "Unknown";
+    
+    decl->ipada = (meta.pada == Grammar::Pada::PARASMAIPADA) ? "Parasmaipada" : "Atmanepada";
     decl->body = parseBlock();
     return decl;
 }
@@ -335,12 +344,16 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
 
         if (match(TokenType::PUNCTUATION, "(")) {
             auto call = std::make_unique<CallExpression>();
-            // Update AST to use unique_ptr<Expression> callee if necessary, 
-            // but for now we'll cast or keep it as ID for simpler LLVM parity.
+            auto meta = grammar.analyzeTinanta(grammar.toUtf32(idToken.value));
+            
             auto calleeId = std::make_unique<Identifier>();
-            calleeId->name = name;
+            calleeId->name = grammar.toUtf8(meta.root);
             call->callee = std::move(calleeId);
             
+            // SUL v13.0: Call-time Lakara/Vachana detection
+            if (meta.lakara == Grammar::Lakara::LRT) call->lakara = "Lrt"; 
+            call->vachana = meta.vachana;
+
             if (!check(TokenType::PUNCTUATION, ")")) {
                 do {
                     if (!call->arguments.empty()) {

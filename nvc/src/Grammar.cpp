@@ -8,6 +8,51 @@ const std::vector<std::u32string> Grammar::shivaSutras = {
     U"शषसर्", U"हल्"
 };
 
+Grammar::VerbMeta Grammar::analyzeTinanta(const std::u32string& word) {
+    VerbMeta meta = { word, Lakara::LAT, 1, 1, Pada::PARASMAIPADA, Gana::BHVADI };
+    if (word.empty()) return meta;
+
+    struct TinMap { std::u32string suffix; Lakara l; int p; int v; Pada pada; };
+    static const std::vector<TinMap> tinSuffixes = {
+        // Parasmaipada (Lat - Standard)
+        { U"तः", Lakara::LAT, 1, 2, Pada::PARASMAIPADA },
+        { U"न्ति", Lakara::LAT, 1, 3, Pada::PARASMAIPADA },
+        { U"ति", Lakara::LAT, 1, 1, Pada::PARASMAIPADA },
+        // Parasmaipada (Lrt - Async)
+        { U"इष्यति", Lakara::LRT, 1, 1, Pada::PARASMAIPADA },
+        { U"इष्यतः", Lakara::LRT, 1, 2, Pada::PARASMAIPADA },
+        { U"इष्यन्ति", Lakara::LRT, 1, 3, Pada::PARASMAIPADA },
+        // Lot (Imperative)
+        { U"तु", Lakara::LOT, 1, 1, Pada::PARASMAIPADA },
+        // Lang (Past)
+        { U"त्", Lakara::LANG, 1, 1, Pada::PARASMAIPADA },
+        // Atmanepada (Local/Private)
+        { U"ते", Lakara::LAT, 1, 1, Pada::ATMANEPADA }
+    };
+
+    for (const auto& s : tinSuffixes) {
+        if (word.length() > s.suffix.length() && word.substr(word.length() - s.suffix.length()) == s.suffix) {
+            meta.root = word.substr(0, word.length() - s.suffix.length());
+            meta.lakara = s.l;
+            meta.purusha = s.p;
+            meta.vachana = s.v;
+            meta.pada = s.pada;
+            return meta;
+        }
+    }
+
+    return meta;
+}
+
+std::u32string Grammar::applyVikarana(std::u32string root, Gana g) {
+    switch (g) {
+        case Gana::BHVADI: return root + U"अ"; // Shap
+        case Gana::CURADI: return root + U"अय"; // Nic
+        case Gana::TANADI: return root + U"उ"; // u
+        default: return root;
+    }
+}
+
 std::u32string Grammar::resolvePratyahara(const std::string& name) {
     std::u32string u32name = toUtf32(name);
     if (u32name.length() < 2) return U"";

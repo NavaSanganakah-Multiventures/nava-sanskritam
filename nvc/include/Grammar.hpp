@@ -36,6 +36,14 @@ public:
         NGAS, OS, AM2, NGI, OS2, SUP
     };
 
+    enum class Lakara {
+        LAT, LRT, LOT, LANG, VIDHI_LIN, ASHIR_LIN, LIT, LUT, LUNG, LRUNG, UNKNOWN
+    };
+
+    enum class Pada { PARASMAIPADA, ATMANEPADA };
+
+    enum class Gana { BHVADI, ADADI, JOTYADADI, DIVADI, SVADI, TUDADI, RUDHADI, TANADI, KRYADI, CURADI };
+
     struct WordMeta {
         std::u32string root;
         Vibhakti vibhakti;
@@ -43,8 +51,19 @@ public:
         int vachana; // 1: singular, 2: dual, 3: plural
     };
 
+    struct VerbMeta {
+        std::u32string root;
+        Lakara lakara;
+        int purusha; // 1: Prathama, 2: Madhyama, 3: Uttama
+        int vachana;
+        Pada pada;
+        Gana gana;
+    };
+
     static WordMeta analyzeSubanta(const std::u32string& word);
+    static VerbMeta analyzeTinanta(const std::u32string& word);
     static std::u32string processAnubandha(SupPratyaya p);
+    static std::u32string applyVikarana(std::u32string root, Gana g);
     static std::u32string toUtf32(const std::string& utf8);
     static std::string toUtf8(const std::u32string& utf32);
 
