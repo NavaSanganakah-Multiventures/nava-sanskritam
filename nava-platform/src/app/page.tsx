@@ -96,23 +96,38 @@ export default function NativePlayground() {
 
         {/* Output Section */}
         <section className="col-span-12 lg:col-span-4 flex flex-col gap-4">
-          {/* Dashboard Stats */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex flex-col gap-1">
-              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">IR Speed</span>
-              <span className="text-xl font-mono text-orange-500">42ms</span>
+        {/* Output & Preview Section */}
+        <section className="col-span-12 lg:col-span-4 flex flex-col gap-4">
+          {/* Darshakam Preview */}
+          <div className="h-64 rounded-2xl border border-white/10 bg-gradient-to-br from-[#0a0a0a] to-[#111] overflow-hidden flex flex-col shadow-2xl relative">
+            <div className="h-10 px-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+               <div className="flex items-center gap-2">
+                 <Globe className="w-3.5 h-3.5 text-blue-500" />
+                 <span className="text-[10px] uppercase tracking-widest font-bold text-white/40">Darshakam Preview (UI)</span>
+               </div>
+               <div className="px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[8px] text-blue-400 font-bold uppercase tracking-tighter">
+                  v2.0 Skia-WASM
+               </div>
             </div>
-            <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex flex-col gap-1">
-              <span className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Type System</span>
-              <span className="text-xl font-mono text-blue-500">Strong</span>
+            <div className="flex-1 flex items-center justify-center relative p-8">
+               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-500/5 via-transparent to-transparent pointer-events-none" />
+               <motion.div 
+                 initial={{ scale: 0.8, opacity: 0 }}
+                 animate={{ scale: 1, opacity: 1 }}
+                 className="w-24 h-24 rounded-full bg-gradient-to-tr from-orange-500/20 to-orange-500/0 border-2 border-orange-500/50 flex items-center justify-center relative"
+               >
+                  <div className="w-12 h-12 rounded-full border border-orange-500/80 animate-ping absolute" />
+                  <div className="w-4 h-4 bg-orange-500 rounded-full shadow-[0_0_20px_rgba(249,115,22,0.6)]" />
+               </motion.div>
             </div>
+            <div className="absolute bottom-2 right-2 text-[8px] text-white/20 font-mono italic text-right px-2">Skia Native Bridge: Enabled</div>
           </div>
 
           {/* Terminal */}
           <div className="flex-1 rounded-2xl border border-white/10 bg-[#0a0a0a] overflow-hidden flex flex-col shadow-2xl">
             <div className="h-10 px-4 border-b border-white/5 flex items-center bg-white/[0.02]">
               <Terminal className="w-3.5 h-3.5 mr-2 text-white/40" />
-              <span className="text-[10px] uppercase tracking-widest font-bold text-white/40">Terminal Output</span>
+              <span className="text-[10px] uppercase tracking-widest font-bold text-white/40">Build Logs</span>
             </div>
             <div className="flex-1 p-5 font-mono text-sm overflow-auto text-green-500/90 leading-relaxed whitespace-pre-wrap">
               {output || 'Ready for native compilation...'}

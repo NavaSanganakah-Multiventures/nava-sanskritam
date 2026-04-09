@@ -18,9 +18,13 @@ std::string Parser::stripVibhakti(std::string id, std::string* role) {
     
     if (role) {
         if (normalized.length() < u32id.length()) {
-             // Basic role detection based on what was removed
              char32_t removed = u32id.back();
-             if (removed == 0x0903) *role = "Nominative";
+             // 0x0903 = Visarga (ः) -> Nominative (Karta)
+             // 0x092E + 0x094D = Ma + Halant (म्) -> Accusative (Karma)
+             // 0x0947 = E vowel sign (े) -> Locative (Adhikarana)
+             if (removed == 0x0903) *role = "Karta";
+             else if (removed == 0x094D) *role = "Karma";
+             else if (removed == 0x0947) *role = "Adhikarana";
              else *role = "Inflected";
         } else {
             *role = "None";

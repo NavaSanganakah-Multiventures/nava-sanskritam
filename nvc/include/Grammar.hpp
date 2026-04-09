@@ -18,12 +18,21 @@ public:
     
     // Vibhakti Normalization
     std::u32string normalize(const std::u32string& id);
+    std::u32string stripUpsarga(const std::u32string& id, std::u32string* upsarga);
+
+    // Phonetic Categories (Pratyaharas)
+    std::u32string resolvePratyahara(const std::string& name);
+    bool isInPratyahara(char32_t c, const std::string& name);
 
     // Helpers to convert between UTF-8 and UTF-32
     static std::u32string toUtf32(const std::string& utf8);
     static std::string toUtf8(const std::u32string& utf32);
 
 private:
+    static const std::vector<std::u32string> shivaSutras;
+    std::u32string utf8ToUtf32(const std::string& str);
+    std::string utf32ToUtf8(const std::u32string& str);
+
     bool isSavarna(char32_t c1, char32_t c2);
     char32_t getSavarnaLong(char32_t c);
 
