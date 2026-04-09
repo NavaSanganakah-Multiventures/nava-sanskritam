@@ -1,5 +1,5 @@
 {
-    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "scopeName": "source.ns",
     "name": "Nava Sanskritam",
     "patterns": [
         {
@@ -72,6 +72,5 @@
                 }
             ]
         }
-    ],
-    "scopeName": "source.ns"
+    }
 }

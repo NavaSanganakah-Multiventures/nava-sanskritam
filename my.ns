@@ -1,3 +1,8 @@
 asti a = 10
 
 vad(a);
+
+asti b = 20;
+
+vad(b);
+
