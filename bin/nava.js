@@ -11,12 +11,13 @@ const Interpreter = require('../Interpreter');
 program
     .name('nava')
     .description('Nava Sanskritam (Panini\'s Ashtadhyayi logic engine CLI)')
-    .version('1.0.0');
+    .version('2.0.0');
 
 program
     .command('run <file>')
     .description('Execute a Nava Sanskritam (.ns) script')
     .action((file) => {
+        console.log("Nava Sanskritam V2.0 - Powered by NavaSanganakah\n");
         try {
             if (!file.endsWith('.ns')) {
                 console.error("दोषः (Error): कृपया '.ns' इति विस्तारयुक्तं सञ्चिकां प्रयच्छतु। (Please provide a file with a '.ns' extension.)");

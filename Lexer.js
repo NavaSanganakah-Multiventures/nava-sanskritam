@@ -6,7 +6,7 @@ class Lexer {
         this.col = 1;
         this.tokens = [];
 
-        this.keywords = new Set(['अस्ति', 'वद', 'यदि', 'तर्हि', 'चक्र']);
+        this.keywords = new Set(['अस्ति', 'वद', 'यदि', 'तर्हि', 'चक्र', 'अन्यथा', 'फलम्', 'विधिः', 'नित्य']);
         this.devanagariDigits = {
             '०': '0', '१': '1', '२': '2', '३': '3', '४': '4',
             '५': '5', '६': '6', '७': '7', '८': '8', '९': '9'
@@ -51,6 +51,13 @@ class Lexer {
                 if (this.keywords.has(id)) {
                     this.tokens.push({ type: 'KEYWORD', value: id, line: this.line, col: this.col });
                 } else {
+                    if (id.length > 1 && id.endsWith('ः')) {
+                        id = id.slice(0, -1);
+                    } else if (id.length > 2 && id.endsWith('म्')) {
+                        id = id.slice(0, -2);
+                    } else if (id.length > 1 && id.endsWith('े')) {
+                        id = id.slice(0, -1);
+                    }
                     this.tokens.push({ type: 'IDENTIFIER', value: id, line: this.line, col: this.col });
                 }
                 continue;

@@ -14,11 +14,50 @@ class Parser {
 
     parseStatement() {
         if (this.match('KEYWORD', 'अस्ति')) return this.parseVariableDeclaration();
+        if (this.match('KEYWORD', 'नित्य')) return this.parseConstantDeclaration();
         if (this.match('KEYWORD', 'वद')) return this.parsePrintStatement();
         if (this.match('KEYWORD', 'यदि')) return this.parseIfStatement();
         if (this.match('KEYWORD', 'चक्र')) return this.parseLoopStatement();
+        if (this.match('KEYWORD', 'विधिः')) return this.parseFunctionDeclaration();
+        if (this.match('KEYWORD', 'फलम्')) return this.parseReturnStatement();
 
         return this.parseExpressionStatement();
+    }
+
+    parseFunctionDeclaration() {
+        let idToken = this.consume('IDENTIFIER', "Expected function name after 'विधिः'.");
+        this.consume('PUNCTUATION', "Expected '(' after function name.", '(');
+
+        let params = [];
+        if (!this.check('PUNCTUATION', ')')) {
+            do {
+                if (params.length > 0) {
+                    this.consume('PUNCTUATION', "Expected ',' between parameters.", ',');
+                }
+                params.push(this.consume('IDENTIFIER', "Expected parameter name.").value);
+            } while (this.check('PUNCTUATION', ','));
+        }
+        this.consume('PUNCTUATION', "Expected ')' after parameters.", ')');
+
+        let body = this.parseBlock();
+        return {
+            type: 'FunctionDeclaration',
+            id: { type: 'Identifier', name: idToken.value },
+            params: params,
+            body: body
+        };
+    }
+
+    parseReturnStatement() {
+        let value = null;
+        if (!this.check('PUNCTUATION', ';')) {
+            value = this.parseExpression();
+        }
+        this.consume('PUNCTUATION', "Expected ';' after return value.", ';');
+        return {
+            type: 'ReturnStatement',
+            argument: value
+        };
     }
 
     parseVariableDeclaration() {
@@ -29,6 +68,18 @@ class Parser {
         this.consume('PUNCTUATION', "Expected ';' after variable declaration.", ';');
         return {
             type: 'VariableDeclaration',
+            id: idToken.value,
+            init: init
+        };
+    }
+
+    parseConstantDeclaration() {
+        let idToken = this.consume('IDENTIFIER', "Expected variable name after 'नित्य'.");
+        this.consume('OPERATOR', "Expected '=' after variable name.", '=');
+        let init = this.parseExpression();
+        this.consume('PUNCTUATION', "Expected ';' after constant declaration.", ';');
+        return {
+            type: 'ConstantDeclaration',
             id: idToken.value,
             init: init
         };
@@ -62,10 +113,20 @@ class Parser {
             consequence = this.parseStatement();
         }
 
+        let alternate = null;
+        if (this.match('KEYWORD', 'अन्यथा')) {
+            if (this.check('PUNCTUATION', '{')) {
+                alternate = this.parseBlock();
+            } else {
+                alternate = this.parseStatement();
+            }
+        }
+
         return {
             type: 'IfStatement',
             condition: condition,
-            consequence: consequence
+            consequence: consequence,
+            alternate: alternate
         };
     }
 
@@ -215,7 +276,21 @@ class Parser {
             return { type: 'Literal', value: this.previous().value };
         }
         if (this.match('IDENTIFIER')) {
-            return { type: 'Identifier', name: this.previous().value };
+            let node = { type: 'Identifier', name: this.previous().value };
+            if (this.match('PUNCTUATION', '(')) {
+                let args = [];
+                if (!this.check('PUNCTUATION', ')')) {
+                    do {
+                        if (args.length > 0) {
+                            this.consume('PUNCTUATION', "Expected ',' between arguments.", ',');
+                        }
+                        args.push(this.parseExpression());
+                    } while (this.check('PUNCTUATION', ','));
+                }
+                this.consume('PUNCTUATION', "Expected ')' after arguments.", ')');
+                return { type: 'CallExpression', callee: node, arguments: args };
+            }
+            return node;
         }
         if (this.match('PUNCTUATION', '(')) {
             let expr = this.parseExpression();

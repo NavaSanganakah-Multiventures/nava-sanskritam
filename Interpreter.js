@@ -1,6 +1,64 @@
+class Environment {
+    constructor(parent = null) {
+        this.values = new Map();
+        this.constants = new Set();
+        this.parent = parent;
+    }
+
+    define(name, value, isConstant = false) {
+        if (this.values.has(name)) {
+            throw new Error(`Variable '${name}' is already defined.`);
+        }
+        this.values.set(name, value);
+        if (isConstant) {
+            this.constants.add(name);
+        }
+    }
+
+    get(name) {
+        if (this.values.has(name)) {
+            return this.values.get(name);
+        }
+        if (this.parent !== null) {
+            return this.parent.get(name);
+        }
+        throw new Error(`Undefined variable: ${name}`);
+    }
+
+    assign(name, value) {
+        if (this.values.has(name)) {
+            if (this.constants.has(name)) {
+                throw new Error(`Cannot reassign constant '${name}'.`);
+            }
+            this.values.set(name, value);
+            return;
+        }
+        if (this.parent !== null) {
+            this.parent.assign(name, value);
+            return;
+        }
+        // Implicitly declare if not found anywhere (mostly for backward compatibility in loops)
+        this.values.set(name, value);
+    }
+}
+
 class Interpreter {
     constructor() {
-        this.environment = new Map();
+        this.environment = new Environment();
+
+        // Built-in functions
+        this.environment.define('समय', {
+            type: 'NativeFunction',
+            call: () => Date.now()
+        }, true);
+
+        this.environment.define('गणन', {
+            type: 'NativeFunction',
+            call: (a, b) => {
+                if (typeof a === 'number' && typeof b === 'number') return a + b;
+                return 0;
+            }
+        }, true);
     }
 
     interpret(ast) {
@@ -17,8 +75,21 @@ class Interpreter {
         switch (stmt.type) {
             case 'VariableDeclaration':
                 let val = this.evaluate(stmt.init);
-                this.environment.set(stmt.id, val);
+                this.environment.define(stmt.id, val, false);
                 break;
+            case 'ConstantDeclaration':
+                let constVal = this.evaluate(stmt.init);
+                this.environment.define(stmt.id, constVal, true);
+                break;
+            case 'FunctionDeclaration':
+                this.environment.define(stmt.id.name, stmt, false);
+                break;
+            case 'ReturnStatement':
+                let retVal = null;
+                if (stmt.argument) {
+                    retVal = this.evaluate(stmt.argument);
+                }
+                throw { type: 'ReturnValue', value: retVal };
             case 'PrintStatement':
                 console.log(this.evaluate(stmt.expression));
                 break;
@@ -28,6 +99,8 @@ class Interpreter {
             case 'IfStatement':
                 if (this.evaluate(stmt.condition)) {
                     this.executeBlockOrStatement(stmt.consequence);
+                } else if (stmt.alternate) {
+                    this.executeBlockOrStatement(stmt.alternate);
                 }
                 break;
             case 'LoopStatement':
@@ -64,15 +137,43 @@ class Interpreter {
             case 'Literal':
                 return expr.value;
             case 'Identifier':
-                if (this.environment.has(expr.name)) {
-                    return this.environment.get(expr.name);
+                return this.environment.get(expr.name);
+            case 'CallExpression':
+                let callee = this.evaluate(expr.callee);
+                let args = expr.arguments.map(arg => this.evaluate(arg));
+
+                if (callee.type === 'NativeFunction') {
+                    return callee.call(...args);
                 }
-                throw new Error(`Undefined variable: ${expr.name}`);
+
+                if (callee.type === 'FunctionDeclaration') {
+                    let previousEnv = this.environment;
+                    let localEnv = new Environment(this.environment);
+
+                    for (let i = 0; i < callee.params.length; i++) {
+                        let paramName = callee.params[i];
+                        let argValue = i < args.length ? args[i] : null;
+                        localEnv.define(paramName, argValue, false);
+                    }
+
+                    this.environment = localEnv;
+                    try {
+                        this.executeBlockOrStatement(callee.body);
+                    } catch (e) {
+                        if (e.type === 'ReturnValue') {
+                            this.environment = previousEnv;
+                            return e.value;
+                        }
+                        throw e;
+                    }
+                    this.environment = previousEnv;
+                    return null;
+                }
+
+                throw new Error("Cannot call non-function.");
             case 'Assignment':
                 let value = this.evaluate(expr.right);
-                // Allow assignment to implicitly declare if not present in loops, but strict generally
-                // Actually, for the loop like `i = 1`, if it's not declared with अस्ति, we should allow it as implicit declaration or simply set it.
-                this.environment.set(expr.left, value);
+                this.environment.assign(expr.left, value);
                 return value;
             case 'BinaryExpression':
                 let left = this.evaluate(expr.left);
