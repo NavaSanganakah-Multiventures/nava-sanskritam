@@ -98,6 +98,10 @@ llvm::Value* CodeGen::generateNode(ASTNode* node) {
             return generateCallExpression(static_cast<CallExpression*>(node));
         case ASTNodeType::FunctionDeclaration:
             return generateFunctionDeclaration(static_cast<FunctionDeclaration*>(node));
+        case ASTNodeType::ObjectLiteral:
+            return generateObjectLiteral(static_cast<ObjectLiteral*>(node));
+        case ASTNodeType::MemberAccess:
+            return generateMemberAccess(static_cast<MemberAccess*>(node));
         default:
             throw std::runtime_error("Unknown AST Node Type");
     }
@@ -303,11 +307,28 @@ llvm::Value* CodeGen::generateLiteral(Literal* node) {
 llvm::Value* CodeGen::generateIdentifier(Identifier* node) {
     llvm::AllocaInst* A = namedValues[node->name];
     if (!A) {
-        throw std::runtime_error("Unknown variable name: " + node->name);
+        // SUL Dynamic Behavior: Return 0 if undefined
+        return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
     }
-    // Here we could implement different memory access patterns based on node->role
-    // but for now we just load the variable.
     return builder->CreateLoad(A->getAllocatedType(), A, node->name.c_str());
+}
+
+llvm::Value* CodeGen::generateMemberAccess(MemberAccess* node) {
+    // SUL v11.0 Native Semantic Property Access
+    // Logic: Look for mangled name 'object_property'
+    std::string objName = static_cast<Identifier*>(node->object.get())->name;
+    std::string mangledName = objName + "_" + node->property;
+    
+    llvm::AllocaInst* A = namedValues[mangledName];
+    if (!A) {
+        return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
+    }
+    return builder->CreateLoad(A->getAllocatedType(), A, mangledName.c_str());
+}
+
+llvm::Value* CodeGen::generateObjectLiteral(ObjectLiteral* node) {
+    // Basic implementation: generate stubs for properties
+    return llvm::Constant::getNullValue(llvm::Type::getDoubleTy(*context));
 }
 
 llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {

@@ -39,6 +39,8 @@ private:
     llvm::Value* generateIdentifier(Identifier* node);
     llvm::Value* generateCallExpression(CallExpression* node);
     llvm::Value* generateFunctionDeclaration(FunctionDeclaration* node);
+    llvm::Value* generateObjectLiteral(ObjectLiteral* node);
+    llvm::Value* generateMemberAccess(MemberAccess* node);
 
     llvm::AllocaInst* createEntryBlockAlloca(llvm::Function* theFunction, const std::string& varName);
     llvm::Function* getPrintf();

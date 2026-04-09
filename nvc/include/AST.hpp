@@ -19,7 +19,9 @@ enum class ASTNodeType {
     Identifier,
     CallExpression,
     Assignment,
-    FunctionDeclaration
+    FunctionDeclaration,
+    ObjectLiteral,
+    MemberAccess
 };
 
 class ASTNode {
@@ -134,4 +136,21 @@ public:
     std::vector<std::string> params;
     std::unique_ptr<BlockStatement> body;
     ASTNodeType getType() const override { return ASTNodeType::FunctionDeclaration; }
+};
+
+class ObjectLiteral : public Expression {
+public:
+    struct Property {
+        std::string key;
+        std::unique_ptr<Expression> value;
+    };
+    std::vector<Property> properties;
+    ASTNodeType getType() const override { return ASTNodeType::ObjectLiteral; }
+};
+
+class MemberAccess : public Expression {
+public:
+    std::unique_ptr<Expression> object;
+    std::string property;
+    ASTNodeType getType() const override { return ASTNodeType::MemberAccess; }
 };

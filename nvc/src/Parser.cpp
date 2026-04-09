@@ -14,24 +14,22 @@ std::unique_ptr<Program> Parser::parse() {
 
 std::string Parser::stripVibhakti(std::string id, std::string* role) {
     std::u32string u32id = grammar.toUtf32(id);
-    std::u32string normalized = grammar.normalize(u32id);
+    Grammar::WordMeta meta = grammar.analyzeSubanta(u32id);
     
     if (role) {
-        if (normalized.length() < u32id.length()) {
-             char32_t removed = u32id.back();
-             // 0x0903 = Visarga (ः) -> Nominative (Karta)
-             // 0x092E + 0x094D = Ma + Halant (म्) -> Accusative (Karma)
-             // 0x0947 = E vowel sign (े) -> Locative (Adhikarana)
-             if (removed == 0x0903) *role = "Karta";
-             else if (removed == 0x094D) *role = "Karma";
-             else if (removed == 0x0947) *role = "Adhikarana";
-             else *role = "Inflected";
-        } else {
-            *role = "None";
+        switch (meta.vibhakti) {
+            case Grammar::Vibhakti::PRATHAMA: *role = "Karta"; break;
+            case Grammar::Vibhakti::DWITIYA: *role = "Karma"; break;
+            case Grammar::Vibhakti::TRITIYA: *role = "Karana"; break;
+            case Grammar::Vibhakti::CHATURTHI: *role = "Sampradana"; break;
+            case Grammar::Vibhakti::PANCHAMI: *role = "Apadaana"; break;
+            case Grammar::Vibhakti::SHASHTI: *role = "Shashti"; break;
+            case Grammar::Vibhakti::SAPTAMI: *role = "Adhikarana"; break;
+            default: *role = "None"; break;
         }
     }
     
-    return grammar.toUtf8(normalized);
+    return grammar.toUtf8(meta.root);
 }
 
 std::unique_ptr<Statement> Parser::parseStatement() {
@@ -305,14 +303,31 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
         return lit;
     }
     if (match(TokenType::IDENTIFIER)) {
-        auto id = std::make_unique<Identifier>();
         std::string role;
-        id->name = stripVibhakti(previous().value, &role);
-        id->role = role;
+        std::string name = stripVibhakti(previous().value, &role);
+        auto expr = std::make_unique<Identifier>();
+        expr->name = name;
+        expr->role = role;
+
+        // SUL v11.0: Native Shashti (Genitive) Property Access
+        if (role == "Shashti") {
+            if (check(TokenType::IDENTIFIER)) {
+                auto propToken = consume(TokenType::IDENTIFIER, "Expected property name after Shashti declension.");
+                auto member = std::make_unique<MemberAccess>();
+                member->object = std::move(expr);
+                member->property = propToken.value;
+                return member;
+            }
+        }
 
         if (match(TokenType::PUNCTUATION, "(")) {
             auto call = std::make_unique<CallExpression>();
-            call->callee = std::move(id);
+            // Update AST to use unique_ptr<Expression> callee if necessary, 
+            // but for now we'll cast or keep it as ID for simpler LLVM parity.
+            auto calleeId = std::make_unique<Identifier>();
+            calleeId->name = name;
+            call->callee = std::move(calleeId);
+            
             if (!check(TokenType::PUNCTUATION, ")")) {
                 do {
                     if (!call->arguments.empty()) {
@@ -324,7 +339,7 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
             consume(TokenType::PUNCTUATION, "Expected ')' after arguments.", ")");
             return call;
         }
-        return id;
+        return expr;
     }
     if (match(TokenType::PUNCTUATION, "(")) {
         auto expr = parseExpression();
