@@ -383,6 +383,29 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
     }
 
+    // SUL v14.0: Native Niyamah (Assertion) Handler
+    if (mangledName == "नियमः" || mangledName == "niyamah") {
+        llvm::Value* cond = argsV[0];
+        if (cond->getType()->isDoubleTy()) {
+            cond = builder->CreateFCmpONE(cond, llvm::ConstantFP::get(*context, llvm::APFloat(0.0)), "assertcond");
+        }
+        
+        llvm::Function* theFunction = builder->GetInsertBlock()->getParent();
+        llvm::BasicBlock* failBB = llvm::BasicBlock::Create(*context, "assert_fail", theFunction);
+        llvm::BasicBlock* passBB = llvm::BasicBlock::Create(*context, "assert_pass", theFunction);
+        
+        builder->CreateCondBr(cond, passBB, failBB);
+        builder->SetInsertPoint(failBB);
+        
+        // Native Trap / Panic
+        llvm::Function* trap = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::trap);
+        builder->CreateCall(trap, {});
+        builder->CreateUnreachable();
+        
+        builder->SetInsertPoint(passBB);
+        return llvm::ConstantFP::get(*context, llvm::APFloat(1.0)); // True
+    }
+
     return builder->CreateCall(calleeF, argsV, "calltmp");
 }
 

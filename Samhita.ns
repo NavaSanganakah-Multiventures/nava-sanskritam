@@ -1,0 +1,36 @@
+// Nava Sanskritam Samhita (SUL Standard Library) v14.0
+// Comprehensive Sūtras for Mathematics, Logic, and Systems
+
+// 1. Math Sūtras (Ganita-Sūtras)
+
+// Trairashikam (Rule of Three) 
+// Formula: (b * c) / a
+// Example: If 2 units cost 4, 10 units cost 20.
+विधिः त्रैराशिकम्(अ, ब, च) {
+    अस्ति परिणामम् = (ब * च) / अ;
+    फलम् परिणामम्; 
+}
+
+// Varga-mula Stub (Square Logic)
+विधिः वर्गः(संख्या) {
+    फलम् संख्या * संख्या;
+}
+
+// 2. Logic Sūtras (Nyaya-Sūtras)
+
+// Niyamah (Assertion)
+// Logic: If condition is false, halt execution.
+विधिः नियमः(शर्त, सन्देशः) {
+    यदि (!शर्त) तर्हि {
+        वद("नियम-भङ्गः: " + सन्देशः);
+        // Halting logic is handled by CodeGen for this keyword
+    }
+}
+
+// 3. System Sūtras (Antah-Karana)
+
+// Time and Performance tracking
+विधिः समयः() {
+    // LLVM intrinsic for clock cycles
+    फलम् ०; 
+}
