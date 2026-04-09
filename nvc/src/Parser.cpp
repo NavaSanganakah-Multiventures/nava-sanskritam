@@ -13,18 +13,21 @@ std::unique_ptr<Program> Parser::parse() {
 }
 
 std::string Parser::stripVibhakti(std::string id, std::string* role) {
-    if (id.length() >= 3 && id.compare(id.length() - 3, 3, "ः") == 0) {
-        if (role) *role = "Nominative";
-        return id.substr(0, id.length() - 3);
-    } else if (id.length() >= 6 && id.compare(id.length() - 6, 6, "म्") == 0) {
-        if (role) *role = "Accusative";
-        return id.substr(0, id.length() - 6);
-    } else if (id.length() >= 3 && id.compare(id.length() - 3, 3, "े") == 0) {
-        if (role) *role = "Locative";
-        return id.substr(0, id.length() - 3);
+    std::u32string u32id = grammar.toUtf32(id);
+    std::u32string normalized = grammar.normalize(u32id);
+    
+    if (role) {
+        if (normalized.length() < u32id.length()) {
+             // Basic role detection based on what was removed
+             char32_t removed = u32id.back();
+             if (removed == 0x0903) *role = "Nominative";
+             else *role = "Inflected";
+        } else {
+            *role = "None";
+        }
     }
-    if (role) *role = "None";
-    return id;
+    
+    return grammar.toUtf8(normalized);
 }
 
 std::unique_ptr<Statement> Parser::parseStatement() {

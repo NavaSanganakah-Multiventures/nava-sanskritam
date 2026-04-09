@@ -2,6 +2,7 @@
 
 #include "Lexer.hpp"
 #include "AST.hpp"
+#include "Grammar.hpp"
 #include <memory>
 
 class Parser {
@@ -12,6 +13,7 @@ public:
 private:
     std::vector<Token> tokens;
     size_t pos;
+    Grammar grammar;
 
     bool isAtEnd() const;
     Token peek() const;

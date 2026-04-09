@@ -33,6 +33,19 @@ program
 
             const input = fs.readFileSync(filePath, 'utf-8');
 
+            // Attempt Native Execution first if NVC is built
+            const nvcPath = path.join(__dirname, '../nvc/build/nvc');
+            if (fs.existsSync(nvcPath) || fs.existsSync(nvcPath + '.exe')) {
+                console.log("Status: Executing via Nava Native LLVM...");
+                const { execSync } = require('child_process');
+                try {
+                    execSync(`${nvcPath} ${filePath}`, { stdio: 'inherit' });
+                    process.exit(0);
+                } catch (e) {
+                    console.error("Native execution failed, falling back to interpreter...");
+                }
+            }
+
             const lexer = new Lexer(input);
             const tokens = lexer.tokenize();
 

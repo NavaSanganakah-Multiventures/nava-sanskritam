@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(nvc CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 
@@ -23,6 +23,7 @@ set(SRC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Lexer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Parser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Grammar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/CodeGen.cpp)
 add_executable(nvc ${SRC_FILES})
 
