@@ -1,0 +1,15 @@
+// SUL v9.0 Subanta (Sup Pratyaya) Test
+अस्ति कः = १००;
+
+वद("कः की मूल वैल्यू है:");
+वद(कः);
+
+// Testing Shashti (Possession) - Currently should normalize to 'क'
+वद("कस्य (Shashti) भी 'क' ही है:");
+वद(कस्य);
+
+// Testing Tritiya (Instrumental)
+अस्ति ख = कस्य + १०; // Using Declined form in expression
+वद(ख);
+
+"सुप्रुत्पन्नः! (Sup Pratyayas identified)" वद;

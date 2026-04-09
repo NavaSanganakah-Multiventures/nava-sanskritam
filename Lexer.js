@@ -91,7 +91,7 @@ class Lexer {
     }
 
     isPunctuation(char) {
-        return /[(){}\[\],;]/.test(char);
+        return ['(', ')', '{', '}', ';', ',', '.' , ':'].includes(char);
     }
 
     isOperatorChar(char) {
@@ -161,13 +161,33 @@ class Lexer {
     splitSamasa(id) {
         if (id.length === 0) return [];
 
-        // 1. Normalization (Suffix Stripping) - Should be aware of Sanskrit patterns
-        let baseId = id;
-        if (id.length > 1 && id.endsWith('ः')) baseId = id.slice(0, -1);
-        else if (id.length > 2 && id.endsWith('म्')) baseId = id.slice(0, -2);
-        else if (id.length > 1 && id.endsWith('े')) baseId = id.slice(0, -1);
+        // 1. Normalization (Subanta / Suffix Analysis)
+        const subantaSuffixes = [
+            { s: 'आणाम्', v: 'SHASHTI', n: 3 }, { s: 'एभ्यः', v: 'CHATURTHI', n: 3 },
+            { s: 'आभ्याम्', v: 'TRITIYA', n: 2 }, { s: 'एषु', v: 'SAPTAMI', n: 3 },
+            { s: 'ईणाम्', v: 'SHASHTI', n: 3 }, { s: 'स्य', v: 'SHASHTI', n: 1 },
+            { s: 'एण', v: 'TRITIYA', n: 1 }, { s: 'आय', v: 'CHATURTHI', n: 1 },
+            { s: 'आत्', v: 'PANCHAMI', n: 1 }, { s: 'योः', v: 'SHASHTI', n: 2 },
+            { s: 'आः', v: 'PRATHAMA', n: 3 }, { s: 'आन्', v: 'DWITIYA', n: 3 },
+            { s: 'ऐः', v: 'TRITIYA', n: 3 }, { s: 'ए', v: 'SAPTAMI', n: 1 },
+            { s: 'ः', v: 'PRATHAMA', n: 1 }, { s: 'म्', v: 'DWITIYA', n: 1 },
+            { s: 'औ', v: 'PRATHAMA', n: 2 }
+        ];
 
-        if (this.keywords.has(baseId)) return [{ type: 'KEYWORD', value: baseId }];
+        let baseId = id;
+        let vibhakti = 'UNKNOWN';
+        let vachana = 1;
+
+        for (const res of subantaSuffixes) {
+            if (id.length > res.s.length && id.endsWith(res.s)) {
+                baseId = id.slice(0, -res.s.length);
+                vibhakti = res.v;
+                vachana = res.n;
+                break;
+            }
+        }
+
+        if (this.keywords.has(baseId)) return [{ type: 'KEYWORD', value: baseId, vibhakti, vachana }];
 
         // 2. Greedy search for keywords within the compound
         for (let i = baseId.length - 1; i >= 2; i--) { // Min 2 chars for a keyword usually
@@ -187,7 +207,7 @@ class Lexer {
         }
 
         // 3. Fallback: If no keywords found, it's a single identifier
-        return [{ type: 'IDENTIFIER', value: baseId }];
+        return [{ type: 'IDENTIFIER', value: baseId, vibhakti, vachana }];
     }
 }
 

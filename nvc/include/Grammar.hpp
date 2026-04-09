@@ -25,6 +25,18 @@ public:
     bool isInPratyahara(char32_t c, const std::string& name);
 
     // Helpers to convert between UTF-8 and UTF-32
+    enum class Vibhakti { 
+        PRATHAMA, DWITIYA, TRITIYA, CHATURTHI, 
+        PANCHAMI, SHASHTI, SAPTAMI, SAMBODHANA, UNKNOWN 
+    };
+
+    struct WordMeta {
+        std::u32string root;
+        Vibhakti vibhakti;
+        int vachana; // 1: singular, 2: dual, 3: plural
+    };
+
+    static WordMeta analyzeSubanta(const std::u32string& word);
     static std::u32string toUtf32(const std::string& utf8);
     static std::string toUtf8(const std::u32string& utf32);
 

@@ -179,3 +179,33 @@ std::string Grammar::toUtf8(const std::u32string& utf32) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
     return convert.to_bytes(utf32);
 }
+
+Grammar::WordMeta Grammar::analyzeSubanta(const std::u32string& word) {
+    WordMeta meta = { word, Vibhakti::UNKNOWN, 1 };
+    if (word.empty()) return meta;
+
+    // Ordered list of suffixes for matching (longest first to avoid partial matches)
+    struct SuffixMap { std::u32string suffix; Vibhakti v; int n; };
+    static const std::vector<SuffixMap> suffixes = {
+        { U"आणाम्", Vibhakti::SHASHTI, 3 }, { U"एभ्यः", Vibhakti::CHATURTHI, 3 },
+        { U"आभ्याम्", Vibhakti::TRITIYA, 2 }, { U"एषु", Vibhakti::SAPTAMI, 3 },
+        { U"ईणाम्", Vibhakti::SHASHTI, 3 }, { U"स्य", Vibhakti::SHASHTI, 1 },
+        { U"एण", Vibhakti::TRITIYA, 1 }, { U"आय", Vibhakti::CHATURTHI, 1 },
+        { U"आत्", Vibhakti::PANCHAMI, 1 }, { U"योः", Vibhakti::SHASHTI, 2 },
+        { U"आः", Vibhakti::PRATHAMA, 3 }, { U"आन्", Vibhakti::DWITIYA, 3 },
+        { U"ऐः", Vibhakti::TRITIYA, 3 }, { U"ए", Vibhakti::SAPTAMI, 1 },
+        { U"ः", Vibhakti::PRATHAMA, 1 }, { U"म्", Vibhakti::DWITIYA, 1 },
+        { U"औ", Vibhakti::PRATHAMA, 2 }
+    };
+
+    for (const auto& s : suffixes) {
+        if (word.length() > s.suffix.length() && word.substr(word.length() - s.suffix.length()) == s.suffix) {
+            meta.root = word.substr(0, word.length() - s.suffix.length());
+            meta.vibhakti = s.v;
+            meta.vachana = s.n;
+            return meta;
+        }
+    }
+
+    return meta;
+}

@@ -336,7 +336,21 @@ class Parser {
             return { type: 'Literal', value: this.previous().value };
         }
         if (this.match('IDENTIFIER')) {
-            let node = { type: 'Identifier', name: this.previous().value };
+            let idToken = this.previous();
+            let expr = { type: 'Identifier', name: idToken.value };
+            
+            // SUL v10.0: Shashti (Genitive) Property Access Logic
+            if (idToken.vibhakti === 'SHASHTI') {
+                if (this.check('IDENTIFIER')) {
+                    let propToken = this.consume('IDENTIFIER', "Expected property name after Shashti declension.");
+                    expr = {
+                        type: 'MemberAccess',
+                        object: expr,
+                        property: propToken.value
+                    };
+                }
+            }
+
             if (this.match('PUNCTUATION', '(')) {
                 let args = [];
                 if (!this.check('PUNCTUATION', ')')) {
@@ -348,9 +362,10 @@ class Parser {
                     } while (this.check('PUNCTUATION', ','));
                 }
                 this.consume('PUNCTUATION', "Expected ')' after arguments.", ')');
-                return { type: 'CallExpression', callee: node, arguments: args };
+                return { type: 'CallExpression', callee: expr, arguments: args };
             }
-            return node;
+
+            return expr;
         }
         if (this.match('PUNCTUATION', '(')) {
             let expr = this.parseExpression();
@@ -358,7 +373,24 @@ class Parser {
             return expr;
         }
 
-        throw new Error(`Parser Error: Unexpected token '${this.peek().value}' at line ${this.peek().line}, col ${this.peek().col}`);
+        if (this.match('PUNCTUATION', '{')) {
+            return this.parseObjectLiteral();
+        }
+
+        throw new Error(`Parser Error: Expected expression. Found '${this.peek().value}' at line ${this.peek().line}, col ${this.peek().col}`);
+    }
+
+    parseObjectLiteral() {
+        let properties = {};
+        while (!this.check('PUNCTUATION', '}') && !this.isAtEnd()) {
+            let keyToken = this.consume('IDENTIFIER', "Expected property name in object literal.");
+            this.consume('PUNCTUATION', "Expected ':' after property name.", ':');
+            let value = this.parseExpression();
+            properties[keyToken.value] = value;
+            if (this.check('PUNCTUATION', ',')) this.advance();
+        }
+        this.consume('PUNCTUATION', "Expected '}' after object literal.", '}');
+        return { type: 'ObjectLiteral', properties };
     }
 
     match(type, value = null) {

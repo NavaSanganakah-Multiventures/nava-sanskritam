@@ -191,6 +191,18 @@ class Interpreter {
                 let value = this.evaluate(expr.right);
                 this.environment.assign(expr.left, value);
                 return value;
+            case 'ObjectLiteral':
+                let obj = {};
+                for (let key in expr.properties) {
+                    obj[key] = this.evaluate(expr.properties[key]);
+                }
+                return obj;
+            case 'MemberAccess':
+                let target = this.evaluate(expr.object);
+                if (target && typeof target === 'object') {
+                    return target[expr.property];
+                }
+                throw new Error(`Cannot access property '${expr.property}' of non-object.`);
             case 'BinaryExpression':
                 let left = this.evaluate(expr.left);
                 let right = this.evaluate(expr.right);
