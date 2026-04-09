@@ -80,7 +80,27 @@ std::u32string Grammar::applySandhi(const std::u32string& w1, const std::u32stri
     char32_t last = w1.back();
     char32_t first = w2.front();
 
-    // Savarnadirgha
+    // 1. Visarga Sandhi (ः)
+    if (last == 0x0903) {
+        // ः + च -> श्च (sh)
+        if (first == 0x091a || first == 0x091b) {
+            return w1.substr(0, w1.length() - 1) + U"श्" + w2;
+        }
+        // ः + त -> स्त (s)
+        if (first == 0x0924 || first == 0x0925) {
+            return w1.substr(0, w1.length() - 1) + U"स्" + w2;
+        }
+    }
+
+    // 2. Yan Sandhi (i/u -> y/v)
+    if (yanMap.count(last) && (first == 0x0905 || first == 0x0906)) {
+        std::u32string res = w1.substr(0, w1.length() - 1);
+        res += yanMap[last];
+        res += w2;
+        return res;
+    }
+
+    // 3. Savarnadirgha
     if (isSavarna(last, first)) {
         std::u32string res = w1.substr(0, w1.length() - 1);
         res += getSavarnaLong(last);
@@ -88,7 +108,7 @@ std::u32string Grammar::applySandhi(const std::u32string& w1, const std::u32stri
         return res;
     }
 
-    // Guna
+    // 4. Guna
     if ((last == 0x0905 || last == 0x0906) && gunaMap.count(first)) {
         std::u32string res = w1.substr(0, w1.length() - 1);
         res += gunaMap[first];

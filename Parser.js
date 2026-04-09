@@ -13,6 +13,19 @@ class Parser {
     }
 
     parseStatement() {
+        // Look ahead for "Permutation Declaration" Pattern: <expr> KEYWORD(अस्ति) <id>
+        // Example: 10 अस्ति खम्
+        if (!this.isAtEnd()) {
+            let current = this.peek();
+            // If current is identifier or number, and next is KEYWORD(अस्ति)
+            if (current.type === 'NUMBER' || current.type === 'STRING' || current.type === 'IDENTIFIER') {
+                let next = this.tokens[this.pos + 1];
+                if (next && next.type === 'KEYWORD' && next.value === 'अस्ति') {
+                    return this.parsePermutedVariableDeclaration();
+                }
+            }
+        }
+
         if (this.match('KEYWORD', 'अस्ति')) return this.parseVariableDeclaration();
         if (this.match('KEYWORD', 'नित्य')) return this.parseConstantDeclaration();
         if (this.match('KEYWORD', 'वद')) return this.parsePrintStatement();
@@ -22,6 +35,20 @@ class Parser {
         if (this.match('KEYWORD', 'फलम्')) return this.parseReturnStatement();
 
         return this.parseExpressionStatement();
+    }
+
+    parsePermutedVariableDeclaration() {
+        // Pattern: <EXPR> अस्ति <ID>
+        let init = this.parseExpression();
+        this.consume('KEYWORD', "Expected 'अस्ति' after expression.", 'अस्ति');
+        let idToken = this.consume('IDENTIFIER', "Expected variable name after 'अस्ति'.");
+        this.consume('PUNCTUATION', "Expected ';' after variable declaration.", ';');
+        
+        return {
+            type: 'VariableDeclaration',
+            id: idToken.value,
+            init: init
+        };
     }
 
     parseFunctionDeclaration() {
@@ -203,7 +230,40 @@ class Parser {
         }
 
         let expr = this.parseExpression();
-        this.consume('PUNCTUATION', "Expected ';' after expression.", ';');
+
+        // Sūtra Logic: Postfix Verb Support
+        // If an expression is followed by an action keyword (like वद), transform it.
+        if (this.match('KEYWORD', 'वद')) {
+            // Implicit Semicolon check or consume explicit one
+            if (this.check('PUNCTUATION', ';')) this.advance();
+            return {
+                type: 'PrintStatement',
+                expression: expr
+            };
+        }
+        
+        if (this.match('KEYWORD', 'फलम्')) {
+            if (this.check('PUNCTUATION', ';')) this.advance();
+            return {
+                type: 'ReturnStatement',
+                argument: expr
+            };
+        }
+
+        // Standard semicolon consumption (now optional via our evolved consume method)
+        if (this.check('PUNCTUATION', ';')) {
+            this.advance();
+        } else {
+            // Check for line ending or EOF handled in consume, but here we just need to ensure 
+            // the statement is complete. Our updated consume() handles implicit ones.
+            try {
+                this.consume('PUNCTUATION', "Expected ';' after expression.", ';');
+            } catch (e) {
+                // If implicit was allowed, ignore error
+                if (!e.message.includes("implicit")) throw e;
+            }
+        }
+
         return {
             type: 'ExpressionStatement',
             expression: expr
@@ -336,6 +396,20 @@ class Parser {
 
     consume(type, message, value = null) {
         if (this.check(type, value)) return this.advance();
+        
+        // Optional Semicolon Logic:
+        // If we expect a ';' but it's not there, check if we are at the end of a line 
+        // or the next token is a keyword/closing brace.
+        if (type === 'PUNCTUATION' && value === ';') {
+            let prev = this.previous();
+            let current = this.peek();
+            
+            // If they are on different lines, or current is '}', assume implicit semicolon
+            if (prev && current && (current.line > prev.line || current.value === '}' || current.type === 'EOF')) {
+                return { type: 'PUNCTUATION', value: ';', implicit: true };
+            }
+        }
+
         throw new Error(`Parser Error: ${message} Found '${this.peek().value}' at line ${this.peek().line}, col ${this.peek().col}`);
     }
 }

@@ -28,6 +28,9 @@ public:
     static std::u32string toUtf32(const std::string& utf8);
     static std::string toUtf8(const std::u32string& utf32);
 
+    // Advanced Sandhi
+    std::u32string applyVisargaSandhi(char32_t visarga, char32_t next);
+
 private:
     static const std::vector<std::u32string> shivaSutras;
     std::u32string utf8ToUtf32(const std::string& str);

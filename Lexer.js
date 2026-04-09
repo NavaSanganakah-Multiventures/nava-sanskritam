@@ -22,6 +22,13 @@ class Lexer {
                 continue;
             }
 
+            if (char === '/' && this.input[this.pos + 1] === '/') {
+                while (this.pos < this.input.length && this.currentChar() !== '\n') {
+                    this.advance();
+                }
+                continue;
+            }
+
             if (this.isPunctuation(char)) {
                 this.tokens.push({ type: 'PUNCTUATION', value: char, line: this.line, col: this.col });
                 this.advance();
@@ -48,20 +55,12 @@ class Lexer {
 
             if (this.isIdentifierChar(char)) {
                 let id = this.readIdentifier();
-                if (this.keywords.has(id)) {
-                    this.tokens.push({ type: 'KEYWORD', value: id, line: this.line, col: this.col });
-                } else {
-                    const keepSuffixes = new Set(['अङ्गम्', 'शीर्षकम्', 'अनुच्छेदः', 'सूची', 'बटनम्']);
-                    if (!keepSuffixes.has(id)) {
-                        if (id.length > 1 && id.endsWith('ः')) {
-                            id = id.slice(0, -1);
-                        } else if (id.length > 2 && id.endsWith('म्')) {
-                            id = id.slice(0, -2);
-                        } else if (id.length > 1 && id.endsWith('े')) {
-                            id = id.slice(0, -1);
-                        }
-                    }
-                    this.tokens.push({ type: 'IDENTIFIER', value: id, line: this.line, col: this.col });
+                let samasaTokens = this.splitSamasa(id);
+                
+                for (let token of samasaTokens) {
+                    token.line = this.line;
+                    token.col = this.col;
+                    this.tokens.push(token);
                 }
                 continue;
             }
@@ -158,6 +157,37 @@ class Lexer {
             this.advance();
         }
         return id;
+    }
+    splitSamasa(id) {
+        if (id.length === 0) return [];
+
+        // 1. Normalization (Suffix Stripping) - Should be aware of Sanskrit patterns
+        let baseId = id;
+        if (id.length > 1 && id.endsWith('ः')) baseId = id.slice(0, -1);
+        else if (id.length > 2 && id.endsWith('म्')) baseId = id.slice(0, -2);
+        else if (id.length > 1 && id.endsWith('े')) baseId = id.slice(0, -1);
+
+        if (this.keywords.has(baseId)) return [{ type: 'KEYWORD', value: baseId }];
+
+        // 2. Greedy search for keywords within the compound
+        for (let i = baseId.length - 1; i >= 2; i--) { // Min 2 chars for a keyword usually
+            for (let start = 0; start <= baseId.length - i; start++) {
+                let sub = baseId.substring(start, start + i);
+                if (this.keywords.has(sub)) {
+                    let left = baseId.substring(0, start);
+                    let right = baseId.substring(start + i);
+                    
+                    let result = [];
+                    if (left) result.push(...this.splitSamasa(left));
+                    result.push({ type: 'KEYWORD', value: sub });
+                    if (right) result.push(...this.splitSamasa(right));
+                    return result;
+                }
+            }
+        }
+
+        // 3. Fallback: If no keywords found, it's a single identifier
+        return [{ type: 'IDENTIFIER', value: baseId }];
     }
 }
 
