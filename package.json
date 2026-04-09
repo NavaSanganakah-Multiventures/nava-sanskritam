@@ -1,6 +1,6 @@
 {
-  "name": "nava-sanskritam",
-  "version": "1.0.0",
+  "name": "nava-sanskritam-preview",
+  "version": "1.0.1",
   "description": "Nava Sanskritam - A revolutionary programming language based on Panini's Ashtadhyayi logic. (Obfuscated Version)",
   "main": "dist/Interpreter.js",
   "type": "commonjs",
