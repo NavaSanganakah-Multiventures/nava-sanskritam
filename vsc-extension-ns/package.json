@@ -1,7 +1,7 @@
 {
     "name": "nava-sanskritam-sul",
-    "displayName": "Nava Sanskritam (SUL)",
-    "description": "Native Syntax Support for Nava Sanskritam (SUL) Programming Language.",
+    "displayName": "Nava Framework",
+    "description": "Native Syntax Support and Instant Options for Nava Framework (.ns) Programming Language.",
     "version": "1.0.0",
     "publisher": "navasanganakah",
     "engines": {
@@ -33,6 +33,12 @@
                 "language": "nava-sanskritam",
                 "scopeName": "source.ns",
                 "path": "./syntaxes/nava-sanskritam.tmLanguage.json"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "nava-sanskritam",
+                "path": "./snippets/nava-sanskritam.snippets.json"
             }
         ]
     }
