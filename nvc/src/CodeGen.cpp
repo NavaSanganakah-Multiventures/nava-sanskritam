@@ -522,6 +522,51 @@ llvm::Value* CodeGen::generateDrishyamElement(DrishyamElement* node) {
     return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
 }
 
+std::string CodeGen::exportAsJSON(Program* program) {
+    std::stringstream ss;
+    ss << "[\n";
+    bool first = true;
+    for (const auto& stmt : program->statements) {
+        if (stmt->getType() == ASTNodeType::DarshanamBlock) {
+            auto darshanam = static_cast<DarshanamBlock*>(stmt.get());
+            if (!first) ss << ",\n";
+            ss << "  {\n";
+            ss << "    \"id\": \"" << darshanam->id << "\",\n";
+            ss << "    \"elements\": [\n";
+            bool firstElem = true;
+            for (const auto& elem : darshanam->elements) {
+                if (!firstElem) ss << ",\n";
+                serializeUI(elem.get(), ss, 6);
+                firstElem = false;
+            }
+            ss << "    ]\n";
+            ss << "  }";
+            first = false;
+        }
+    }
+    ss << "\n]";
+    return ss.str();
+}
+
+void CodeGen::serializeUI(DrishyamElement* node, std::stringstream& ss, int indent) {
+    std::string pad(indent, ' ');
+    ss << pad << "{\n";
+    ss << pad << "  \"type\": \"" << node->type << "\",\n";
+    ss << pad << "  \"label\": \"" << node->label << "\",\n";
+    ss << pad << "  \"color\": \"" << node->color << "\",\n";
+    ss << pad << "  \"source\": \"" << node->source << "\",\n";
+    
+    ss << pad << "  \"children\": [\n";
+    bool firstChar = true;
+    for (const auto& child : node->children) {
+        if (!firstChar) ss << ",\n";
+        serializeUI(child.get(), ss, indent + 4);
+        firstChar = false;
+    }
+    ss << "\n" << pad << "  ]\n";
+    ss << pad << "}";
+}
+
 void CodeGen::writeObject(const std::string& filename) {
     llvm::InitializeAllTargetInfos();
     llvm::InitializeAllTargets();

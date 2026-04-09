@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="sa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nava Sanskritam Darshanam</title>
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Outfit', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #050505;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .bg-glow {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 40%;
+            height: 40%;
+            background: rgba(249, 115, 22, 0.05);
+            filter: blur(120px);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased selection:bg-orange-500/30">
+    <div class="bg-glow"></div>
+    <div class="bg-glow" style="top: auto; bottom: -10%; left: auto; right: -10%; background: rgba(37, 99, 235, 0.05);"></div>
+
+    <div id="sul-root" class="relative z-10 px-6">
+        <!-- Sanskrit UI components will be rendered here by SanskritRuntime.js -->
+    </div>
+
+    <!-- SUL Runtime -->
+    <script src="SanskritRuntime.js"></script>
+</body>
+</html>

@@ -14,6 +14,7 @@ public:
     CodeGen(const std::string& moduleName);
     void generate(Program* program);
     void writeObject(const std::string& filename);
+    std::string exportAsJSON(Program* program);
 
 private:
     std::unique_ptr<llvm::LLVMContext> context;
@@ -44,4 +45,6 @@ private:
 
     llvm::AllocaInst* createEntryBlockAlloca(llvm::Function* theFunction, const std::string& varName);
     llvm::Function* getPrintf();
+
+    void serializeUI(DrishyamElement* node, std::stringstream& ss, int indent);
 };
