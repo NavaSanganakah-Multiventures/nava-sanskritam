@@ -1,19 +1,28 @@
 {
-  "name": "nava",
+  "name": "nava-sanskritam",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "description": "Nava Sanskritam - A revolutionary programming language based on Panini's Ashtadhyayi logic.",
+  "main": "Interpreter.js",
   "type": "commonjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bin/nava.js"
+  },
+  "keywords": [
+    "Sanskrit",
+    "Vedic",
+    "Programming",
+    "Ashtadhyayi",
+    "NavaSanganakah",
+    "Panini"
+  ],
+  "author": "Acharya Pandit Dheerendra Tripathi (NavaSanganakah Multiventures)",
+  "license": "MIT",
   "dependencies": {
     "commander": "^14.0.3"
   },
   "bin": {
     "nava": "bin/nava.js"
-  }
+  },
+  "private": false
 }
