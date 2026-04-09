@@ -1,23 +1,32 @@
-// v5.0 Advanced Paninian Grammar Test
-अस्ति संदेशः = "नमस्ते! यह नव संस्कृतम् v5.0 है।";
-वद(संदेशः);
+// SUL v13.0 - True Paninian Grammatical Test
+// Testing Sup (Vibhakti), Tin (Lakara), and Karaka Mapping
 
-अस्ति कः = २०; // Nominative (Karta)
-10 अस्ति खम्; // Accusative (Karma)
+// 1. Prathama (Su-Pratyaya) -> Independent Variable (Karta)
+अस्ति रामः = १००;
+अस्ति कृष्णः = २००;
 
-विधिः योग(अ, ब) {
-    फलम् अ + ब;
+// 2. Dwitiya (Am-Pratyaya) -> Target Data (Karma)
+अस्ति सन्देशम् = "नमस्ते नव-संस्कृतम्!";
+
+// 3. Saptami (Ngi-Pratyaya) -> Address Pointer (Adhikarana)
+अस्ति कोषे = { रत्नम्: ९९९ };
+
+// 4. Tin-Anta: Lat-Lakara (Present Tense - Synchronous)
+// Rule: Root 'पठ्' + 'ति' (Suffix)
+विधिः पठति(ज्ञानम्) {
+    वद(ज्ञानम्);
 }
 
-वद(खम्);
-वद(योग(कः, खम्));
-
-// Dependency logic test
-यदि (कः > खम्) तर्हि {
-    वद("विषयः: कः खम्-तः विशालः अस्ति। (True: K is greater than KH)");
+// 5. Tin-Anta: Lṛṭ-Lakara (Future Tense - Asynchronous)
+// Rule: Root 'वद्' + 'इष्यति' (Suffix)
+विधिः वदिष्यति(वचनम्) {
+    वद(वचनम्);
 }
 
-वद("चक्रम् (Loop) १-३:");
-चक्र (i = १; i < ४; i = i + १) {
-    वद(i);
-}
+// --- Execution Pass ---
+
+पठति(रामः);               // Call with Karta (Prathama)
+वदिष्यति(सन्देशम्);        // Async Call with Karma (Dwitiya)
+
+वद(कोषे_रत्नम्);          // Memory Access via Adhikarana
+वद(रामः + कृष्णः);       // Arithmetic with Declinable variables
