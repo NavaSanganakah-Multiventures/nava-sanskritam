@@ -1,0 +1,37 @@
+[
+  {
+    "id": "मम_वेबसाइट",
+    "elements": [
+      {
+        "type": "Box",
+        "label": "मुख्य_खण्डः",
+        "color": "None",
+        "source": "",
+        "children": [
+          { "type": "Text", "label": "नव-संस्कृतम् जाल-संसारः", "color": "नीलवर्णः", "source": "", "children": [] },
+          { "type": "Text", "label": "केवलं संस्कृतबलेन वेबसाइट् निर्माणम् अद्य सम्भवम्।", "color": "None", "source": "", "children": [] }
+        ]
+      },
+      {
+        "type": "Box",
+        "label": "विभागः",
+        "color": "None",
+        "source": "",
+        "children": [
+          { "type": "Button", "label": "आरम्भः (Start)", "color": "हरितवर्णः", "source": "", "children": [] },
+          { "type": "Button", "label": "अधिकं पठतु (Read More)", "color": "श्वेतवर्णः", "source": "", "children": [] }
+        ]
+      },
+      {
+        "type": "Box",
+        "label": "सम्पर्कः",
+        "color": "None",
+        "source": "",
+        "children": [
+          { "type": "Input", "label": "मम ईमेल...", "color": "None", "source": "", "children": [] },
+          { "type": "Button", "label": "सदस्यतां लभस्व (Subscribe)", "color": "नीलवर्णः", "source": "", "children": [] }
+        ]
+      }
+    ]
+  }
+]

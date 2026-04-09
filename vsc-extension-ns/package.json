@@ -1,0 +1,39 @@
+{
+    "name": "nava-sanskritam-sul",
+    "displayName": "Nava Sanskritam (SUL)",
+    "description": "Native Syntax Support for Nava Sanskritam (SUL) Programming Language.",
+    "version": "1.0.0",
+    "publisher": "navasanganakah",
+    "engines": {
+        "vscode": "^1.60.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "nava-sanskritam",
+                "aliases": [
+                    "Nava Sanskritam",
+                    "SUL"
+                ],
+                "extensions": [
+                    ".ns"
+                ],
+                "configuration": "./language-configuration.json",
+                "icon": {
+                    "light": "./icons/ns-icon.png",
+                    "dark": "./icons/ns-icon.png"
+                }
+            }
+        ],
+        "grammars": [
+            {
+                "language": "nava-sanskritam",
+                "scopeName": "source.ns",
+                "path": "./syntaxes/nava-sanskritam.tmLanguage.json"
+            }
+        ]
+    }
+}
