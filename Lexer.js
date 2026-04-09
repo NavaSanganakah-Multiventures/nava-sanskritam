@@ -11,6 +11,51 @@ class Lexer {
             '०': '0', '१': '1', '२': '2', '३': '3', '४': '4',
             '५': '5', '६': '6', '७': '7', '८': '8', '९': '9'
         };
+
+        // Shiva Sutrani for Pratyahara definitions
+        this.shivaSutras = [
+            { letters: ['अ', 'इ', 'उ'], it: 'ण्' },
+            { letters: ['ऋ', 'ऌ'], it: 'क्' },
+            { letters: ['ए', 'ओ'], it: 'ङ्' },
+            { letters: ['ऐ', 'औ'], it: 'च्' },
+            { letters: ['ह', 'य', 'व', 'र'], it: 'ट्' },
+            { letters: ['ल'], it: 'ण्' },
+            { letters: ['ञ', 'म', 'ङ', 'ण', 'न'], it: 'म्' },
+            { letters: ['झ', 'भ'], it: 'ञ्' },
+            { letters: ['घ', 'ढ', 'ध'], it: 'ष्' },
+            { letters: ['ज', 'ब', 'ग', 'ड', 'द'], it: 'श्' },
+            { letters: ['ख', 'फ', 'छ', 'ठ', 'थ', 'च', 'ट', 'त'], it: 'व्' },
+            { letters: ['क', 'प'], it: 'य्' },
+            { letters: ['श', 'ष', 'स'], it: 'र्' },
+            { letters: ['ह'], it: 'ल्' }
+        ];
+    }
+
+    /**
+     * Look up a Pratyahara (e.g., 'अक्') and return its array of letters.
+     */
+    getPratyahara(name) {
+        if (!name || name.length < 2) return [];
+        let startChar = name.charAt(0);
+        let itChar = name.slice(1);
+
+        let result = [];
+        let collecting = false;
+
+        for (let sutra of this.shivaSutras) {
+            for (let letter of sutra.letters) {
+                if (letter === startChar) {
+                    collecting = true;
+                }
+                if (collecting) {
+                    result.push(letter);
+                }
+            }
+            if (collecting && sutra.it === itChar) {
+                return result;
+            }
+        }
+        return [];
     }
 
     tokenize() {
@@ -51,16 +96,8 @@ class Lexer {
                 if (this.keywords.has(id)) {
                     this.tokens.push({ type: 'KEYWORD', value: id, line: this.line, col: this.col });
                 } else {
-                    const keepSuffixes = new Set(['अङ्गम्', 'शीर्षकम्', 'अनुच्छेदः', 'सूची', 'बटनम्']);
-                    if (!keepSuffixes.has(id)) {
-                        if (id.length > 1 && id.endsWith('ः')) {
-                            id = id.slice(0, -1);
-                        } else if (id.length > 2 && id.endsWith('म्')) {
-                            id = id.slice(0, -2);
-                        } else if (id.length > 1 && id.endsWith('े')) {
-                            id = id.slice(0, -1);
-                        }
-                    }
+                    // Implicit Vibhakti suffix stripping is removed per Adhyaya 1 integration.
+                    // The raw variable name with its suffix is sent to the Parser.
                     this.tokens.push({ type: 'IDENTIFIER', value: id, line: this.line, col: this.col });
                 }
                 continue;

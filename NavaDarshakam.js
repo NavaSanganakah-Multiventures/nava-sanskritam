@@ -17,7 +17,7 @@ class NavaDarshakam {
         };
     }
 
-    addTag(tag, content, styleObj = null) {
+    addTag(tag, content, styleObj = null, role = 'None') {
         this.used = true;
         let mappedTag = tag;
         switch (tag) {
@@ -28,10 +28,24 @@ class NavaDarshakam {
             case 'बटनम्': mappedTag = 'button'; break;
         }
 
-        let classStr = '';
+        let cssStr = '';
         if (styleObj) {
+            cssStr += this.parseStyles(styleObj);
+        }
+
+        // Apply automatic dynamic styling based on grammatical roles
+        if (role === 'Subject') {
+            cssStr += 'color: #1E3A8A; font-weight: bold; '; // Distinct color + bold
+        } else if (role === 'Object') {
+            cssStr += 'color: #065F46; font-style: italic; '; // Distinct color + italic
+        } else if (role === 'Locative/Dative') {
+            cssStr += 'color: #92400E; text-decoration: underline; ';
+        }
+
+        let classStr = '';
+        if (cssStr !== '') {
             let className = 'ns-style-' + Math.random().toString(36).substring(2, 9);
-            this.cssClasses.set(className, this.parseStyles(styleObj));
+            this.cssClasses.set(className, cssStr);
             classStr = ` class="${className}"`;
         }
 

@@ -60,27 +60,51 @@ class Parser {
         };
     }
 
+    extractKarakaRole(identifier) {
+        let role = 'None';
+        let id = identifier;
+
+        const keepSuffixes = new Set(['अङ्गम्', 'शीर्षकम्', 'अनुच्छेदः', 'सूची', 'बटनम्']);
+        if (!keepSuffixes.has(id)) {
+            if (id.length > 1 && id.endsWith('ः')) {
+                id = id.slice(0, -1);
+                role = 'Subject'; // Nominative
+            } else if (id.length > 2 && id.endsWith('म्')) {
+                id = id.slice(0, -2);
+                role = 'Object'; // Accusative
+            } else if (id.length > 1 && id.endsWith('े')) {
+                id = id.slice(0, -1);
+                role = 'Locative/Dative';
+            }
+        }
+        return { id, role };
+    }
+
     parseVariableDeclaration() {
         // अस्ति नाम = "आचार्य";
         let idToken = this.consume('IDENTIFIER', "Expected variable name after 'अस्ति'.");
+        const { id, role } = this.extractKarakaRole(idToken.value);
         this.consume('OPERATOR', "Expected '=' after variable name.", '=');
         let init = this.parseExpression();
         this.consume('PUNCTUATION', "Expected ';' after variable declaration.", ';');
         return {
             type: 'VariableDeclaration',
-            id: idToken.value,
+            id: id,
+            role: role,
             init: init
         };
     }
 
     parseConstantDeclaration() {
         let idToken = this.consume('IDENTIFIER', "Expected variable name after 'नित्य'.");
+        const { id, role } = this.extractKarakaRole(idToken.value);
         this.consume('OPERATOR', "Expected '=' after variable name.", '=');
         let init = this.parseExpression();
         this.consume('PUNCTUATION', "Expected ';' after constant declaration.", ';');
         return {
             type: 'ConstantDeclaration',
-            id: idToken.value,
+            id: id,
+            role: role,
             init: init
         };
     }
@@ -188,6 +212,7 @@ class Parser {
             let nextToken = this.tokens[this.pos + 1];
             if (nextToken && nextToken.type === 'OPERATOR' && nextToken.value === '=') {
                 let idToken = this.consume('IDENTIFIER');
+                const { id, role } = this.extractKarakaRole(idToken.value);
                 this.consume('OPERATOR', "Expected '='", '=');
                 let right = this.parseExpression();
                 this.consume('PUNCTUATION', "Expected ';'", ';');
@@ -195,7 +220,8 @@ class Parser {
                     type: 'ExpressionStatement',
                     expression: {
                         type: 'Assignment',
-                        left: idToken.value,
+                        left: id,
+                        role: role,
                         right: right
                     }
                 };
@@ -276,7 +302,9 @@ class Parser {
             return { type: 'Literal', value: this.previous().value };
         }
         if (this.match('IDENTIFIER')) {
-            let node = { type: 'Identifier', name: this.previous().value };
+            let rawId = this.previous().value;
+            const { id, role } = this.extractKarakaRole(rawId);
+            let node = { type: 'Identifier', name: id, role: role };
             if (this.match('PUNCTUATION', '(')) {
                 let args = [];
                 if (!this.check('PUNCTUATION', ')')) {

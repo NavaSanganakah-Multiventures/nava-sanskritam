@@ -1,4 +1,5 @@
 const NavaDarshakam = require('./NavaDarshakam');
+const SanjnaEngine = require('./SanjnaEngine');
 
 class Environment {
     constructor(parent = null) {
@@ -49,16 +50,19 @@ class Interpreter {
     constructor() {
         this.environment = new Environment();
         this.darshakam = new NavaDarshakam();
+        this.sanjnaEngine = new SanjnaEngine();
 
         // Built-in functions
         this.environment.define('समय', {
             type: 'NativeFunction',
-            call: () => Date.now()
+            call: (args) => Date.now()
         }, true);
 
         this.environment.define('गणन', {
             type: 'NativeFunction',
-            call: (a, b) => {
+            call: (args) => {
+                let a = args[0];
+                let b = args[1];
                 if (typeof a === 'number' && typeof b === 'number') return a + b;
                 return 0;
             }
@@ -69,12 +73,47 @@ class Interpreter {
         for (let tag of tags) {
             this.environment.define(tag, {
                 type: 'NativeFunction',
-                call: (content, styleObj = null) => {
-                    this.darshakam.addTag(tag, content, styleObj);
+                call: (args, context = {}) => {
+                    let content = args[0] || '';
+                    let styleObj = args[1] || null;
+                    // Extract role from the passed argument context if any
+                    let role = 'None';
+                    if (context.argsAst && context.argsAst.length > 0) {
+                        const firstArgNode = context.argsAst[0];
+                        if (firstArgNode.type === 'Identifier' && firstArgNode.role) {
+                            role = firstArgNode.role;
+                        }
+                    }
+                    // Since it expects a plain styleObj, make sure we aren't accidentally passing an AST object.
+                    // The bug was ...args unpacking into styleObj instead of context when styleObj was omitted.
+                    this.darshakam.addTag(tag, content, styleObj, role);
                     return null;
                 }
             }, true);
         }
+
+        // Ashtadhyayi Transform functions
+        this.environment.define('गुण', {
+            type: 'NativeFunction',
+            call: (args) => {
+                let word = args[0];
+                if (typeof word === 'string') {
+                    return this.sanjnaEngine.applyGuna(word);
+                }
+                return word;
+            }
+        }, true);
+
+        this.environment.define('वृद्धि', {
+            type: 'NativeFunction',
+            call: (args) => {
+                let word = args[0];
+                if (typeof word === 'string') {
+                    return this.sanjnaEngine.applyVriddhi(word);
+                }
+                return word;
+            }
+        }, true);
     }
 
     interpret(ast) {
@@ -159,7 +198,7 @@ class Interpreter {
                 let args = expr.arguments.map(arg => this.evaluate(arg));
 
                 if (callee.type === 'NativeFunction') {
-                    return callee.call(...args);
+                    return callee.call(args, { argsAst: expr.arguments });
                 }
 
                 if (callee.type === 'FunctionDeclaration') {
