@@ -1,3 +1,5 @@
+const NavaDarshakam = require('./NavaDarshakam');
+
 class Environment {
     constructor(parent = null) {
         this.values = new Map();
@@ -43,8 +45,10 @@ class Environment {
 }
 
 class Interpreter {
+
     constructor() {
         this.environment = new Environment();
+        this.darshakam = new NavaDarshakam();
 
         // Built-in functions
         this.environment.define('समय', {
@@ -59,6 +63,18 @@ class Interpreter {
                 return 0;
             }
         }, true);
+
+        // Vedic UI Syntax
+        const tags = ['अङ्गम्', 'शीर्षकम्', 'अनुच्छेदः', 'सूची', 'बटनम्'];
+        for (let tag of tags) {
+            this.environment.define(tag, {
+                type: 'NativeFunction',
+                call: (content, styleObj = null) => {
+                    this.darshakam.addTag(tag, content, styleObj);
+                    return null;
+                }
+            }, true);
+        }
     }
 
     interpret(ast) {

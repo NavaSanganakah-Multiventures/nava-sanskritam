@@ -51,12 +51,15 @@ class Lexer {
                 if (this.keywords.has(id)) {
                     this.tokens.push({ type: 'KEYWORD', value: id, line: this.line, col: this.col });
                 } else {
-                    if (id.length > 1 && id.endsWith('ः')) {
-                        id = id.slice(0, -1);
-                    } else if (id.length > 2 && id.endsWith('म्')) {
-                        id = id.slice(0, -2);
-                    } else if (id.length > 1 && id.endsWith('े')) {
-                        id = id.slice(0, -1);
+                    const keepSuffixes = new Set(['अङ्गम्', 'शीर्षकम्', 'अनुच्छेदः', 'सूची', 'बटनम्']);
+                    if (!keepSuffixes.has(id)) {
+                        if (id.length > 1 && id.endsWith('ः')) {
+                            id = id.slice(0, -1);
+                        } else if (id.length > 2 && id.endsWith('म्')) {
+                            id = id.slice(0, -2);
+                        } else if (id.length > 1 && id.endsWith('े')) {
+                            id = id.slice(0, -1);
+                        }
                     }
                     this.tokens.push({ type: 'IDENTIFIER', value: id, line: this.line, col: this.col });
                 }
