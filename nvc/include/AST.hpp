@@ -119,7 +119,8 @@ public:
 class Identifier : public Expression {
 public:
     std::string name;
-    std::string role; // "Nominative", "Accusative", "Locative", etc.
+    std::string role; // "Karta", "Karma", "Shashti", etc.
+    int vachana;      // 1: single, 2: dual, 3: plural
     ASTNodeType getType() const override { return ASTNodeType::Identifier; }
 };
 

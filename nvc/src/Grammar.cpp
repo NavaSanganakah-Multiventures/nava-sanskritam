@@ -180,28 +180,77 @@ std::string Grammar::toUtf8(const std::u32string& utf32) {
     return convert.to_bytes(utf32);
 }
 
+std::u32string Grammar::processAnubandha(SupPratyaya p) {
+    // SUL v12.0: Pāṇinian Anubandha-Lopa (It-removal)
+    // Rule: 'Halamtyam' (Last consonant as 'it') and 'Tasya Lopah'
+    switch (p) {
+        case SupPratyaya::SU: return U"स्"; // सुँ -> उँ is it -> s
+        case SupPratyaya::AU: return U"औ";
+        case SupPratyaya::JAS: return U"अस्"; // जस् -> ज is it -> as
+        case SupPratyaya::AM: return U"अम्";
+        case SupPratyaya::AUT: return U"औ"; // औट् -> ट is it
+        case SupPratyaya::SHAS: return U"अस्"; // शस् -> श is it
+        case SupPratyaya::TA: return U"आ"; // टा -> ट is it
+        case SupPratyaya::BHYAM: 
+        case SupPratyaya::BHYAM2:
+        case SupPratyaya::BHYAM3: return U"भ्याम्";
+        case SupPratyaya::BHIS: return U"भिस्";
+        case SupPratyaya::NGE: return U"ए"; // ङे -> ङ is it
+        case SupPratyaya::BHYAS:
+        case SupPratyaya::BHYAS2: return U"भ्यस्";
+        case SupPratyaya::NGASI: return U"आत्"; // Simplified: Ngasi -> aat in many forms
+        case SupPratyaya::NGAS: return U"अस्"; // ङस् -> ङ is it
+        case SupPratyaya::OS:
+        case SupPratyaya::OS2: return U"ओस्";
+        case SupPratyaya::AM2: return U"आम्";
+        case SupPratyaya::NGI: return U"इ"; // ङि -> ङ is it
+        case SupPratyaya::SUP: return U"सु"; // सुप् ->प् is it
+        default: return U"";
+    }
+}
+
 Grammar::WordMeta Grammar::analyzeSubanta(const std::u32string& word) {
-    WordMeta meta = { word, Vibhakti::UNKNOWN, 1 };
+    WordMeta meta = { word, Vibhakti::PRATHAMA, SupPratyaya::SU, 1 };
     if (word.empty()) return meta;
 
-    // Ordered list of suffixes for matching (longest first to avoid partial matches)
-    struct SuffixMap { std::u32string suffix; Vibhakti v; int n; };
+    // Ordered list of Pada-Siddhi transformations (v12.0 Table)
+    struct SuffixMap { std::u32string transformed; Vibhakti v; SupPratyaya p; int n; };
     static const std::vector<SuffixMap> suffixes = {
-        { U"आणाम्", Vibhakti::SHASHTI, 3 }, { U"एभ्यः", Vibhakti::CHATURTHI, 3 },
-        { U"आभ्याम्", Vibhakti::TRITIYA, 2 }, { U"एषु", Vibhakti::SAPTAMI, 3 },
-        { U"ईणाम्", Vibhakti::SHASHTI, 3 }, { U"स्य", Vibhakti::SHASHTI, 1 },
-        { U"एण", Vibhakti::TRITIYA, 1 }, { U"आय", Vibhakti::CHATURTHI, 1 },
-        { U"आत्", Vibhakti::PANCHAMI, 1 }, { U"योः", Vibhakti::SHASHTI, 2 },
-        { U"आः", Vibhakti::PRATHAMA, 3 }, { U"आन्", Vibhakti::DWITIYA, 3 },
-        { U"ऐः", Vibhakti::TRITIYA, 3 }, { U"ए", Vibhakti::SAPTAMI, 1 },
-        { U"ः", Vibhakti::PRATHAMA, 1 }, { U"म्", Vibhakti::DWITIYA, 1 },
-        { U"औ", Vibhakti::PRATHAMA, 2 }
+        // Prathama (Karta)
+        { U"ः", Vibhakti::PRATHAMA, SupPratyaya::SU, 1 },
+        { U"औ", Vibhakti::PRATHAMA, SupPratyaya::AU, 2 },
+        { U"आः", Vibhakti::PRATHAMA, SupPratyaya::JAS, 3 },
+        // Dwitiya (Karma)
+        { U"म्", Vibhakti::DWITIYA, SupPratyaya::AM, 1 },
+        { U"औ", Vibhakti::DWITIYA, SupPratyaya::AUT, 2 },
+        { U"आन्", Vibhakti::DWITIYA, SupPratyaya::SHAS, 3 },
+        // Tritiya (Karana)
+        { U"एण", Vibhakti::TRITIYA, SupPratyaya::TA, 1 },
+        { U"आभ्याम्", Vibhakti::TRITIYA, SupPratyaya::BHYAM, 2 },
+        { U"ऐः", Vibhakti::TRITIYA, SupPratyaya::BHIS, 3 },
+        // Chaturthi (Sampradana)
+        { U"आय", Vibhakti::CHATURTHI, SupPratyaya::NGE, 1 },
+        { U"आभ्याम्", Vibhakti::CHATURTHI, SupPratyaya::BHYAM2, 2 },
+        { U"एभ्यः", Vibhakti::CHATURTHI, SupPratyaya::BHYAS, 3 },
+        // Panchami (Apadana)
+        { U"आत्", Vibhakti::PANCHAMI, SupPratyaya::NGASI, 1 },
+        { U"आभ्याम्", Vibhakti::PANCHAMI, SupPratyaya::BHYAM3, 2 },
+        { U"एभ्यः", Vibhakti::PANCHAMI, SupPratyaya::BHYAS2, 3 },
+        // Shashti (Pointer Access)
+        { U"स्य", Vibhakti::SHASHTI, SupPratyaya::NGAS, 1 },
+        { U"योः", Vibhakti::SHASHTI, SupPratyaya::OS, 2 },
+        { U"आणाम्", Vibhakti::SHASHTI, SupPratyaya::AM2, 3 },
+        // Saptami (Base Allocator)
+        { U"ए", Vibhakti::SAPTAMI, SupPratyaya::NGI, 1 },
+        { U"योः", Vibhakti::SAPTAMI, SupPratyaya::OS2, 2 },
+        { U"एषु", Vibhakti::SAPTAMI, SupPratyaya::SUP, 3 }
     };
 
     for (const auto& s : suffixes) {
-        if (word.length() > s.suffix.length() && word.substr(word.length() - s.suffix.length()) == s.suffix) {
-            meta.root = word.substr(0, word.length() - s.suffix.length());
+        if (word.length() > s.transformed.length() && word.substr(word.length() - s.transformed.length()) == s.transformed) {
+            meta.root = word.substr(0, word.length() - s.transformed.length());
             meta.vibhakti = s.v;
+            meta.pratyaya = s.p;
             meta.vachana = s.n;
             return meta;
         }

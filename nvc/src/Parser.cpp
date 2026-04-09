@@ -304,13 +304,26 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
     }
     if (match(TokenType::IDENTIFIER)) {
         std::string role;
-        std::string name = stripVibhakti(previous().value, &role);
+        Token idToken = previous();
+        Grammar::WordMeta meta = grammar.analyzeSubanta(grammar.toUtf32(idToken.value));
+        
         auto expr = std::make_unique<Identifier>();
-        expr->name = name;
-        expr->role = role;
+        expr->name = grammar.toUtf8(meta.root);
+        
+        switch (meta.vibhakti) {
+            case Grammar::Vibhakti::PRATHAMA: expr->role = "Karta"; break;
+            case Grammar::Vibhakti::DWITIYA: expr->role = "Karma"; break;
+            case Grammar::Vibhakti::TRITIYA: expr->role = "Karana"; break;
+            case Grammar::Vibhakti::CHATURTHI: expr->role = "Sampradana"; break;
+            case Grammar::Vibhakti::PANCHAMI: expr->role = "Apadaana"; break;
+            case Grammar::Vibhakti::SHASHTI: expr->role = "Shashti"; break;
+            case Grammar::Vibhakti::SAPTAMI: expr->role = "Adhikarana"; break;
+            default: expr->role = "None"; break;
+        }
+        expr->vachana = meta.vachana;
 
-        // SUL v11.0: Native Shashti (Genitive) Property Access
-        if (role == "Shashti") {
+        // SUL v12.0: Native Shashti (Genitive) Property Access
+        if (expr->role == "Shashti") {
             if (check(TokenType::IDENTIFIER)) {
                 auto propToken = consume(TokenType::IDENTIFIER, "Expected property name after Shashti declension.");
                 auto member = std::make_unique<MemberAccess>();

@@ -30,13 +30,21 @@ public:
         PANCHAMI, SHASHTI, SAPTAMI, SAMBODHANA, UNKNOWN 
     };
 
+    enum class SupPratyaya {
+        SU, AU, JAS, AM, AUT, SHAS, TA, BHYAM, BHIS, 
+        NGE, BHYAM2, BHYAS, NGASI, BHYAM3, BHYAS2, 
+        NGAS, OS, AM2, NGI, OS2, SUP
+    };
+
     struct WordMeta {
         std::u32string root;
         Vibhakti vibhakti;
+        SupPratyaya pratyaya;
         int vachana; // 1: singular, 2: dual, 3: plural
     };
 
     static WordMeta analyzeSubanta(const std::u32string& word);
+    static std::u32string processAnubandha(SupPratyaya p);
     static std::u32string toUtf32(const std::string& utf8);
     static std::string toUtf8(const std::u32string& utf32);
 

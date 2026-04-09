@@ -117,16 +117,27 @@ llvm::Value* CodeGen::generateBlock(BlockStatement* node) {
 
 llvm::Value* CodeGen::generateVariableDeclaration(VariableDeclaration* node) {
     llvm::Function* theFunction = builder->GetInsertBlock()->getParent();
+    llvm::Type* allocType = llvm::Type::getDoubleTy(*context);
+    
+    // Vachana-based Memory Sizing (SUL v12.0)
+    if (node->vachana == 2) {
+        allocType = llvm::ArrayType::get(llvm::Type::getDoubleTy(*context), 2);
+    } else if (node->vachana == 3) {
+        allocType = llvm::PointerType::getUnqual(llvm::Type::getDoubleTy(*context)); // Vector pointer
+    }
+
     llvm::AllocaInst* alloca = createEntryBlockAlloca(theFunction, node->id);
+    // Explicitly re-create alloca if type is different
+    if (allocType != llvm::Type::getDoubleTy(*context)) {
+        llvm::IRBuilder<> tmpBuilder(&theFunction->getEntryBlock(), theFunction->getEntryBlock().begin());
+        alloca = tmpBuilder.CreateAlloca(allocType, nullptr, node->id);
+    }
 
     if (node->init) {
         llvm::Value* initVal = generateNode(node->init.get());
         if (!initVal) return nullptr;
-        if (initVal->getType()->isPointerTy()) {
-             llvm::IRBuilder<> tmpBuilder(&theFunction->getEntryBlock(),
-                                 theFunction->getEntryBlock().begin());
-             alloca = tmpBuilder.CreateAlloca(initVal->getType(), nullptr, node->id);
-        }
+        
+        // Handle vector/complex initialization later
         builder->CreateStore(initVal, alloca);
     }
 
@@ -307,9 +318,16 @@ llvm::Value* CodeGen::generateLiteral(Literal* node) {
 llvm::Value* CodeGen::generateIdentifier(Identifier* node) {
     llvm::AllocaInst* A = namedValues[node->name];
     if (!A) {
-        // SUL Dynamic Behavior: Return 0 if undefined
         return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
     }
+
+    // SUL v12.0: Karaka-to-LLVM Semantic Dispatch
+    // SAPTAMI (Adhikarana) -> Return Address (The Base Pointer - आधारः)
+    if (node->role == "Adhikarana") {
+        return A; // Return the pointer itself instead of loading value
+    }
+
+    // Default: Load the value (Karta/Karma behavior)
     return builder->CreateLoad(A->getAllocatedType(), A, node->name.c_str());
 }
 
