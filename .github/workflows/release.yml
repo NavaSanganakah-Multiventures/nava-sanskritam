@@ -1,0 +1,48 @@
+name: Nava Release Build
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-web:
+    name: Build Web (WASM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Build WASM
+        run: |
+          cd nvc
+          mkdir -p build-wasm && cd build-wasm
+          emcmake cmake ..
+          make
+
+      - name: Upload WASM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvc-wasm
+          path: nvc/build-wasm/libnava_core.a
+
+  release:
+    name: Create GitHub Release
+    needs: [build-web]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/nvc-wasm/libnava_core.a
