@@ -39,7 +39,8 @@ else()
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Parser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Grammar.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/CodeGen.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/SandhiPass.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/SandhiPass.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Interpreter.cpp)
     add_executable(nvc ${SRC_FILES})
     target_link_libraries(nvc PRIVATE LLVM)
 endif()

@@ -2,8 +2,9 @@
 #include "Parser.hpp"
 #ifndef EMSCRIPTEN
 #include "CodeGen.hpp"
-#else
+#endif
 #include "Interpreter.hpp"
+#ifdef EMSCRIPTEN
 #include <emscripten.h>
 #endif
 #include <iostream>
@@ -63,6 +64,7 @@ window.onload = initSUL;
 int main(int argc, char* argv[]) {
     bool targetWeb = false;
     bool targetWasm = false;
+    bool runMode = false;
     std::string filename;
 
     for (int i = 1; i < argc; ++i) {
@@ -71,13 +73,15 @@ int main(int argc, char* argv[]) {
             std::string target = argv[++i];
             if (target == "web") targetWeb = true;
             else if (target == "wasm") targetWasm = true;
+        } else if (arg == "--run") {
+            runMode = true;
         } else if (filename.empty()) {
             filename = arg;
         }
     }
 
     if (filename.empty()) {
-        std::cerr << "Usage: nvc <file.ns> [--target web/wasm]\n";
+        std::cerr << "Usage: nvc <file.ns> [--target web/wasm] [--run]\n";
         std::cerr << "(Press Enter to exit)\n";
         std::cin.get();
         return 1;
@@ -105,6 +109,14 @@ int main(int argc, char* argv[]) {
 
         Parser parser(tokens);
         std::unique_ptr<Program> ast = parser.parse();
+
+        // Interpret dynamically
+        if (runMode) {
+            Interpreter interpreter;
+            std::string output = interpreter.evaluate(ast.get());
+            std::cout << output;
+            return 0;
+        }
 
         CodeGen codegen("nava_module");
         

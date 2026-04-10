@@ -40,7 +40,7 @@ ipcMain.on('run-code', (event, code) => {
   
   fs.writeFileSync(tempFilePath, code);
 
-  execFile(binPath, [tempFilePath], (error, stdout, stderr) => {
+  execFile(binPath, [tempFilePath, '--run'], (error, stdout, stderr) => {
     if (error) {
       event.reply('run-result', { success: false, output: stderr || error.message });
       return;
