@@ -5,39 +5,78 @@ const path = window.nodeRequire ? window.nodeRequire('path') : require('path');
 let editor;
 let currentFilePath = null;
 
-// Sanskrit Transliteration Engine (Simple mapping)
-const sansMapping = {
-    'a': 'अ', 'aa': 'आ', 'i': 'इ', 'ii': 'ई', 'u': 'उ', 'uu': 'ऊ', 'e': 'ए', 'ai': 'ऐ', 'o': 'ओ', 'au': 'औ',
+// Real Sanskrit Transliteration Engine (Handling Matras & Conjuncts)
+const consonants = {
     'k': 'क', 'kh': 'ख', 'g': 'ग', 'gh': 'घ', 'ng': 'ङ',
     'c': 'च', 'ch': 'छ', 'j': 'ज', 'jh': 'झ', 'ny': 'ञ',
     'T': 'ट', 'Th': 'ठ', 'D': 'ड', 'Dh': 'ढ', 'N': 'ण',
     't': 'त', 'th': 'थ', 'd': 'द', 'dh': 'ध', 'n': 'न',
     'p': 'प', 'ph': 'फ', 'b': 'ब', 'bh': 'भ', 'm': 'म',
-    'y': 'य', 'r': 'र', 'l': 'ल', 'v': 'व', 'sh': 'श', 'shh': 'ष', 's': 'स', 'h': 'ह',
-    'om': 'ॐ', ' ': ' '
+    'y': 'य', 'r': 'र', 'l': 'ल', 'v': 'व', 'sh': 'श', 'shh': 'ष', 's': 'स', 'h': 'ह', 'L': 'ळ'
 };
 
-// Vowel Signs
-const vowelSigns = {
-    'aa': 'ा', 'i': 'ि', 'ii': 'ी', 'u': 'ु', 'uu': 'ू', 'e': 'े', 'ai': 'ै', 'o': 'ो', 'au': 'ौ'
+const vowels = {
+    'a': '', 'aa': 'ा', 'i': 'ि', 'ii': 'ी', 'u': 'ु', 'uu': 'ू', 'e': 'े', 'ai': 'ै', 'o': 'ो', 'au': 'ौ', 'an': 'ं', 'ah': 'ः'
 };
 
-// Phonetic conversion wrapper
+const independentVowels = {
+    'a': 'अ', 'aa': 'आ', 'i': 'इ', 'ii': 'ई', 'u': 'उ', 'uu': 'ऊ', 'e': 'ए', 'ai': 'ऐ', 'o': 'ओ', 'au': 'औ', 'an': 'अं', 'ah': 'अः'
+};
+
+const virama = '्';
+
 function transliterate(str) {
-    // This is a simplified "greedy" mapper for Devanagari
     let result = '';
     let i = 0;
+    
     while (i < str.length) {
-        let chunk3 = str.substring(i, i + 3);
         let chunk2 = str.substring(i, i + 2);
         let chunk1 = str.substring(i, i + 1);
-
-        if (sansMapping[chunk3]) { result += sansMapping[chunk3]; i += 3; }
-        else if (sansMapping[chunk2]) { result += sansMapping[chunk2]; i += 2; }
-        else if (sansMapping[chunk1]) { result += sansMapping[chunk1]; i += 1; }
-        else { result += chunk1; i++; }
+        
+        // 1. Check for Consonant
+        let c = null;
+        let cLen = 0;
+        if (consonants[chunk2]) { c = consonants[chunk2]; cLen = 2; }
+        else if (consonants[chunk1]) { c = consonants[chunk1]; cLen = 1; }
+        
+        if (c) {
+            i += cLen;
+            let v = null;
+            let vLen = 0;
+            let nextChunk2 = str.substring(i, i + 2);
+            let nextChunk1 = str.substring(i, i + 1);
+            
+            if (vowels[nextChunk2] !== undefined) { v = vowels[nextChunk2]; vLen = 2; }
+            else if (vowels[nextChunk1] !== undefined) { v = vowels[nextChunk1]; vLen = 1; }
+            
+            if (v !== null) {
+                result += c + v;
+                i += vLen;
+            } else {
+                // No vowel following - add Virama (half-letter) unless it's the end of word and we want schwa?
+                // For Sanskrit, usually it's better to add Virama for lone consonants.
+                result += c + virama;
+            }
+        } 
+        // 2. Check for Independent Vowel
+        else {
+            let iv = null;
+            let ivLen = 0;
+            if (independentVowels[chunk2]) { iv = independentVowels[chunk2]; ivLen = 2; }
+            else if (independentVowels[chunk1]) { iv = independentVowels[chunk1]; ivLen = 1; }
+            
+            if (iv) {
+                result += iv;
+                i += ivLen;
+            } else {
+                result += chunk1;
+                i++;
+            }
+        }
     }
-    return result;
+    
+    // Cleanup double Viramas or Virama at end if user typed 'a'
+    return result.replace(/्ा/g, 'ा').replace(/्ि/g, 'ि').replace(/्ी/g, 'ी').replace(/्ु/g, 'ु').replace(/्ू/g, 'ू').replace(/्े/g, 'े').replace(/्ै/g, 'ै').replace(/्ो/g, 'ो').replace(/्ौ/g, 'ौ').replace(/्ं/g, 'ं').replace(/्ः/g, 'ः').replace(/् /g, ' ');
 }
 
 // Load Monaco Editor
@@ -69,16 +108,19 @@ require(['vs/editor/editor.main'], function () {
     editor.onKeyUp((e) => {
         if (!document.getElementById('keyboard-toggle').checked) return;
         
-        // Only trigger on space or word boundaries for simplicity
         if (e.keyCode === monaco.KeyCode.Space) {
             const model = editor.getModel();
             const pos = editor.getPosition();
             const lineContent = model.getLineContent(pos.lineNumber);
-            const word = lineContent.trim().split(' ').pop();
             
-            if (word && /^[a-zA-Z]+$/.test(word)) {
-                const devanagari = transliterate(word.toLowerCase());
-                const range = new monaco.Range(pos.lineNumber, pos.column - word.length - 1, pos.lineNumber, pos.column - 1);
+            // Get text before cursor
+            const beforeCursor = lineContent.substring(0, pos.column - 1);
+            const words = beforeCursor.split(' ');
+            const lastWord = words[words.length - 1];
+            
+            if (lastWord && /^[a-zA-Z]+$/.test(lastWord)) {
+                const devanagari = transliterate(lastWord.toLowerCase());
+                const range = new monaco.Range(pos.lineNumber, pos.column - lastWord.length - 1, pos.lineNumber, pos.column - 1);
                 editor.executeEdits("transliteration", [{ range: range, text: devanagari }]);
             }
         }
@@ -87,7 +129,7 @@ require(['vs/editor/editor.main'], function () {
     updateFileExplorer();
 });
 
-// File Explorer Logic (Pure Sanskrit)
+// File Explorer Logic
 function updateFileExplorer() {
     const cwd = process.cwd();
     const fileListMsg = document.getElementById('file-list');
@@ -115,16 +157,13 @@ function loadFile(filePath, element) {
     element.classList.add('active');
 }
 
-// Run Button Event
 document.getElementById('run-btn').addEventListener('click', () => {
     const code = editor.getValue();
     const output = document.getElementById('terminal-output');
     output.innerText = 'सङ्कलनं भवति...';
-    
     ipcRenderer.send('run-code', code);
 });
 
-// Save Button Event
 document.getElementById('save-btn').addEventListener('click', () => {
     const code = editor.getValue();
     if (currentFilePath) {
@@ -136,7 +175,6 @@ document.getElementById('save-btn').addEventListener('click', () => {
     }
 });
 
-// Receive Result
 ipcRenderer.on('run-result', (event, result) => {
     const output = document.getElementById('terminal-output');
     if (result.success) {
@@ -148,19 +186,17 @@ ipcRenderer.on('run-result', (event, result) => {
     }
 });
 
-// Terminal Input Logic
 document.getElementById('terminal-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         const cmd = e.target.value.trim().toLowerCase();
         const output = document.getElementById('terminal-output');
-        
         output.innerText += '\n🚩 > ' + cmd;
         
-        if (cmd === 'चलाओ' || cmd === 'run' || cmd === 'chalaya') {
+        if (cmd === 'चलाओ' || cmd === 'run') {
             document.getElementById('run-btn').click();
-        } else if (cmd === 'संग्रहः' || cmd === 'save' || cmd === 'rakshaya') {
+        } else if (cmd === 'संग्रहः' || cmd === 'save') {
             document.getElementById('save-btn').click();
-        } else if (cmd === 'साफ' || cmd === 'clear' || cmd === 'shodhaya') {
+        } else if (cmd === 'साफ' || cmd === 'clear') {
             output.innerText = 'नव-सङ्गणक-शालायां स्वागतम्...';
         } else {
             output.innerText += '\nत्रुटिः: अमान्या आज्ञा';

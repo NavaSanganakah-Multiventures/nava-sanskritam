@@ -12,6 +12,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      spellcheck: false
     }
   });
 
@@ -35,22 +36,28 @@ app.whenReady().then(() => {
   // Create Standard Application Menu (PURE SANSKRIT)
   const template = [
     {
-      label: 'सम्पादनम् (Edit)',
+      label: 'सञ्चिका (File)',
       submenu: [
-        { label: 'पूर्ववत् (Undo)', role: 'undo' },
-        { label: 'पुनरावृत्तिः (Redo)', role: 'redo' },
-        { type: 'separator' },
-        { label: 'कर्तनम् (Cut)', role: 'cut' },
-        { label: 'पठतु (Copy)', role: 'copy' },
-        { label: 'लिखतु (Paste)', role: 'paste' },
-        { label: 'सर्वं वृणोतु (Select All)', role: 'selectAll' }
+        { label: 'निर्गमनम् (Exit)', role: 'quit' }
       ]
     },
     {
-      label: 'दृश्यम् (View)',
+      label: 'सम्पादनम्', // PURE SANSKRIT - Edit
       submenu: [
-        { label: 'पुनर्भारणम् (Reload)', role: 'reload' },
-        { label: 'निरीक्षकः (DevTools)', role: 'toggleDevTools' }
+        { label: 'पूर्ववत्', role: 'undo' },
+        { label: 'पुनरावृत्तिः', role: 'redo' },
+        { type: 'separator' },
+        { label: 'कर्तनम्', role: 'cut' },
+        { label: 'पठतु', role: 'copy' },
+        { label: 'लिखतु', role: 'paste' },
+        { label: 'सर्वं वृणोतु', role: 'selectAll' }
+      ]
+    },
+    {
+      label: 'दृश्यम्', // View
+      submenu: [
+        { label: 'पुनर्भारणम्', role: 'reload' },
+        { label: 'निरीक्षकः', role: 'toggleDevTools' }
       ]
     }
   ];
