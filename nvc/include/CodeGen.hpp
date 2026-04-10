@@ -15,6 +15,8 @@ public:
     void generate(Program* program);
     void writeObject(const std::string& filename);
     std::string exportAsJSON(Program* program);
+    
+    bool targetWasm = false;
 
 private:
     std::unique_ptr<llvm::LLVMContext> context;

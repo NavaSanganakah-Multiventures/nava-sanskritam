@@ -585,7 +585,7 @@ void CodeGen::writeObject(const std::string& filename) {
     llvm::InitializeAllAsmParsers();
     llvm::InitializeAllAsmPrinters();
 
-    auto targetTripleStr = llvm::sys::getDefaultTargetTriple();
+    std::string targetTripleStr = targetWasm ? "wasm32-unknown-unknown" : llvm::sys::getDefaultTargetTriple();
     llvm::Triple targetTriple(targetTripleStr);
     module->setTargetTriple(targetTriple); // LLVM 18 prefers Triple object
 

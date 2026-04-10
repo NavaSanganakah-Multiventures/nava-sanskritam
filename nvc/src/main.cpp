@@ -57,6 +57,7 @@ window.onload = initSUL;
 
 int main(int argc, char* argv[]) {
     bool targetWeb = false;
+    bool targetWasm = false;
     std::string filename;
 
     for (int i = 1; i < argc; ++i) {
@@ -64,6 +65,7 @@ int main(int argc, char* argv[]) {
         if (arg == "--target" && i + 1 < argc) {
             std::string target = argv[++i];
             if (target == "web") targetWeb = true;
+            else if (target == "wasm") targetWasm = true;
         } else if (filename.empty()) {
             filename = arg;
         }
@@ -128,7 +130,19 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
+        if (targetWasm) {
+            codegen.targetWasm = true;
+        }
+
         codegen.generate(ast.get());
+
+        if (targetWasm) {
+            outputFilename = filename.substr(0, filename.find_last_of('.')) + ".wasm.o";
+            codegen.writeObject(outputFilename);
+            std::cout << "Successfully compiled WebAssembly object to " << outputFilename << "\n";
+            std::cout << "Use wasm-ld to link this into a final .wasm browser executable.\n";
+            return 0; // Skip native linking
+        }
 
         // 4. Output Object File
         outputFilename = filename.substr(0, filename.find_last_of('.')) + ".o";
