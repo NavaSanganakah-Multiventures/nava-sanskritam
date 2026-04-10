@@ -74,7 +74,15 @@ jobs:
           cd build
           mkdir nvc-mac
           cp nvc nvc-mac/
-          create-dmg --volname "Nava Compiler" --window-pos 200 120 --window-size 800 400 --icon-size 100 --icon "nvc" 200 190 --hide-extension "nvc" --app-drop-link 600 185 "nvc.dmg" "nvc-mac/"
+          create-dmg \
+            --volname "Nava Compiler" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "nvc" 200 190 \
+            --hide-extension "nvc" \
+            "nvc.dmg" \
+            "nvc-mac/"
 
       - name: Prepare Windows Executable
         if: runner.os == 'Windows'
@@ -90,79 +98,9 @@ jobs:
             build/nvc.dmg
             build/nvc.exe
 
-  build-web:
-    name: Build Web (WASM)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v12
-
-      - name: Build WASM
-        run: |
-          mkdir build-wasm && cd build-wasm
-          emcmake cmake ../nvc
-          make
-
-      - name: Upload WASM Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifacts/nvc-wasm
-          path: build-wasm/libnava_core.a
-
-  build-mobile:
-    name: Build Mobile (${{ matrix.target }})
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        target: [android, ios]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Dependencies
-        run: brew install ninja cmake
-
-      - name: Setup Android NDK
-        if: matrix.target == 'android'
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r25c
-
-      - name: Build for Android
-        if: matrix.target == 'android'
-        run: |
-          mkdir build-android && cd build-android
-          cmake -G Ninja ../nvc \
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
-            -DANDROID_ABI=arm64-v8a \
-            -DANDROID_PLATFORM=android-21
-          ninja nava_core
-          cp libnava_core.a ../nava_core_android.a
-
-      - name: Build for iOS
-        if: matrix.target == 'ios'
-        run: |
-          mkdir build-ios && cd build-ios
-          cmake -G Xcode ../nvc \
-            -DCMAKE_SYSTEM_NAME=iOS \
-            -DCMAKE_OSX_SYSROOT=iphoneos \
-            -DCMAKE_OSX_ARCHITECTURES=arm64
-          cmake --build . --config Release --target nava_core
-          cp Release-iphoneos/libnava_core.a ../nava_core_ios.a
-
-      - name: Upload Mobile Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nvc-${{ matrix.target }}
-          path: |
-            nava_core_android.a
-            nava_core_ios.a
-
   release:
     name: Create GitHub Release
-    needs: [build-desktop, build-web, build-mobile]
+    needs: [build-desktop]
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifacts
@@ -177,6 +115,3 @@ jobs:
             artifacts/nvc-binary-ubuntu-latest/nvc.deb
             artifacts/nvc-binary-macos-latest/nvc.dmg
             artifacts/nvc-binary-windows-latest/nvc.exe
-            artifacts/nvc-wasm/libnava_core.a
-            artifacts/nvc-android/nava_core_android.a
-            artifacts/nvc-ios/nava_core_ios.a
