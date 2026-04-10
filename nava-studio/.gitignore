@@ -1,0 +1,5 @@
+node_modules/
+dist/
+bin/nvc.exe
+.DS_Store
+*.log

@@ -1,0 +1,67 @@
+name: Build Nava Studio (Desktop Installer)
+
+on:
+  push:
+    branches: [ "nava-framework-vsc-extension-9061376043773154792" ]
+  pull_request:
+    branches: [ "nava-framework-vsc-extension-9061376043773154792" ]
+
+jobs:
+  build-nvc:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install LLVM
+      run: choco install llvm
+      
+    - name: Configure CMake
+      run: |
+        cd nvc
+        mkdir build
+        cd build
+        cmake .. -G Ninja
+        
+    - name: Build NVC
+      run: |
+        cd nvc/build
+        ninja
+        
+    - name: Upload NVC Binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: nvc-binary
+        path: nvc/build/nvc.exe
+
+  package-electron:
+    needs: build-nvc
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-size: 18
+        
+    - name: Download NVC Binary
+      uses: actions/download-artifact@v3
+      with:
+        name: nvc-binary
+        path: nava-studio/bin/
+        
+    - name: Install Dependencies
+      run: |
+        cd nava-studio
+        npm install
+        
+    - name: Build Installer
+      run: |
+        cd nava-studio
+        npm run build
+        
+    - name: Upload Installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: nava-studio-installer
+        path: nava-studio/dist/*.exe
