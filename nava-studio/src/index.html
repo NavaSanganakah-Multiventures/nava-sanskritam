@@ -105,6 +105,14 @@ Ready to compile Sanskrit logic.</div>
     </div>
   </div>
 
+  <script>
+    if (typeof require !== 'undefined') {
+      window.nodeRequire = require;
+      delete window.require;
+      delete window.exports;
+      delete window.module;
+    }
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.min.js"></script>
   <script src="renderer.js"></script>
 </body>

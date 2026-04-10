@@ -1,4 +1,4 @@
-const { ipcRenderer } = require('electron');
+const { ipcRenderer } = window.nodeRequire ? window.nodeRequire('electron') : require('electron');
 
 let editor;
 

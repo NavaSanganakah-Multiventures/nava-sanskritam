@@ -72,7 +72,9 @@ int main(int argc, char* argv[]) {
     }
 
     if (filename.empty()) {
-        std::cerr << "Usage: nvc <file.ns> [--target web]\n";
+        std::cerr << "Usage: nvc <file.ns> [--target web/wasm]\n";
+        std::cerr << "(Press Enter to exit)\n";
+        std::cin.get();
         return 1;
     }
 
