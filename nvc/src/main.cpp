@@ -1,6 +1,11 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
+#ifndef EMSCRIPTEN
 #include "CodeGen.hpp"
+#else
+#include "Interpreter.hpp"
+#include <emscripten.h>
+#endif
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -88,68 +93,51 @@ int main(int argc, char* argv[]) {
     buffer << file.rdbuf();
     std::string sourceCode = buffer.str();
 
+#ifdef EMSCRIPTEN
+    return 0; // Entry point handled by compileSanskrit Export
+#endif
+
+#ifndef EMSCRIPTEN
     std::string outputFilename;
     try {
-        // 1. Lexical Analysis
         Lexer lexer(sourceCode);
         std::vector<Token> tokens = lexer.tokenize();
 
-        // 2. Parsing
         Parser parser(tokens);
         std::unique_ptr<Program> ast = parser.parse();
 
-        // 3. Code Generation
         CodeGen codegen("nava_module");
         
         if (targetWeb) {
             std::string json = codegen.exportAsJSON(ast.get());
             std::cout << "Exporting Darshakam Web Bundle...\n";
-            
-            // Create web_output directory
             #ifdef _WIN32
                 std::system("mkdir web_output");
             #else
                 std::system("mkdir -p web_output");
             #endif
-
             std::ofstream webOut("web_output/darshanam.json");
-            webOut << json;
-            webOut.close();
-
-            std::cout << "Successfully generated web_output/darshanam.json\n";
-            std::cout << "Copying SUL Runtime and Template...\n";
-            
+            webOut << json; webOut.close();
             std::ofstream htmlOut("web_output/index.html");
-            htmlOut << SUL_WEB_TEMPLATE;
-            htmlOut.close();
-
+            htmlOut << SUL_WEB_TEMPLATE; htmlOut.close();
             std::ofstream jsOut("web_output/SanskritRuntime.js");
-            jsOut << SUL_RUNTIME_JS;
-            jsOut.close();
-
+            jsOut << SUL_RUNTIME_JS; jsOut.close();
             std::cout << "NVC Web Suite Generated in 'web_output/'\n";
-            std::cout << "Open web_output/index.html in a browser to view your Sanskrit Website.\n";
             return 0;
         }
 
-        if (targetWasm) {
-            codegen.targetWasm = true;
-        }
-
+        if (targetWasm) codegen.targetWasm = true;
         codegen.generate(ast.get());
 
         if (targetWasm) {
             outputFilename = filename.substr(0, filename.find_last_of('.')) + ".wasm.o";
             codegen.writeObject(outputFilename);
             std::cout << "Successfully compiled WebAssembly object to " << outputFilename << "\n";
-            std::cout << "Use wasm-ld to link this into a final .wasm browser executable.\n";
-            return 0; // Skip native linking
+            return 0;
         }
 
-        // 4. Output Object File
         outputFilename = filename.substr(0, filename.find_last_of('.')) + ".o";
         codegen.writeObject(outputFilename);
-
         std::cout << "Successfully compiled to " << outputFilename << "\n";
 
     } catch (const std::exception& e) {
@@ -157,20 +145,43 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // 5. Link Final Executable
     std::string binaryName = filename.substr(0, filename.find_last_of('.'));
-    // We assume nvc is run from project root, and the static library is at nvc/build/libnvc_runtime.a
     std::string command = "clang++ -no-pie " + outputFilename + " nvc/build/libnvc_runtime.a -o " + binaryName;
     int linkResult = std::system(command.c_str());
 
     if (linkResult == 0) {
         std::cout << "Successfully linked executable to " << binaryName << "\n";
-        // Remove intermediate .o
         std::remove(outputFilename.c_str());
     } else {
         std::cerr << "Linking failed.\n";
         return 1;
     }
-
+#endif
     return 0;
 }
+
+#ifdef EMSCRIPTEN
+extern "C" {
+    EMSCRIPTEN_KEEPALIVE
+    const char* compileSanskrit(const char* code) {
+        try {
+            std::string sourceCode(code);
+            Lexer lexer(sourceCode);
+            std::vector<Token> tokens = lexer.tokenize();
+
+            Parser parser(tokens);
+            std::unique_ptr<Program> ast = parser.parse();
+
+            static Interpreter interpreter;
+            static std::string output;
+            output = interpreter.evaluate(ast.get());
+            
+            return output.c_str();
+        } catch (const std::exception& e) {
+            static std::string err;
+            err = std::string("त्रुटि (Error): ") + e.what();
+            return err.c_str();
+        }
+    }
+}
+#endif
