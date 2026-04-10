@@ -170,6 +170,37 @@ std::u32string Grammar::applySandhi(const std::u32string& w1, const std::u32stri
         return res;
     }
 
+    // 6. Ayadi Sandhi (एचोऽयवायावः)
+    // e -> ay, ai -> aay, o -> av, au -> aav (when followed by vowel)
+    auto isVowel = [](char32_t c) { return c >= 0x0904 && c <= 0x0914; };
+    if (isVowel(first)) {
+        if (last == 0x090F) { // e -> ay
+            return w1.substr(0, w1.length() - 1) + U"अय्" + w2;
+        } else if (last == 0x0910) { // ai -> aay
+            return w1.substr(0, w1.length() - 1) + U"आय्" + w2;
+        } else if (last == 0x0913) { // o -> av
+            return w1.substr(0, w1.length() - 1) + U"अव्" + w2;
+        } else if (last == 0x0914) { // au -> aav
+            return w1.substr(0, w1.length() - 1) + U"आव्" + w2;
+        }
+    }
+
+    // 7. Purvarupa Sandhi (एङः पदान्तादति)
+    // E/O + A -> E/O + Avagraha (ऽ)
+    if ((last == 0x090F || last == 0x0913) && first == 0x0905) {
+        std::u32string res = w1; // Keep last (E/O)
+        res += U"ऽ";             // Add Avagraha
+        res += w2.substr(1);     // Skip 'A'
+        return res;
+    }
+
+    // 8. Prakritibhava (प्लुतप्रगृह्या अचि नित्यम्)
+    // Pluta (३) or Pragrihya (dual ending in ई, ऊ, ए) -> No sandhi.
+    // If ending in 3 (0x0969), abort sandhi
+    if (last == 0x0969) {
+        return w1 + w2;
+    }
+
     return w1 + w2;
 }
 

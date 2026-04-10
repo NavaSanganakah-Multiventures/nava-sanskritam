@@ -24,7 +24,8 @@ set(SRC_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Lexer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Parser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Grammar.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/CodeGen.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/CodeGen.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/SandhiPass.cpp)
 add_executable(nvc ${SRC_FILES})
 
 # Link LLVM directly

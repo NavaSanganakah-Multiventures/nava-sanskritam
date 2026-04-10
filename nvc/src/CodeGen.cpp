@@ -64,6 +64,16 @@ void CodeGen::generate(Program* program) {
     }
 
     builder->CreateRet(builder->getInt32(0));
+
+    // Pad-Siddhi: Apply Sandhi Optimization Pass
+    llvm::legacy::FunctionPassManager fpm(module.get());
+    extern llvm::Pass* createSwarSandhiOptimizationPass();
+    fpm.add(createSwarSandhiOptimizationPass());
+    fpm.doInitialization();
+    for (auto& F : *module) {
+        fpm.run(F);
+    }
+    fpm.doFinalization();
 }
 
 llvm::Value* CodeGen::generateNode(ASTNode* node) {
