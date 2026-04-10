@@ -108,5 +108,22 @@
             "}"
         ],
         "description": "Batanam (Button) component"
+    },
+    "Praveshaya Login Sup Pratyaya": {
+        "prefix": ["praveshaya", "प्रवेशाय", "login"],
+        "body": [
+            "मंजूषा प्रवेश-खण्डः {",
+            "\tदृश्यम् पाठः() { नाम: \"लॉगिन (Login)\"; }",
+            "\tदृश्यम् प्रविष्टिः() { नाम: \"उपयोगकर्ता (Username)\"; }",
+            "\tदृश्यम् प्रविष्टिः() { नाम: \"गुप्तशब्दः (Password)\"; }",
+            "\tदृश्यम् बटनम्() {",
+            "\t\tनाम: \"प्रविश (Enter)\";",
+            "\t\tरङ्गः: नीलवर्णः;",
+            "\t\tक्रिया: प्रवेशाय;",
+            "\t}",
+            "\t$0",
+            "}"
+        ],
+        "description": "Auto-generates a semantic Login Form using Sup Pratyaya logic (Chaturthi Vibhakti 'for login')"
     }
 }
