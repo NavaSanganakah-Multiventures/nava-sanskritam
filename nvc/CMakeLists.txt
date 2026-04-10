@@ -29,8 +29,8 @@ if (EMSCRIPTEN)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Interpreter.cpp)
     add_executable(nvc ${SRC_FILES})
     
-    # Export compileSanskrit to JS and allow cwrap
-    set_target_properties(nvc PROPERTIES LINK_FLAGS "-s EXPORTED_RUNTIME_METHODS=['cwrap'] -s EXPORTED_FUNCTIONS=['_compileSanskrit'] -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME='NavaCompiler' -s ENVIRONMENT='web,worker'")
+    # Export compileSanskrit to JS and allow cwrap/UTF8ToString
+    set_target_properties(nvc PROPERTIES LINK_FLAGS "-s EXPORTED_RUNTIME_METHODS=['cwrap','UTF8ToString'] -s EXPORTED_FUNCTIONS=['_compileSanskrit'] -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME='NavaCompiler' -s ENVIRONMENT='web,worker,node'")
 else()
     set(SRC_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp

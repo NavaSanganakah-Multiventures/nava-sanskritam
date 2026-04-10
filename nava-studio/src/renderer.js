@@ -97,7 +97,73 @@ require(['vs/editor/editor.main'], function () {
         }
     });
 
+    // Sanskrit IntelliSense (Autocomplete)
+    monaco.languages.registerCompletionItemProvider('nava', {
+        provideCompletionItems: (model, position) => {
+            const keywords = ['अस्ति', 'वद', 'यदि', 'तर्हि', 'चक्र', 'अन्यथा', 'फलम्', 'विधिः', 'नित्य'];
+            const suggestions = keywords.map(kw => ({
+                label: kw,
+                kind: monaco.languages.CompletionItemKind.Keyword,
+                insertText: kw
+            }));
+
+            // Dynamic Variable Suggestions: Scan for 'अस्ति ' or 'नित्य '
+            const text = model.getValue();
+            const varRegex = /(?:अस्ति|नित्य)\s+([^\s;=]+)/g;
+            let match;
+            const foundVars = new Set();
+            while ((match = varRegex.exec(text)) !== null) {
+                foundVars.add(match[1]);
+            }
+
+            foundVars.forEach(v => {
+                suggestions.push({
+                    label: v,
+                    kind: monaco.languages.CompletionItemKind.Variable,
+                    insertText: v,
+                    detail: 'नव्या-सञ्चिका-चरः (SUL Variable)'
+                });
+            });
+
+            return { suggestions: suggestions };
+        }
+    });
+
     updateFileExplorer();
+
+    // Real-time Diagnostics (साक्षात्-दोष-दर्शनम्)
+    let lintTimeout;
+    editor.onDidChangeModelContent(() => {
+        clearTimeout(lintTimeout);
+        lintTimeout = setTimeout(() => {
+            if (!nvcModule) return;
+            const code = editor.getValue();
+            const compileSanskrit = nvcModule.cwrap('compileSanskrit', 'string', ['string']);
+            const result = compileSanskrit(code);
+            
+            const markers = [];
+            if (result.includes('त्रुटि')) {
+                // Parse coordinates for Red Underline
+                // Format: ... - पङ्क्तिः 6, स्तम्भः 15
+                const lineMatch = result.match(/पङ्क्तिः\s+(\d+)/);
+                const colMatch = result.match(/स्तम्भः\s+(\d+)/);
+                
+                if (lineMatch) {
+                    const line = parseInt(lineMatch[1]);
+                    const col = colMatch ? parseInt(colMatch[1]) : 1;
+                    markers.push({
+                        startLineNumber: line,
+                        startColumn: col,
+                        endLineNumber: line,
+                        endColumn: col + 5, // Approximate
+                        message: result,
+                        severity: monaco.MarkerSeverity.Error
+                    });
+                }
+            }
+            monaco.editor.setModelMarkers(editor.getModel(), 'nava', markers);
+        }, 500);
+    });
 });
 
 // File Explorer Logic

@@ -141,6 +141,14 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         std::string val = evaluateExpression(assign->right.get());
         environment[assign->left] = val;
         return val;
+    } else if (type == ASTNodeType::MemberAccess) {
+        auto member = static_cast<MemberAccess*>(expr);
+        std::string objName = static_cast<Identifier*>(member->object.get())->name;
+        std::string key = objName + "." + member->property;
+        if (environment.find(key) != environment.end()) {
+            return environment[key];
+        }
+        return "न-प्राप्तम् (Not Found: " + key + ")";
     } else if (type == ASTNodeType::CallExpression) {
         auto call = static_cast<CallExpression*>(expr);
         if (call->callee->name == "वद") {

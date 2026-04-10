@@ -219,24 +219,30 @@ std::unique_ptr<LoopStatement> Parser::parseLoopStatement() {
 }
 
 std::unique_ptr<Statement> Parser::parseExpressionStatement() {
-    if (check(TokenType::IDENTIFIER)) {
-        if (pos + 1 < tokens.size() && tokens[pos + 1].type == TokenType::OPERATOR && tokens[pos + 1].value == "=") {
-            Token idToken = consume(TokenType::IDENTIFIER, "");
-            consume(TokenType::OPERATOR, "Expected '='", "=");
-            auto right = parseExpression();
-            consume(TokenType::PUNCTUATION, "Expected ';'", ";");
+    auto expr = parseExpression();
+    
+    if (match(TokenType::OPERATOR, "=")) {
+        auto right = parseExpression();
+        consume(TokenType::PUNCTUATION, "Expected ';' after assignment.", ";");
 
-            auto assign = std::make_unique<Assignment>();
-            assign->left = stripVibhakti(idToken.value, nullptr);
-            assign->right = std::move(right);
-
-            auto stmt = std::make_unique<ExpressionStatement>();
-            stmt->expression = std::move(assign);
-            return stmt;
+        auto assign = std::make_unique<Assignment>();
+        
+        // Handle Identifier or MemberAccess on the left
+        if (expr->getType() == ASTNodeType::Identifier) {
+            assign->left = static_cast<Identifier*>(expr.get())->name;
+        } else if (expr->getType() == ASTNodeType::MemberAccess) {
+            auto member = static_cast<MemberAccess*>(expr.get());
+            assign->left = static_cast<Identifier*>(member->object.get())->name + "." + member->property;
+        } else {
+            throw std::runtime_error("व्याकरण-त्रुटिः: अमान्यः निर्देशः (Invalid assignment target).");
         }
+        
+        assign->right = std::move(right);
+        auto stmt = std::make_unique<ExpressionStatement>();
+        stmt->expression = std::move(assign);
+        return stmt;
     }
 
-    auto expr = parseExpression();
     consume(TokenType::PUNCTUATION, "Expected ';' after expression.", ";");
     auto stmt = std::make_unique<ExpressionStatement>();
     stmt->expression = std::move(expr);
