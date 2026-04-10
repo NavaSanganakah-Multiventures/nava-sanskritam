@@ -1,0 +1,10 @@
+{
+  "name": "nava-language-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npm install --legacy-peer-deps --prefix nava-platform && npm run build --prefix nava-platform",
+    "pages:build": "npm install --legacy-peer-deps --prefix nava-platform && npm run pages:build --prefix nava-platform",
+    "dev": "npm run dev --prefix nava-platform"
+  }
+}
