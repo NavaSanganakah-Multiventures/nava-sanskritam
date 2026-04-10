@@ -152,7 +152,7 @@ public:
     ASTNodeType getType() const override { return ASTNodeType::FunctionDeclaration; }
 };
 
-class DrishyamElement : public ASTNode {
+class DrishyamElement : public Statement {
 public:
     std::string type; // "Button", "Text", "Box", "List", "Image", "Input"
     std::vector<std::unique_ptr<Expression>> pos; // x, y, w, h

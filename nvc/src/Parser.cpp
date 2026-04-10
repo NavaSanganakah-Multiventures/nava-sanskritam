@@ -441,11 +441,11 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
                 consume(TokenType::PUNCTUATION, "Expected ':' after attribute.", ":");
                 
                 if (key.value == "नाम") {
-                    element->label = consume(TokenType::LITERAL, "Expected label string.").value;
+                    element->label = consume(TokenType::STRING, "Expected label string.").value;
                 } else if (key.value == "रङ्गः") {
                     element->color = consume(TokenType::IDENTIFIER, "Expected color name.").value;
                 } else if (key.value == "स्रोतस") {
-                    element->source = consume(TokenType::LITERAL, "Expected source URL.").value;
+                    element->source = consume(TokenType::STRING, "Expected source URL.").value;
                 }
                 if (check(TokenType::PUNCTUATION, ";")) advance();
             }
