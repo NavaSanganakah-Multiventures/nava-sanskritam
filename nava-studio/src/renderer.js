@@ -157,11 +157,34 @@ function loadFile(filePath, element) {
     element.classList.add('active');
 }
 
+// WASM Compiler Integration
+let nvcModule = null;
+if (typeof NavaCompiler === 'function') {
+    NavaCompiler().then(instance => {
+        nvcModule = instance;
+        const output = document.getElementById('terminal-output');
+        if (output) output.innerText += '\n🚩 नव्या-सङ्कलकः (WASM) सिद्धः!';
+    });
+}
+
 document.getElementById('run-btn').addEventListener('click', () => {
     const code = editor.getValue();
     const output = document.getElementById('terminal-output');
-    output.innerText = 'सङ्कलनं भवति...';
-    ipcRenderer.send('run-code', code);
+    output.innerText = 'सङ्कलनं भवति (Compiling)...';
+    
+    if (nvcModule) {
+        try {
+            const compileSanskrit = nvcModule.cwrap('compileSanskrit', 'string', ['string']);
+            const result = compileSanskrit(code);
+            output.style.color = '#10b981';
+            output.innerText = 'सफलता (Success):\n' + result;
+        } catch (err) {
+            output.style.color = '#ef4444';
+            output.innerText = 'त्रुटि (Error):\n' + err.message;
+        }
+    } else {
+        ipcRenderer.send('run-code', code);
+    }
 });
 
 document.getElementById('save-btn').addEventListener('click', () => {
