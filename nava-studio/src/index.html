@@ -46,6 +46,7 @@
     .toolbar {
       display: flex;
       gap: 10px;
+      align-items: center;
     }
     button {
       background-color: var(--accent);
@@ -56,6 +57,13 @@
       cursor: pointer;
       font-weight: 600;
       font-size: 13px;
+    }
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #94a3b8;
     }
     #sidebar {
       grid-row: 2 / 4;
@@ -154,13 +162,17 @@
     <header>
       <div class="logo">🚩 नव-सङ्गणक-शाला</div>
       <div class="toolbar">
-        <button id="run-btn">संचालनम् (Run)</button>
-        <button id="save-btn" style="background: #e11d48; color: white;">संग्रहः (Save)</button>
+        <div class="toggle-container">
+          <label>संस्कृति-लेखनम्:</label>
+          <input type="checkbox" id="keyboard-toggle" checked />
+        </div>
+        <button id="run-btn">चालनम्</button>
+        <button id="save-btn" style="background: #e11d48; color: white;">संग्रहः</button>
       </div>
     </header>
     
     <nav id="sidebar">
-      <div class="sidebar-title">सञ्चिका-दर्शिका (Explorer)</div>
+      <div class="sidebar-title">सञ्चिका-प्रबन्धकः</div>
       <div id="file-list">
         <!-- Files populated by JS -->
       </div>
@@ -169,16 +181,16 @@
     <div id="editor-container"></div>
 
     <div id="terminal-container">
-      <div class="terminal-header">सङ्गणक-वचनम् (Output)</div>
-      <div id="terminal-output">स्वागतम् - Nava Studio v2.0...</div>
+      <div class="terminal-header">निर्गम-पटलम्</div>
+      <div id="terminal-output">नव-सङ्गणक-शालायां स्वागतम्...</div>
       <div class="terminal-input-wrapper">
         <span class="terminal-prompt">🚩 वदतु:</span>
-        <input type="text" id="terminal-input" placeholder="आज्ञां लिखतु... (e.g. चलाओ, संग्रहः)" />
+        <input type="text" id="terminal-input" placeholder="आज्ञां लिखतु... (उदा. चलाओ, संग्रहः)" />
       </div>
     </div>
 
     <div class="status-bar">
-      स्थितिः: सिद्धम् (Ready) | सत्रम्: सक्रियम् (Session: Active)
+      स्थितिः: सिद्धम् | सत्रम्: सक्रियम्
     </div>
   </div>
 

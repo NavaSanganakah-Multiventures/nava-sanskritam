@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, MenuItem } = require('electron');
 const path = require('path');
 const { execFile } = require('child_process');
 const fs = require('fs');
@@ -7,7 +7,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-    title: "Nava Studio v1.0",
+    title: "नव-सङ्गणक-शाला (Nava Studio) v2.0",
     icon: path.join(__dirname, 'public/favicon.ico'),
     webPreferences: {
       nodeIntegration: true,
@@ -16,31 +16,41 @@ function createWindow() {
   });
 
   win.loadFile('src/index.html');
-  // win.webContents.openDevTools(); // Uncomment for debugging
+  
+  // Set Context Menu
+  const ctxMenu = new Menu();
+  ctxMenu.append(new MenuItem({ label: 'पठतु (Copy)', role: 'copy' }));
+  ctxMenu.append(new MenuItem({ label: 'लिखतु (Paste)', role: 'paste' }));
+  ctxMenu.append(new MenuItem({ type: 'separator' }));
+  ctxMenu.append(new MenuItem({ label: 'सर्वं वृणोतु (Select All)', role: 'selectAll' }));
+
+  win.webContents.on('context-menu', (e, params) => {
+    ctxMenu.popup({ window: win, x: params.x, y: params.y });
+  });
 }
 
 app.whenReady().then(() => {
   createWindow();
 
-  // Create Standard Application Menu for Copy/Paste
+  // Create Standard Application Menu (PURE SANSKRIT)
   const template = [
     {
-      label: 'Edit',
+      label: 'सम्पादनम् (Edit)',
       submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
+        { label: 'पूर्ववत् (Undo)', role: 'undo' },
+        { label: 'पुनरावृत्तिः (Redo)', role: 'redo' },
         { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' }
+        { label: 'कर्तनम् (Cut)', role: 'cut' },
+        { label: 'पठतु (Copy)', role: 'copy' },
+        { label: 'लिखतु (Paste)', role: 'paste' },
+        { label: 'सर्वं वृणोतु (Select All)', role: 'selectAll' }
       ]
     },
     {
-      label: 'View',
+      label: 'दृश्यम् (View)',
       submenu: [
-        { role: 'reload' },
-        { role: 'toggleDevTools' }
+        { label: 'पुनर्भारणम् (Reload)', role: 'reload' },
+        { label: 'निरीक्षकः (DevTools)', role: 'toggleDevTools' }
       ]
     }
   ];
@@ -78,7 +88,7 @@ ipcMain.on('run-code', (event, code) => {
 // IPC Handler to save file
 ipcMain.on('save-file', (event, code) => {
   const result = dialog.showSaveDialogSync({
-    title: 'Nava Sanskritam - Save Code',
+    title: 'नव-सङ्गणक-शाला - सञ्चिका-संग्रहः',
     defaultPath: path.join(app.getPath('documents'), 'file.ns'),
     filters: [
       { name: 'Nava Sanskritam', extensions: ['ns'] },
