@@ -112,8 +112,15 @@ Ready to compile Sanskrit logic.</div>
       delete window.exports;
       delete window.module;
     }
+    // Force Monaco to use browser XHR instead of Node fs
+    window.electronProcess = window.process;
+    window.process = undefined;
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.min.js"></script>
+  <script>
+    // Restore process after loader finishes defining AMD
+    window.process = window.electronProcess;
+  </script>
   <script src="renderer.js"></script>
 </body>
 </html>
