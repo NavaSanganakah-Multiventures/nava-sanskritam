@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ "nava-framework-vsc-extension-9061376043773154792" ]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build-nvc:
     runs-on: windows-latest
@@ -16,19 +13,21 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Install LLVM
-      run: choco install llvm
-      
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "18"
+        
     - name: Configure CMake
       run: |
         cd nvc
         mkdir build
         cd build
-        cmake .. -G Ninja -DLLVM_DIR="C:/Program Files/LLVM/lib/cmake/llvm"
+        cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
         
     - name: Build NVC
       run: |
         cd nvc/build
-        ninja -v
+        ninja
         
     - name: Upload NVC Binary
       uses: actions/upload-artifact@v4
@@ -45,7 +44,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 18
+        node-version: 20
         
     - name: Download NVC Binary
       uses: actions/download-artifact@v4
@@ -68,3 +67,4 @@ jobs:
       with:
         name: nava-studio-installer
         path: nava-studio/dist/*.exe
+
