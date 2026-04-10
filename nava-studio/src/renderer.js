@@ -39,6 +39,12 @@ document.getElementById('run-btn').addEventListener('click', () => {
     ipcRenderer.send('run-code', code);
 });
 
+// Save Button Event
+document.getElementById('save-btn').addEventListener('click', () => {
+    const code = editor.getValue();
+    ipcRenderer.send('save-file', code);
+});
+
 // Receive Result
 ipcRenderer.on('run-result', (event, result) => {
     const outputContainer = document.getElementById('output-container');

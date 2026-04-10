@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const { execFile } = require('child_process');
 const fs = require('fs');
@@ -21,6 +21,32 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
+
+  // Create Standard Application Menu for Copy/Paste
+  const template = [
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'toggleDevTools' }
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -47,4 +73,20 @@ ipcMain.on('run-code', (event, code) => {
     }
     event.reply('run-result', { success: true, output: stdout });
   });
+});
+
+// IPC Handler to save file
+ipcMain.on('save-file', (event, code) => {
+  const result = dialog.showSaveDialogSync({
+    title: 'Nava Sanskritam - Save Code',
+    defaultPath: path.join(app.getPath('documents'), 'file.ns'),
+    filters: [
+      { name: 'Nava Sanskritam', extensions: ['ns'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  });
+
+  if (result) {
+    fs.writeFileSync(result, code);
+  }
 });
