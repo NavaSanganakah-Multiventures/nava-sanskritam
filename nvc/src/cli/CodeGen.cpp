@@ -302,7 +302,11 @@ llvm::Value* CodeGen::generateBinaryExpression(BinaryExpression* node) {
     if (node->op == "==") return builder->CreateFCmpUEQ(L, R, "cmptmp");
     if (node->op == "!=") return builder->CreateFCmpUNE(L, R, "cmptmp");
     if (node->op == "^") {
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* powF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
+#else
+        llvm::Function* powF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
+#endif
         return builder->CreateCall(powF, {L, R}, "powtmp");
     }
 
@@ -415,7 +419,11 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         builder->SetInsertPoint(failBB);
         
         // Native Trap / Panic
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* trap = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::trap);
+#else
+        llvm::Function* trap = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::trap);
+#endif
         builder->CreateCall(trap, {});
         builder->CreateUnreachable();
         
@@ -425,15 +433,27 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
 
     // SUL v18.0: Native Math Intrinsics (Jya, Kojya, Vargamulam)
     if (mangledName == "ज्या" || mangledName == "jya") {
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* sinF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
+#else
+        llvm::Function* sinF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
+#endif
         return builder->CreateCall(sinF, {argsV[0]}, "sintmp");
     }
     if (mangledName == "कोज्या" || mangledName == "kojya") {
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* cosF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
+#else
+        llvm::Function* cosF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
+#endif
         return builder->CreateCall(cosF, {argsV[0]}, "costmp");
     }
     if (mangledName == "वर्गमूलम्" || mangledName == "vargamulam") {
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* sqrtF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
+#else
+        llvm::Function* sqrtF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
+#endif
         return builder->CreateCall(sqrtF, {argsV[0]}, "sqrttmp");
     }
 
@@ -484,7 +504,7 @@ llvm::Value* CodeGen::generateDarshanamBlock(DarshanamBlock* node) {
         createWin = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "SUL_UI_CreateWindow", module.get());
     }
 
-    builder->CreateCall(createWin, { builder->CreateGlobalStringPtr(node->id) });
+    builder->CreateCall(createWin, { builder->CreateGlobalString(node->id) });
 
     for (const auto& el : node->elements) {
         generateDrishyamElement(el.get());
@@ -509,8 +529,13 @@ llvm::Value* CodeGen::generateDrishyamElement(DrishyamElement* node) {
     }
 
     std::vector<llvm::Value*> argsV;
-    argsV.push_back(builder->CreateGlobalStringPtr(node->type));
-    argsV.push_back(builder->CreateGlobalStringPtr(node->label.empty() ? "" : node->label));
+#if LLVM_VERSION_MAJOR >= 18
+    argsV.push_back(builder->CreateGlobalString(node->type));
+    argsV.push_back(builder->CreateGlobalString(node->label.empty() ? "" : node->label));
+#else
+    argsV.push_back(builder->CreateGlobalString(node->type));
+    argsV.push_back(builder->CreateGlobalString(node->label.empty() ? "" : node->label));
+#endif
     
     // Position
     if (node->pos.size() >= 2) {
@@ -521,7 +546,7 @@ llvm::Value* CodeGen::generateDrishyamElement(DrishyamElement* node) {
         argsV.push_back(llvm::ConstantFP::get(*context, llvm::APFloat(0.0)));
     }
     
-    argsV.push_back(builder->CreateGlobalStringPtr(node->color.empty() ? "None" : node->color));
+    argsV.push_back(builder->CreateGlobalString(node->color.empty() ? "None" : node->color));
 
     builder->CreateCall(addWidget, argsV);
 
