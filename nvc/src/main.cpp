@@ -55,6 +55,7 @@ async function initSUL() {
 window.onload = initSUL;
 )JS";
 
+int main(int argc, char* argv[]) {
     bool targetWeb = false;
     std::string filename;
 

@@ -16,12 +16,6 @@
         },
         {
             "include": "#functions"
-        },
-        {
-            "include": "#properties"
-        },
-        {
-            "include": "#operators"
         }
     ],
     "repository": {
@@ -29,7 +23,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.ns",
-                    "match": "\\b(अस्ति|वद|यदि|तर्हि|चक्र|नित्य|फलम्|दर्शनम्|दृश्यम्|मंजूषा|सूची|चित्त्रम्|प्रविष्टिः|सन्धिः|विभक्तिः|नियमः|प्रवेशाय|प्रविश)\\b"
+                    "match": "\\b(अस्ति|वद|यदि|तर्हि|चक्र|नित्य|फलम्|दर्शनम्|दृश्यम्|मंजूषा|सूची|चित्त्रम्|प्रविष्टिः|सन्धिः|विभक्तिः|नियमः)\\b"
                 },
                 {
                     "name": "keyword.other.ns",
@@ -75,22 +69,6 @@
                     "name": "comment.block.ns",
                     "begin": "/\\*",
                     "end": "\\*/"
-                }
-            ]
-        },
-        "properties": {
-            "patterns": [
-                {
-                    "name": "entity.other.attribute-name.ns",
-                    "match": "\\b([a-zA-Z\\u0900-\\u097F_][a-zA-Z0-9\\u0900-\\u097F_]*)\\s*:"
-                }
-            ]
-        },
-        "operators": {
-            "patterns": [
-                {
-                    "name": "keyword.operator.ns",
-                    "match": "(=|\\+|\\-|\\*|/|%|<|>|!|\\?|\\:|\\&\\&|\\|\\|)"
                 }
             ]
         }
