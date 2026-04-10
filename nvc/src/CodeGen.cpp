@@ -176,29 +176,38 @@ llvm::Value* CodeGen::generateConstantDeclaration(ConstantDeclaration* node) {
 }
 
 llvm::Value* CodeGen::generatePrintStatement(PrintStatement* node) {
-    llvm::Value* val = generateNode(node->expression.get());
-    if (!val) return nullptr;
-
     llvm::Function* printfFunc = getPrintf();
-    std::vector<llvm::Value*> args;
+    
+    for (size_t i = 0; i < node->expressions.size(); ++i) {
+        llvm::Value* val = generateNode(node->expressions[i].get());
+        if (!val) continue;
 
-    if (val->getType()->isPointerTy()) {
-        llvm::Value* formatStr = builder->CreateGlobalString("%s\n");
-        args.push_back(formatStr);
-        args.push_back(val);
-    } else if (val->getType()->isDoubleTy()) {
-        llvm::Value* formatStr = builder->CreateGlobalString("%f\n");
-        args.push_back(formatStr);
-        args.push_back(val);
-    } else if (val->getType()->isIntegerTy(1)) {
-        llvm::Value* formatStr = builder->CreateGlobalString("%d\n");
-        args.push_back(formatStr);
-        args.push_back(builder->CreateZExt(val, builder->getInt32Ty()));
-    } else {
-        throw std::runtime_error("Unsupported type for print");
+        std::vector<llvm::Value*> args;
+        std::string fmt = (i == node->expressions.size() - 1) ? "" : " ";
+
+        if (val->getType()->isPointerTy()) {
+            llvm::Value* formatStr = builder->CreateGlobalString("%s" + fmt);
+            args.push_back(formatStr);
+            args.push_back(val);
+        } else if (val->getType()->isDoubleTy()) {
+            llvm::Value* formatStr = builder->CreateGlobalString("%g" + fmt);
+            args.push_back(formatStr);
+            args.push_back(val);
+        } else if (val->getType()->isIntegerTy(1)) {
+            llvm::Value* formatStr = builder->CreateGlobalString("%d" + fmt);
+            args.push_back(formatStr);
+            args.push_back(builder->CreateZExt(val, builder->getInt32Ty()));
+        } else {
+            continue;
+        }
+
+        builder->CreateCall(printfFunc, args, "printfCall");
     }
 
-    return builder->CreateCall(printfFunc, args, "printfCall");
+    // Add newline at the end
+    builder->CreateCall(printfFunc, {builder->CreateGlobalString("\n")}, "printfCall");
+
+    return llvm::Constant::getNullValue(llvm::Type::getInt32Ty(*context));
 }
 
 llvm::Value* CodeGen::generateIfStatement(IfStatement* node) {
