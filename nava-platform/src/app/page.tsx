@@ -65,7 +65,7 @@ export default function NativePlayground() {
 
           <div className="flex items-center gap-3">
             <a 
-              href="/playground.html"
+              href="/playground"
               className="h-10 px-4 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors flex items-center gap-2 text-sm font-medium"
             >
               <Globe className="w-4 h-4" /> क्रीडाङ्गणम्
