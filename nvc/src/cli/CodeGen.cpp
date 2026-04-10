@@ -612,10 +612,18 @@ void CodeGen::writeObject(const std::string& filename) {
 
     auto targetTripleStr = llvm::sys::getDefaultTargetTriple();
     llvm::Triple targetTriple(targetTripleStr);
+#if LLVM_VERSION_MAJOR >= 18
+    module->setTargetTriple(targetTripleStr); // LLVM 18 accepts StringRef natively
+#else
     module->setTargetTriple(targetTriple.getTriple()); // LLVM 18 prefers Triple object
+#endif
 
     std::string error;
+#if LLVM_VERSION_MAJOR >= 18
     auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error); // lookupTarget expects StringRef
+#else
+    auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error); // lookupTarget expects StringRef
+#endif
 
     if (!target) {
         throw std::runtime_error(error);
@@ -626,7 +634,11 @@ void CodeGen::writeObject(const std::string& filename) {
 
     llvm::TargetOptions opt;
     std::optional<llvm::Reloc::Model> rm;
+#if LLVM_VERSION_MAJOR >= 18
+    auto theTargetMachine = target->createTargetMachine(targetTriple.getTriple(), cpu, features, opt, rm); // createTargetMachine expects Triple ref
+#else
     auto theTargetMachine = target->createTargetMachine(targetTriple.getTriple(), cpu, features, opt, rm); // createTargetMachine expects Triple
+#endif
 
     module->setDataLayout(theTargetMachine->createDataLayout());
 
