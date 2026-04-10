@@ -29,13 +29,12 @@ jobs:
       - name: Build WASM
         run: |
           cd build-wasm
-          emmake make
+          emmake make -j4
+          cp nvc.js ../nava-web/nvc.js
+          cp nvc.wasm ../nava-web/nvc.wasm
 
-      - name: Upload WASM Artifacts
+      - name: Upload NVC Web Playground Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nvc-wasm-bundle
-          path: |
-            build-wasm/nvc.wasm
-            build-wasm/nvc.js
-            build-wasm/nvc.wasm.js
+          name: nvc-web-playground
+          path: nava-web/
