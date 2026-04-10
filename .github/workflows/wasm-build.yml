@@ -24,7 +24,7 @@ jobs:
         run: |
           mkdir build-wasm
           cd build-wasm
-          emcmake cmake .. -DEMSCRIPTEN=ON -DCMAKE_BUILD_TYPE=Release
+          emcmake cmake ../nvc -DEMSCRIPTEN=ON -DCMAKE_BUILD_TYPE=Release
 
       - name: Build WASM
         run: |
