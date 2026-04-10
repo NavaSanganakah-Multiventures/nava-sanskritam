@@ -95,3 +95,25 @@ ipcRenderer.on('run-result', (event, result) => {
         output.innerText = 'त्रुटि (Error):\n' + result.output;
     }
 });
+// Terminal Input Logic (REPL)
+document.getElementById('terminal-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const cmd = e.target.value.trim().toLowerCase();
+        const output = document.getElementById('terminal-output');
+        
+        output.innerText += '\n🚩 > ' + cmd;
+        
+        if (cmd === 'चलाओ' || cmd === 'run') {
+            document.getElementById('run-btn').click();
+        } else if (cmd === 'संग्रहः' || cmd === 'save') {
+            document.getElementById('save-btn').click();
+        } else if (cmd === 'साफ' || cmd === 'clear') {
+            output.innerText = 'स्वागतम् - Nava Studio v2.0...';
+        } else {
+            output.innerText += '\nत्रुटिः: अमान्या आज्ञा (Unknown command)';
+        }
+        
+        e.target.value = '';
+        output.scrollTop = output.scrollHeight;
+    }
+});

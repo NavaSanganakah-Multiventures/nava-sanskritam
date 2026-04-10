@@ -115,6 +115,27 @@
       overflow-y: auto;
       white-space: pre-wrap;
     }
+    .terminal-input-wrapper {
+      display: flex;
+      padding: 5px 15px;
+      background-color: #050505;
+      border-top: 1px solid #111;
+      align-items: center;
+    }
+    .terminal-prompt {
+      color: var(--accent);
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    #terminal-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      width: 100%;
+      outline: none;
+    }
     .status-bar {
       grid-column: 1 / -1;
       background-color: var(--bg-card);
@@ -150,6 +171,10 @@
     <div id="terminal-container">
       <div class="terminal-header">सङ्गणक-वचनम् (Output)</div>
       <div id="terminal-output">स्वागतम् - Nava Studio v2.0...</div>
+      <div class="terminal-input-wrapper">
+        <span class="terminal-prompt">🚩 वदतु:</span>
+        <input type="text" id="terminal-input" placeholder="आज्ञां लिखतु... (e.g. चलाओ, संग्रहः)" />
+      </div>
     </div>
 
     <div class="status-bar">
