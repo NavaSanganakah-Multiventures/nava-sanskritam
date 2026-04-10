@@ -154,10 +154,18 @@ std::u32string Grammar::applySandhi(const std::u32string& w1, const std::u32stri
         return res;
     }
 
-    // 4. Guna
+    // 4. Guna (अ/आ + इ/ई -> ए; अ/आ + उ/ऊ -> ओ)
     if ((last == 0x0905 || last == 0x0906) && gunaMap.count(first)) {
         std::u32string res = w1.substr(0, w1.length() - 1);
         res += gunaMap[first];
+        res += w2.substr(1);
+        return res;
+    }
+
+    // 5. Vriddhi (अ/आ + ए/ऐ -> ऐ; अ/आ + ओ/औ -> औ)
+    if ((last == 0x0905 || last == 0x0906) && vriddhiMap.count(first)) {
+        std::u32string res = w1.substr(0, w1.length() - 1);
+        res += vriddhiMap[first];
         res += w2.substr(1);
         return res;
     }
