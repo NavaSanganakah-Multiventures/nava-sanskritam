@@ -10,7 +10,7 @@ jobs:
   build-nvc:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install LLVM
       run: choco install llvm
@@ -28,7 +28,7 @@ jobs:
         ninja
         
     - name: Upload NVC Binary
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: nvc-binary
         path: nvc/build/nvc.exe
@@ -37,15 +37,15 @@ jobs:
     needs: build-nvc
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-size: 18
+        node-version: 18
         
     - name: Download NVC Binary
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: nvc-binary
         path: nava-studio/bin/
@@ -61,7 +61,7 @@ jobs:
         npm run build
         
     - name: Upload Installer
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: nava-studio-installer
         path: nava-studio/dist/*.exe
