@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { loadNavaCompiler } from '@/lib/wasm-loader';
+import { SanskritRenderer, DrishyamNode } from '@/components/SanskritRenderer';
 import { 
   Play, 
   Terminal, 
@@ -10,12 +11,16 @@ import {
   Zap, 
   CloudLightning,
   ChevronRight,
-  Info
+  Info,
+  Eye,
+  Layout
 } from 'lucide-react';
 
 export default function SanskritPlayground() {
-  const [code, setCode] = useState('वद("🚩 नमस्ते नव्या-क्रीडाङ्गणतः!");');
+  const [code, setCode] = useState('दृश्यम्.मंजूषा({\n  प्रकारः: "मंजूषा",\n  वर्णः: "नीलवर्णः",\n  children: [\n    { प्रकारः: "पाठः", label: "🚩 नमस्ते नव्या-दृश्यम्!", वर्णः: "श्वेतवर्णः" },\n    { प्रकारः: "बटनम्", label: "अत्र क्लिकं कुर्वन्तु", वर्णः: "रक्तवर्णः" }\n  ]\n});');
   const [output, setOutput] = useState('सङ्कलनस्य प्रतीक्षायां...');
+  const [visualData, setVisualData] = useState<DrishyamNode | null>(null);
+  const [viewMode, setViewMode] = useState<'console' | 'preview'>('console');
   const [compiler, setCompiler] = useState<any>(null);
   const [isCompiling, setIsCompiling] = useState(false);
 
@@ -34,6 +39,20 @@ export default function SanskritPlayground() {
     try {
       const result = compiler.compile(code);
       setOutput(result);
+      
+      // Try to detect if it's UI JSON
+      if (result.trim().startsWith('{')) {
+        try {
+          const parsed = JSON.parse(result);
+          setVisualData(parsed);
+          setViewMode('preview'); // Auto-switch to preview if it's UI
+        } catch (e) {
+          setVisualData(null);
+        }
+      } else {
+        setVisualData(null);
+        setViewMode('console');
+      }
     } catch (err: any) {
       setOutput('त्रुटिः: ' + err.message);
     } finally {
@@ -95,14 +114,43 @@ export default function SanskritPlayground() {
 
                 {/* Output & Sidebar */}
                 <div className="lg:col-span-5 flex flex-col gap-6">
-                    {/* Console */}
-                    <div className="flex-1 min-h-[300px] rounded-2xl border border-white/10 bg-slate-950 flex flex-col">
-                        <div className="h-10 px-4 border-b border-white/5 flex items-center bg-white/[0.02]">
-                            <Terminal className="w-3.5 h-3.5 mr-2 text-slate-500" />
-                            <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500">निर्गम-पटलम्</span>
+                    {/* Console / Preview Card */}
+                    <div className="flex-1 min-h-[400px] rounded-2xl border border-white/10 bg-slate-950 flex flex-col shadow-2xl relative">
+                        <div className="h-12 px-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                            <div className="flex gap-4 h-full">
+                                <button 
+                                    onClick={() => setViewMode('console')}
+                                    className={`flex items-center gap-2 px-3 border-b-2 transition-all ${viewMode === 'console' ? 'border-amber-500 text-amber-500' : 'border-transparent text-slate-500'}`}
+                                >
+                                    <Terminal className="w-3.5 h-3.5" />
+                                    <span className="text-[10px] uppercase tracking-widest font-bold">निर्गम-पटलम्</span>
+                                </button>
+                                <button 
+                                    onClick={() => setViewMode('preview')}
+                                    disabled={!visualData}
+                                    className={`flex items-center gap-2 px-3 border-b-2 transition-all ${viewMode === 'preview' ? 'border-amber-500 text-amber-500' : 'border-transparent text-slate-500'} disabled:opacity-30`}
+                                >
+                                    <Eye className="w-3.5 h-3.5" />
+                                    <span className="text-[10px] uppercase tracking-widest font-bold">दृश्य-दर्शनम्</span>
+                                </button>
+                            </div>
+                            {visualData && (
+                                <div className="text-[8px] text-amber-500/50 font-bold uppercase tracking-widest flex items-center gap-1">
+                                    <div className="w-1 h-1 rounded-full bg-amber-500 animate-pulse" /> UI Detected
+                                </div>
+                            )}
                         </div>
-                        <div className="flex-1 p-6 font-mono text-emerald-400 text-sm whitespace-pre-wrap leading-relaxed overflow-auto">
-                            {output}
+                        
+                        <div className="flex-1 p-6 overflow-auto">
+                            {viewMode === 'console' ? (
+                                <pre className="font-mono text-emerald-400 text-sm whitespace-pre-wrap leading-relaxed">
+                                    {output}
+                                </pre>
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-slate-900/10 rounded-xl border border-white/5 p-4">
+                                    {visualData && <SanskritRenderer node={visualData} />}
+                                </div>
+                            )}
                         </div>
                     </div>
 
