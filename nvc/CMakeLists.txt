@@ -26,7 +26,6 @@ if (EMSCRIPTEN)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Lexer.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Parser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Grammar.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/SandhiPass.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Interpreter.cpp)
     add_executable(nvc ${SRC_FILES})
     
