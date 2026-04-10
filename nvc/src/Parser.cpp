@@ -14,6 +14,13 @@ std::unique_ptr<Program> Parser::parse() {
 
 std::string Parser::stripVibhakti(std::string id, std::string* role) {
     std::u32string u32id = grammar.toUtf32(id);
+
+    // Special case for words ending with Halant
+    if (u32id.length() > 0 && u32id.back() == U'्') {
+        if (role) *role = "Karta";
+        return id;
+    }
+
     Grammar::WordMeta meta = grammar.analyzeSubanta(u32id);
     
     if (role) {
@@ -38,14 +45,14 @@ std::unique_ptr<Statement> Parser::parseStatement() {
         match(TokenType::KEYWORD, "सूत्रम्") || 
         match(TokenType::KEYWORD, "योगः")) return parseFunctionDeclaration();
     if (match(TokenType::KEYWORD, "फलम्")) return parseReturnStatement();
-    if (match(TokenType::KEYWORD, "अस्ति")) return parseVariableDeclaration();
+    if (match(TokenType::KEYWORD, "अस्ति") || match(TokenType::IDENTIFIER, "asti")) return parseVariableDeclaration();
     if (match(TokenType::KEYWORD, "नित्य")) return parseConstantDeclaration();
     if (match(TokenType::KEYWORD, "दर्शनम्")) return parseDarshanamBlock();
     if (match(TokenType::KEYWORD, "मंजूषा")) return parseManjushaElement();
     if (match(TokenType::KEYWORD, "सूची")) return parseSuchiElement();
     if (match(TokenType::KEYWORD, "चित्त्रम्")) return parseChittramElement();
     if (match(TokenType::KEYWORD, "प्रविष्टिः")) return parsePrashtihElement();
-    if (match(TokenType::KEYWORD, "वद")) return parsePrintStatement();
+    if (match(TokenType::KEYWORD, "वद") || match(TokenType::IDENTIFIER, "vad") || match(TokenType::IDENTIFIER, "print") || match(TokenType::IDENTIFIER, "show")) return parsePrintStatement();
     if (match(TokenType::KEYWORD, "यदि")) return parseIfStatement();
     if (match(TokenType::KEYWORD, "चक्र")) return parseLoopStatement();
     return parseExpressionStatement();
@@ -83,7 +90,7 @@ std::unique_ptr<FunctionDeclaration> Parser::parseFunctionDeclaration() {
 
 std::unique_ptr<Statement> Parser::parseReturnStatement() {
     auto value = parseExpression();
-    consume(TokenType::PUNCTUATION, "Expected ';' after return value.", ";");
+    if (check(TokenType::PUNCTUATION, ";")) advance();
     auto stmt = std::make_unique<ReturnStatement>();
     stmt->argument = std::move(value);
     return stmt;
@@ -93,7 +100,7 @@ std::unique_ptr<VariableDeclaration> Parser::parseVariableDeclaration() {
     Token idToken = consume(TokenType::IDENTIFIER, "Expected variable name after 'अस्ति'.");
     consume(TokenType::OPERATOR, "Expected '=' after variable name.", "=");
     auto init = parseExpression();
-    consume(TokenType::PUNCTUATION, "Expected ';' after variable declaration.", ";");
+    if (check(TokenType::PUNCTUATION, ";")) advance();
 
     auto decl = std::make_unique<VariableDeclaration>();
     decl->id = stripVibhakti(idToken.value, nullptr);
@@ -105,7 +112,7 @@ std::unique_ptr<ConstantDeclaration> Parser::parseConstantDeclaration() {
     Token idToken = consume(TokenType::IDENTIFIER, "Expected variable name after 'नित्य'.");
     consume(TokenType::OPERATOR, "Expected '=' after variable name.", "=");
     auto init = parseExpression();
-    consume(TokenType::PUNCTUATION, "Expected ';' after constant declaration.", ";");
+    if (check(TokenType::PUNCTUATION, ";")) advance();
 
     auto decl = std::make_unique<ConstantDeclaration>();
     decl->id = stripVibhakti(idToken.value, nullptr);
@@ -117,7 +124,7 @@ std::unique_ptr<PrintStatement> Parser::parsePrintStatement() {
     consume(TokenType::PUNCTUATION, "Expected '(' after 'वद'.", "(");
     auto expr = parseExpression();
     consume(TokenType::PUNCTUATION, "Expected ')' after print expression.", ")");
-    consume(TokenType::PUNCTUATION, "Expected ';' after print statement.", ";");
+    if (check(TokenType::PUNCTUATION, ";")) advance();
 
     auto stmt = std::make_unique<PrintStatement>();
     stmt->expression = std::move(expr);
@@ -216,7 +223,7 @@ std::unique_ptr<Statement> Parser::parseExpressionStatement() {
             Token idToken = consume(TokenType::IDENTIFIER, "");
             consume(TokenType::OPERATOR, "Expected '='", "=");
             auto right = parseExpression();
-            consume(TokenType::PUNCTUATION, "Expected ';'", ";");
+            if (check(TokenType::PUNCTUATION, ";")) advance();
 
             auto assign = std::make_unique<Assignment>();
             assign->left = stripVibhakti(idToken.value, nullptr);
@@ -229,7 +236,7 @@ std::unique_ptr<Statement> Parser::parseExpressionStatement() {
     }
 
     auto expr = parseExpression();
-    consume(TokenType::PUNCTUATION, "Expected ';' after expression.", ";");
+    if (check(TokenType::PUNCTUATION, ";")) advance();
     auto stmt = std::make_unique<ExpressionStatement>();
     stmt->expression = std::move(expr);
     return stmt;
@@ -339,7 +346,12 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
         Grammar::WordMeta meta = grammar.analyzeSubanta(grammar.toUtf32(idToken.value));
         
         auto expr = std::make_unique<Identifier>();
-        expr->name = grammar.toUtf8(meta.root);
+        // Special case: if halant was matched, just use the raw token since we don't want vibhakti modifications
+        if (idToken.value.length() > 2 && grammar.toUtf32(idToken.value).back() == U'्') {
+            expr->name = idToken.value;
+        } else {
+            expr->name = grammar.toUtf8(meta.root);
+        }
         
         switch (meta.vibhakti) {
             case Grammar::Vibhakti::PRATHAMA: expr->role = "Karta"; break;

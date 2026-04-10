@@ -42,6 +42,7 @@ Grammar::VerbMeta Grammar::analyzeTinanta(const std::u32string& word) {
         }
     }
 
+    // Retain root with halant unmodified, instead of falling back to raw stripping incorrectly.
     return meta;
 }
 

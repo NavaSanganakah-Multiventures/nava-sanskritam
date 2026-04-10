@@ -170,6 +170,18 @@ std::vector<Token> Lexer::tokenize() {
             continue;
         }
 
+        if (charStr == "/") {
+            // Check if it's a comment by looking ahead at the next character
+            if (pos + 1 < input.length() && input[pos + 1] == '/') {
+                advance(2); // skip both slashes
+                // Single line comment, skip until newline
+                while (pos < input.length() && input[pos] != '\n') {
+                    advance(1);
+                }
+                continue;
+            }
+        }
+
         if (isOperatorChar(charStr)) {
             std::string op = readOperator();
             tokens.push_back({TokenType::OPERATOR, op, line, col});

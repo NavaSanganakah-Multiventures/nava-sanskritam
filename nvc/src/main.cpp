@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::string binaryName = filename.substr(0, filename.find_last_of('.'));
-    std::string command = "clang++ -no-pie " + outputFilename + " nvc/build/libnvc_runtime.a -o " + binaryName;
+    std::string command = "clang++ -no-pie " + outputFilename + " build/libnvc_runtime.a -o " + binaryName;
     int linkResult = std::system(command.c_str());
 
     if (linkResult == 0) {
