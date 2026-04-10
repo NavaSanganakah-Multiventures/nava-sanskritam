@@ -1,0 +1,1 @@
+// Basic wasm bindings stub
