@@ -484,7 +484,7 @@ llvm::Value* CodeGen::generateDarshanamBlock(DarshanamBlock* node) {
         createWin = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "SUL_UI_CreateWindow", module.get());
     }
 
-    builder->CreateCall(createWin, { builder->CreateGlobalStringPtr(node->id) });
+    builder->CreateCall(createWin, { builder->CreateGlobalString(node->id) });
 
     for (const auto& el : node->elements) {
         generateDrishyamElement(el.get());
@@ -509,8 +509,8 @@ llvm::Value* CodeGen::generateDrishyamElement(DrishyamElement* node) {
     }
 
     std::vector<llvm::Value*> argsV;
-    argsV.push_back(builder->CreateGlobalStringPtr(node->type));
-    argsV.push_back(builder->CreateGlobalStringPtr(node->label.empty() ? "" : node->label));
+    argsV.push_back(builder->CreateGlobalString(node->type));
+    argsV.push_back(builder->CreateGlobalString(node->label.empty() ? "" : node->label));
     
     // Position
     if (node->pos.size() >= 2) {
@@ -521,7 +521,7 @@ llvm::Value* CodeGen::generateDrishyamElement(DrishyamElement* node) {
         argsV.push_back(llvm::ConstantFP::get(*context, llvm::APFloat(0.0)));
     }
     
-    argsV.push_back(builder->CreateGlobalStringPtr(node->color.empty() ? "None" : node->color));
+    argsV.push_back(builder->CreateGlobalString(node->color.empty() ? "None" : node->color));
 
     builder->CreateCall(addWidget, argsV);
 
@@ -590,7 +590,7 @@ void CodeGen::writeObject(const std::string& filename) {
     module->setTargetTriple(targetTriple); // LLVM 18 prefers Triple object
 
     std::string error;
-    auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error); // lookupTarget expects StringRef
+    auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error); // lookupTarget prefers Triple object
 
     if (!target) {
         throw std::runtime_error(error);
