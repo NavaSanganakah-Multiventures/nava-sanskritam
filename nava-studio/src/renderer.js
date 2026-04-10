@@ -115,40 +115,40 @@ function loadFile(filePath, element) {
     element.classList.add('active');
 }
 
-// Run Button Event (Pure Sanskrit)
+// Run Button Event
 document.getElementById('run-btn').addEventListener('click', () => {
     const code = editor.getValue();
     const output = document.getElementById('terminal-output');
-    output.innerText = 'सङ्कलनं भवति... (Sankalanam...)';
+    output.innerText = 'सङ्कलनं भवति...';
     
     ipcRenderer.send('run-code', code);
 });
 
-// Save Button Event (Pure Sanskrit)
+// Save Button Event
 document.getElementById('save-btn').addEventListener('click', () => {
     const code = editor.getValue();
     if (currentFilePath) {
         fs.writeFileSync(currentFilePath, code);
         const output = document.getElementById('terminal-output');
-        output.innerText += '\nसञ्चिका सुरक्षिता! (Pustakam Rakshitam!)';
+        output.innerText += '\nसञ्चिका सुरक्षिता!';
     } else {
         ipcRenderer.send('save-file', code);
     }
 });
 
-// Receive Result (Pure Sanskrit)
+// Receive Result
 ipcRenderer.on('run-result', (event, result) => {
     const output = document.getElementById('terminal-output');
     if (result.success) {
         output.style.color = '#10b981';
-        output.innerText = 'सफलता (Saphala):\n' + result.output;
+        output.innerText = 'सफलता:\n' + result.output;
     } else {
         output.style.color = '#ef4444';
-        output.innerText = 'त्रुटिः (Trutih):\n' + result.output;
+        output.innerText = 'त्रुटिः:\n' + result.output;
     }
 });
 
-// Terminal Input Logic (Sanskrit Only)
+// Terminal Input Logic
 document.getElementById('terminal-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         const cmd = e.target.value.trim().toLowerCase();
@@ -163,7 +163,7 @@ document.getElementById('terminal-input').addEventListener('keydown', (e) => {
         } else if (cmd === 'साफ' || cmd === 'clear' || cmd === 'shodhaya') {
             output.innerText = 'नव-सङ्गणक-शालायां स्वागतम्...';
         } else {
-            output.innerText += '\nत्रुटिः: अमान्या आज्ञा (Unknown command)';
+            output.innerText += '\nत्रुटिः: अमान्या आज्ञा';
         }
         
         e.target.value = '';
