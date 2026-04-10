@@ -587,7 +587,7 @@ void CodeGen::writeObject(const std::string& filename) {
 
     auto targetTripleStr = llvm::sys::getDefaultTargetTriple();
     llvm::Triple targetTriple(targetTripleStr);
-    module->setTargetTriple(targetTriple); // LLVM 18 prefers Triple object
+    module->setTargetTriple(targetTriple.getTriple()); // LLVM 18 prefers Triple object
 
     std::string error;
     auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error); // lookupTarget expects StringRef
@@ -601,7 +601,7 @@ void CodeGen::writeObject(const std::string& filename) {
 
     llvm::TargetOptions opt;
     std::optional<llvm::Reloc::Model> rm;
-    auto theTargetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, rm); // createTargetMachine expects Triple
+    auto theTargetMachine = target->createTargetMachine(targetTriple.getTriple(), cpu, features, opt, rm); // createTargetMachine expects Triple
 
     module->setDataLayout(theTargetMachine->createDataLayout());
 

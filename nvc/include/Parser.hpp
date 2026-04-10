@@ -38,6 +38,7 @@ private:
     
     std::unique_ptr<DarshanamBlock> parseDarshanamBlock();
     std::unique_ptr<DrishyamElement> parseDrishyamElement();
+    std::unique_ptr<DrishyamElement> parseDrishyamElementInternal(std::unique_ptr<DrishyamElement> element);
     std::unique_ptr<DrishyamElement> parseManjushaElement();
     std::unique_ptr<DrishyamElement> parseSuchiElement();
     std::unique_ptr<DrishyamElement> parseChittramElement();

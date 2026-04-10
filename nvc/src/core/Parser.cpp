@@ -41,10 +41,6 @@ std::unique_ptr<Statement> Parser::parseStatement() {
     if (match(TokenType::KEYWORD, "अस्ति")) return parseVariableDeclaration();
     if (match(TokenType::KEYWORD, "नित्य")) return parseConstantDeclaration();
     if (match(TokenType::KEYWORD, "दर्शनम्")) return parseDarshanamBlock();
-    if (match(TokenType::KEYWORD, "मंजूषा")) return parseManjushaElement();
-    if (match(TokenType::KEYWORD, "सूची")) return parseSuchiElement();
-    if (match(TokenType::KEYWORD, "चित्त्रम्")) return parseChittramElement();
-    if (match(TokenType::KEYWORD, "प्रविष्टिः")) return parsePrashtihElement();
     if (match(TokenType::KEYWORD, "वद")) return parsePrintStatement();
     if (match(TokenType::KEYWORD, "यदि")) return parseIfStatement();
     if (match(TokenType::KEYWORD, "चक्र")) return parseLoopStatement();
@@ -407,6 +403,14 @@ std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
     while (!check(TokenType::PUNCTUATION, "}")) {
         if (match(TokenType::KEYWORD, "दृश्यम्")) {
             block->elements.push_back(parseDrishyamElement());
+        } else if (match(TokenType::KEYWORD, "मंजूषा")) {
+            block->elements.push_back(parseManjushaElement());
+        } else if (match(TokenType::KEYWORD, "सूची")) {
+            block->elements.push_back(parseSuchiElement());
+        } else if (match(TokenType::KEYWORD, "चित्त्रम्")) {
+            block->elements.push_back(parseChittramElement());
+        } else if (match(TokenType::KEYWORD, "प्रविष्टिः")) {
+            block->elements.push_back(parsePrashtihElement());
         } else {
             advance(); // Skip unknown for now
         }
@@ -416,10 +420,13 @@ std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
 }
 
 std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
-    Token typeToken = consume(TokenType::IDENTIFIER, "Expected widget type (e.g. Button).");
     auto element = std::make_unique<DrishyamElement>();
+    Token typeToken = consume(TokenType::IDENTIFIER, "Expected widget type (e.g. Button).");
     element->type = typeToken.value;
+    return parseDrishyamElementInternal(std::move(element));
+}
 
+std::unique_ptr<DrishyamElement> Parser::parseDrishyamElementInternal(std::unique_ptr<DrishyamElement> element) {
     if (match(TokenType::PUNCTUATION, "(")) {
         // Parse x, y coordinates
         element->pos.push_back(parseExpression());
@@ -441,11 +448,11 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
                 consume(TokenType::PUNCTUATION, "Expected ':' after attribute.", ":");
                 
                 if (key.value == "नाम") {
-                    element->label = consume(TokenType::LITERAL, "Expected label string.").value;
+                    element->label = consume(TokenType::STRING, "Expected label string.").value;
                 } else if (key.value == "रङ्गः") {
                     element->color = consume(TokenType::IDENTIFIER, "Expected color name.").value;
                 } else if (key.value == "स्रोतस") {
-                    element->source = consume(TokenType::LITERAL, "Expected source URL.").value;
+                    element->source = consume(TokenType::STRING, "Expected source URL.").value;
                 }
                 if (check(TokenType::PUNCTUATION, ";")) advance();
             }
@@ -458,25 +465,25 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
 std::unique_ptr<DrishyamElement> Parser::parseManjushaElement() {
     auto element = std::make_unique<DrishyamElement>();
     element->type = "Box";
-    return parseDrishyamElement(); 
+    return parseDrishyamElementInternal(std::move(element));
 }
 
 std::unique_ptr<DrishyamElement> Parser::parseSuchiElement() {
     auto element = std::make_unique<DrishyamElement>();
     element->type = "List";
-    return parseDrishyamElement();
+    return parseDrishyamElementInternal(std::move(element));
 }
 
 std::unique_ptr<DrishyamElement> Parser::parseChittramElement() {
     auto element = std::make_unique<DrishyamElement>();
     element->type = "Image";
-    return parseDrishyamElement();
+    return parseDrishyamElementInternal(std::move(element));
 }
 
 std::unique_ptr<DrishyamElement> Parser::parsePrashtihElement() {
     auto element = std::make_unique<DrishyamElement>();
     element->type = "Input";
-    return parseDrishyamElement();
+    return parseDrishyamElementInternal(std::move(element));
 }
 
 bool Parser::isAtEnd() const {
