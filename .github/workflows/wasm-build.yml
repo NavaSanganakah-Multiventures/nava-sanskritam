@@ -22,20 +22,20 @@ jobs:
 
       - name: Configure CMake (WASM)
         run: |
-          mkdir build-wasm
+          mkdir -p build-wasm
           cd build-wasm
-          emcmake cmake .. -DEMSCRIPTEN=ON -DCMAKE_BUILD_TYPE=Release
+          emcmake cmake ../nvc -DEMSCRIPTEN=ON -DCMAKE_BUILD_TYPE=Release
 
       - name: Build WASM
         run: |
+          mkdir -p nava-web
           cd build-wasm
-          emmake make
+          emmake make -j4
+          cp nvc.js ../nava-web/nvc.js
+          cp nvc.wasm ../nava-web/nvc.wasm
 
-      - name: Upload WASM Artifacts
+      - name: Upload NVC Web Playground Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nvc-wasm-bundle
-          path: |
-            build-wasm/nvc.wasm
-            build-wasm/nvc.js
-            build-wasm/nvc.wasm.js
+          name: nvc-web-playground
+          path: nava-web/

@@ -26,8 +26,12 @@ void Interpreter::visit(ASTNode* node) {
         }
     } else if (type == ASTNodeType::PrintStatement) {
         auto printStmt = static_cast<PrintStatement*>(node);
-        std::string val = evaluateExpression(printStmt->expression.get());
-        outputBuffer += val + "\n";
+        std::string result = "";
+        for (size_t i = 0; i < printStmt->expressions.size(); ++i) {
+            result += evaluateExpression(printStmt->expressions[i].get());
+            if (i < printStmt->expressions.size() - 1) result += " ";
+        }
+        outputBuffer += result + "\n";
     } else if (type == ASTNodeType::ExpressionStatement) {
         auto exprStmt = static_cast<ExpressionStatement*>(node);
         evaluateExpression(exprStmt->expression.get());
@@ -35,6 +39,55 @@ void Interpreter::visit(ASTNode* node) {
         auto blockStmt = static_cast<BlockStatement*>(node);
         for (const auto& stmt : blockStmt->body) {
             visit(stmt.get());
+        }
+    } else if (type == ASTNodeType::IfStatement) {
+        auto ifStmt = static_cast<IfStatement*>(node);
+        std::string condStr = evaluateExpression(ifStmt->condition.get());
+        bool condition = false;
+        try {
+            condition = std::stod(condStr) != 0;
+        } catch (...) {
+            condition = !condStr.empty();
+        }
+
+        if (condition) {
+            visit(ifStmt->consequence.get());
+        } else if (ifStmt->alternate) {
+            visit(ifStmt->alternate.get());
+        }
+    } else if (type == ASTNodeType::LoopStatement) {
+        auto loopStmt = static_cast<LoopStatement*>(node);
+        // Initialization
+        if (loopStmt->init) {
+            if (loopStmt->init->getType() == ASTNodeType::Assignment) {
+                auto assign = static_cast<Assignment*>(loopStmt->init.get());
+                environment[assign->left] = evaluateExpression(assign->right.get());
+            }
+        }
+
+        while (true) {
+            // Condition Check
+            if (loopStmt->test) {
+                std::string condStr = evaluateExpression(loopStmt->test.get());
+                bool condition = false;
+                try {
+                    condition = std::stod(condStr) != 0;
+                } catch (...) {
+                    condition = !condStr.empty();
+                }
+                if (!condition) break;
+            }
+
+            // Body
+            visit(loopStmt->body.get());
+
+            // Update
+            if (loopStmt->update) {
+                if (loopStmt->update->getType() == ASTNodeType::Assignment) {
+                    auto assign = static_cast<Assignment*>(loopStmt->update.get());
+                    environment[assign->left] = evaluateExpression(assign->right.get());
+                }
+            }
         }
     } else if (type == ASTNodeType::FunctionDeclaration) {
         // Functions mock
@@ -57,20 +110,37 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         return id->name; // fallback
     } else if (type == ASTNodeType::BinaryExpression) {
         auto bin = static_cast<BinaryExpression*>(expr);
-        std::string left = evaluateExpression(bin->left.get());
-        std::string right = evaluateExpression(bin->right.get());
-        // Simple numeric interpretation
+        std::string leftStr = evaluateExpression(bin->left.get());
+        std::string rightStr = evaluateExpression(bin->right.get());
+        
         try {
-            double l = std::stod(left);
-            double r = std::stod(right);
+            double l = std::stod(leftStr);
+            double r = std::stod(rightStr);
+            
             if (bin->op == "+") return std::to_string(l + r);
             if (bin->op == "-") return std::to_string(l - r);
             if (bin->op == "*") return std::to_string(l * r);
             if (bin->op == "/") return std::to_string(l / r);
+            
+            // Relational Operators
+            if (bin->op == ">") return (l > r) ? "1" : "0";
+            if (bin->op == "<") return (l < r) ? "1" : "0";
+            if (bin->op == ">=") return (l >= r) ? "1" : "0";
+            if (bin->op == "<=") return (l <= r) ? "1" : "0";
+            if (bin->op == "==") return (l == r) ? "1" : "0";
+            if (bin->op == "!=") return (l != r) ? "1" : "0";
+            
         } catch (...) {
-            if (bin->op == "+") return left + right; // string concat
+            if (bin->op == "+") return leftStr + rightStr; // string concat
+            if (bin->op == "==") return (leftStr == rightStr) ? "1" : "0";
+            if (bin->op == "!=") return (leftStr != rightStr) ? "1" : "0";
         }
-        return left + bin->op + right;
+        return leftStr + bin->op + rightStr;
+    } else if (type == ASTNodeType::Assignment) {
+        auto assign = static_cast<Assignment*>(expr);
+        std::string val = evaluateExpression(assign->right.get());
+        environment[assign->left] = val;
+        return val;
     } else if (type == ASTNodeType::CallExpression) {
         auto call = static_cast<CallExpression*>(expr);
         if (call->callee->name == "वद") {

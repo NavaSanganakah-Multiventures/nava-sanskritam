@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="sa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>नव्या-क्रीडाङ्गणम् | Nava Web Playground</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Martel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent: #f59e0b; --bg: #020617; }
+        body { background-color: var(--bg); color: #f8fafc; font-family: 'Outfit', sans-serif; }
+        .sanskrit-font { font-family: 'Martel', serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        #editor-container { height: calc(100vh - 200px); border-radius: 12px; overflow: hidden; }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- HEADER -->
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-amber-500/20">न</div>
+                <div>
+                    <h1 class="text-2xl font-bold sanskrit-font tracking-wide">नव्या-क्रीडाङ्गणम्</h1>
+                    <p class="text-slate-400 text-sm">Nava Sanskritam Web IDE v2.5</p>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="runCode()" class="bg-amber-500 hover:bg-amber-600 text-black px-8 py-2.5 rounded-full font-bold transition-all transform hover:-translate-y-1 active:scale-95 shadow-xl shadow-amber-500/20">
+                    चलाओ (RUN)
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- EDITOR -->
+            <div class="glass p-1 rounded-2xl">
+                <div id="editor-container"></div>
+            </div>
+
+            <!-- OUTPUT -->
+            <div class="flex flex-col gap-6">
+                <div class="glass p-6 rounded-2xl flex-1 min-h-[300px]">
+                    <h2 class="text-amber-500 font-bold mb-4 flex items-center gap-2">
+                        <span>🚩</span> निर्गम-पटलम् (OUTPUT)
+                    </h2>
+                    <pre id="output" class="font-mono text-emerald-400 whitespace-pre-wrap">सङ्कलनस्य प्रतीक्षायां...</pre>
+                </div>
+
+                <div class="glass p-6 rounded-2xl">
+                    <h2 class="text-slate-400 font-bold mb-4 text-sm uppercase tracking-widest">सहायः (Info)</h2>
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        इयं नव्या-भाषायाः वेब-सङ्कलक-शाला अस्ति। अत्र भवान् सङ्स्कृत-कोडं लिखनम्, सम्पादनम्, चालनम् च कर्तुं शक्नोति।
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.min.js"></script>
+    <script src="nvc.js"></script>
+    <script>
+        let editor;
+        let nvcModule;
+
+        // Load Monaco
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs' } });
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: 'वद("🚩 नमस्ते नव्या-क्रीडाङ्गणतः!");\n',
+                language: 'javascript', // Temporarily using JS for color
+                theme: 'vs-dark',
+                fontSize: 16,
+                automaticLayout: true,
+                padding: { top: 20 }
+            });
+        });
+
+        // Load WASM
+        NavaCompiler().then(instance => {
+            nvcModule = instance;
+            document.getElementById('output').innerText = "🚩 नव्या-सङ्कलकः सिद्धः! (Compiler Ready)";
+        });
+
+        function runCode() {
+            if (!nvcModule) return;
+            const code = editor.getValue();
+            const compileSanskrit = nvcModule.cwrap('compileSanskrit', 'string', ['string']);
+            
+            const result = compileSanskrit(code);
+            document.getElementById('output').innerText = result;
+        }
+    </script>
+</body>
+</html>
