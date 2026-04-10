@@ -39,12 +39,15 @@ jobs:
       run: |
         cd nvc/build
         ninja
+        ldd nvc.exe | grep '\/mingw64\/bin\/' | awk '{ print $3 }' | xargs -I '{}' cp '{}' .
         
     - name: Upload NVC Binary
       uses: actions/upload-artifact@v4
       with:
         name: nvc-binary
-        path: nvc/build/nvc.exe
+        path: |
+          nvc/build/nvc.exe
+          nvc/build/*.dll
 
   package-electron:
     needs: build-nvc
