@@ -12,12 +12,19 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install LLVM
-      uses: KyleMayes/install-llvm-action@v2
+    - name: Setup MSYS2 and LLVM
+      uses: msys2/setup-msys2@v2
       with:
-        version: "18"
+        msystem: MINGW64
+        install: >-
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-llvm
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-ninja
+        update: true
         
     - name: Configure CMake
+      shell: msys2 {0}
       run: |
         cd nvc
         mkdir build
@@ -25,6 +32,7 @@ jobs:
         cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
         
     - name: Build NVC
+      shell: msys2 {0}
       run: |
         cd nvc/build
         ninja
@@ -44,7 +52,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
         
     - name: Download NVC Binary
       uses: actions/download-artifact@v4
