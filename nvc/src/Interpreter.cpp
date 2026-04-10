@@ -26,8 +26,12 @@ void Interpreter::visit(ASTNode* node) {
         }
     } else if (type == ASTNodeType::PrintStatement) {
         auto printStmt = static_cast<PrintStatement*>(node);
-        std::string val = evaluateExpression(printStmt->expression.get());
-        outputBuffer += val + "\n";
+        std::string result = "";
+        for (size_t i = 0; i < printStmt->expressions.size(); ++i) {
+            result += evaluateExpression(printStmt->expressions[i].get());
+            if (i < printStmt->expressions.size() - 1) result += " ";
+        }
+        outputBuffer += result + "\n";
     } else if (type == ASTNodeType::ExpressionStatement) {
         auto exprStmt = static_cast<ExpressionStatement*>(node);
         evaluateExpression(exprStmt->expression.get());

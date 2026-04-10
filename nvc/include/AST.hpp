@@ -69,7 +69,7 @@ public:
 
 class PrintStatement : public Statement {
 public:
-    std::unique_ptr<Expression> expression;
+    std::vector<std::unique_ptr<Expression>> expressions;
     ASTNodeType getType() const override { return ASTNodeType::PrintStatement; }
 };
 

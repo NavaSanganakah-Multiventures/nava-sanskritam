@@ -1,6 +1,6 @@
 # Nava Sanskritam WASM Build Script
 $buildDir = "build-wasm"
-$outputDir = "nava-web"
+$outputDir = "wasm"
 
 if (-not (Test-Path $buildDir)) {
     mkdir $buildDir

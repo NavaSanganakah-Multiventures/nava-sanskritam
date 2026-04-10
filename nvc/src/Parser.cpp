@@ -115,12 +115,20 @@ std::unique_ptr<ConstantDeclaration> Parser::parseConstantDeclaration() {
 
 std::unique_ptr<PrintStatement> Parser::parsePrintStatement() {
     consume(TokenType::PUNCTUATION, "Expected '(' after 'वद'.", "(");
-    auto expr = parseExpression();
-    consume(TokenType::PUNCTUATION, "Expected ')' after print expression.", ")");
+    auto stmt = std::make_unique<PrintStatement>();
+    
+    if (!check(TokenType::PUNCTUATION, ")")) {
+        do {
+            if (!stmt->expressions.empty()) {
+                consume(TokenType::PUNCTUATION, "Expected ',' between print expressions.", ",");
+            }
+            stmt->expressions.push_back(parseExpression());
+        } while (check(TokenType::PUNCTUATION, ","));
+    }
+    
+    consume(TokenType::PUNCTUATION, "Expected ')' after print expressions.", ")");
     consume(TokenType::PUNCTUATION, "Expected ';' after print statement.", ";");
 
-    auto stmt = std::make_unique<PrintStatement>();
-    stmt->expression = std::move(expr);
     return stmt;
 }
 
