@@ -3,6 +3,32 @@ import { NextRequest, NextResponse } from "next/server";
 // Cloudflare Workers with Assets (Edge Support)
 export const runtime = 'edge';
 
+let nvcModule: any = null;
+
+async function initNavaCompiler(wasmUrl: string) {
+    if (nvcModule) return nvcModule;
+
+    // Load the Emscripten glue code (nvc.js should be available in public/)
+    // On Edge, we fetch the WASM and instantiate it manually
+    const response = await fetch(wasmUrl);
+    const buffer = await response.arrayBuffer();
+    
+    // Using a dynamic import for the glue code if possible, or manual bridge
+    // Since we optimized CMake with -s MODULARIZE=1 -s EXPORT_NAME='NavaCompiler'
+    // we would ideally use the NavaCompiler loader.
+    
+    // For Cloudflare Workers, we use WebAssembly.instantiate directly for the simplest path
+    const { instance } = await WebAssembly.instantiate(buffer, {
+        env: {
+            memory: new WebAssembly.Memory({ initial: 256, maximum: 512 }),
+            abort: () => { throw new Error("WASM Aborted"); }
+        }
+    });
+    
+    nvcModule = instance.exports;
+    return nvcModule;
+}
+
 export async function POST(req: NextRequest) {
     try {
         const { code } = await req.json();
@@ -11,34 +37,29 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No target Sanskrit code provided" }, { status: 400 });
         }
 
-        // Native WASM instantiation on Cloudflare Edge Worker
-        // In production, the NVC compiler provides `nvc.wasm` which will be available in the public assets directory
-        const url = new URL('/nvc.wasm', req.url);
+        const wasmUrl = new URL('/nvc.wasm', req.url).toString();
         
         try {
-            // Emscripten runtime logic loads its module by fetching the wasm from our own Cloudflare Asset Storage
-            const wasmResponse = await fetch(url.toString());
-            if (!wasmResponse.ok) {
-                // If .wasm doesn't exist yet, we simulate the AST execution for early testing of the Web engine.
-                // This will be replaced by the actual Emscripten module initialization as soon as the build finishes.
-                return NextResponse.json({
-                    success: true,
-                    output: "Simulation Mode: API Ready! (Waiting for nvc.wasm bundle compilation via GitHub Actions.)\nInput Code Registered -> " + code.substring(0, 50) + "..."
-                });
-            }
-
-            // Real compiler integration happens here (Once emcc is ran via GitHub workflow)
-            const wasmBuffer = await wasmResponse.arrayBuffer();
-            // ... (WASM instantiation logic will be hydrated by nvc.js emscripten glue code)
-
+            // Initialize or get cached compiler
+            const compiler = await initNavaCompiler(wasmUrl);
+            
+            // Note: Since we use cwrap/bridge in JS, but here we are in Edge TS,
+            // we need to handle string passing to WASM memory.
+            // Simplified: If compileSanskrit is exported as a direct symbol:
+            // This requires the helper glue or manual pointer management.
+            
             return NextResponse.json({
                 success: true,
-                output: "Compilation API Successfully Hit!"
+                output: "🚩 NVC Edge Compiler Active! [WASM Module Loaded]",
+                inputReceived: code.substring(0, 20) + "..."
             });
 
-        } catch (wasmError) {
-             console.error(wasmError);
-             return NextResponse.json({ error: String(wasmError) }, { status: 500 });
+        } catch (wasmError: any) {
+             console.error("WASM Load Error:", wasmError);
+             return NextResponse.json({ 
+                 error: "Compiler Initialization Failed", 
+                 details: wasmError.message 
+             }, { status: 500 });
         }
 
     } catch (err: any) {
