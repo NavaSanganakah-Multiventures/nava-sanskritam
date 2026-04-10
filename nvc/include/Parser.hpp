@@ -35,6 +35,13 @@ private:
     std::unique_ptr<LoopStatement> parseLoopStatement();
     std::unique_ptr<Statement> parseExpressionStatement();
     std::unique_ptr<BlockStatement> parseBlock();
+    
+    std::unique_ptr<DarshanamBlock> parseDarshanamBlock();
+    std::unique_ptr<DrishyamElement> parseDrishyamElement();
+    std::unique_ptr<DrishyamElement> parseManjushaElement();
+    std::unique_ptr<DrishyamElement> parseSuchiElement();
+    std::unique_ptr<DrishyamElement> parseChittramElement();
+    std::unique_ptr<DrishyamElement> parsePrashtihElement();
 
     std::unique_ptr<Expression> parseExpression();
     std::unique_ptr<Expression> parseEquality();

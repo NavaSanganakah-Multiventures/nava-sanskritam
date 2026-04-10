@@ -6,6 +6,7 @@
 #include <llvm/Support/FileSystem.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/TargetParser/Host.h>
+#include <llvm/IR/Intrinsics.h>
 #include <stdexcept>
 #include <iostream>
 
@@ -20,7 +21,7 @@ llvm::Function* CodeGen::getPrintf() {
     if (!printfFunc) {
         llvm::FunctionType* printfType = llvm::FunctionType::get(
             llvm::IntegerType::getInt32Ty(*context),
-            llvm::PointerType::getUnqual(llvm::Type::getInt8Ty(*context)),
+            llvm::PointerType::getUnqual(*context),
             true
         );
         printfFunc = llvm::Function::Create(
@@ -135,7 +136,7 @@ llvm::Value* CodeGen::generateVariableDeclaration(VariableDeclaration* node) {
     if (node->vachana == 2) {
         allocType = llvm::ArrayType::get(llvm::Type::getDoubleTy(*context), 2);
     } else if (node->vachana == 3) {
-        allocType = llvm::PointerType::getUnqual(llvm::Type::getDoubleTy(*context)); // Vector pointer
+        allocType = llvm::PointerType::getUnqual(*context); // Vector pointer
     }
 
     llvm::AllocaInst* alloca = createEntryBlockAlloca(theFunction, node->id);
@@ -182,15 +183,15 @@ llvm::Value* CodeGen::generatePrintStatement(PrintStatement* node) {
     std::vector<llvm::Value*> args;
 
     if (val->getType()->isPointerTy()) {
-        llvm::Value* formatStr = builder->CreateGlobalStringPtr("%s\n");
+        llvm::Value* formatStr = builder->CreateGlobalString("%s\n");
         args.push_back(formatStr);
         args.push_back(val);
     } else if (val->getType()->isDoubleTy()) {
-        llvm::Value* formatStr = builder->CreateGlobalStringPtr("%f\n");
+        llvm::Value* formatStr = builder->CreateGlobalString("%f\n");
         args.push_back(formatStr);
         args.push_back(val);
     } else if (val->getType()->isIntegerTy(1)) {
-        llvm::Value* formatStr = builder->CreateGlobalStringPtr("%d\n");
+        llvm::Value* formatStr = builder->CreateGlobalString("%d\n");
         args.push_back(formatStr);
         args.push_back(builder->CreateZExt(val, builder->getInt32Ty()));
     } else {
@@ -325,7 +326,7 @@ llvm::Value* CodeGen::generateAssignment(Assignment* node) {
 
 llvm::Value* CodeGen::generateLiteral(Literal* node) {
     if (node->isString) {
-        return builder->CreateGlobalStringPtr(node->value);
+        return builder->CreateGlobalString(node->value);
     } else {
         return llvm::ConstantFP::get(*context, llvm::APFloat(std::stod(node->value)));
     }
@@ -536,7 +537,7 @@ std::string CodeGen::exportAsJSON(Program* program) {
     std::stringstream ss;
     ss << "[\n";
     bool first = true;
-    for (const auto& stmt : program->statements) {
+    for (const auto& stmt : program->body) {
         if (stmt->getType() == ASTNodeType::DarshanamBlock) {
             auto darshanam = static_cast<DarshanamBlock*>(stmt.get());
             if (!first) ss << ",\n";
@@ -584,11 +585,12 @@ void CodeGen::writeObject(const std::string& filename) {
     llvm::InitializeAllAsmParsers();
     llvm::InitializeAllAsmPrinters();
 
-    auto targetTriple = llvm::sys::getDefaultTargetTriple();
-    module->setTargetTriple(targetTriple);
+    auto targetTripleStr = llvm::sys::getDefaultTargetTriple();
+    llvm::Triple targetTriple(targetTripleStr);
+    module->setTargetTriple(targetTriple); // LLVM 18 prefers Triple object
 
     std::string error;
-    auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
+    auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error); // lookupTarget expects StringRef
 
     if (!target) {
         throw std::runtime_error(error);
@@ -599,7 +601,7 @@ void CodeGen::writeObject(const std::string& filename) {
 
     llvm::TargetOptions opt;
     std::optional<llvm::Reloc::Model> rm;
-    auto theTargetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, rm);
+    auto theTargetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, rm); // createTargetMachine expects Triple
 
     module->setDataLayout(theTargetMachine->createDataLayout());
 

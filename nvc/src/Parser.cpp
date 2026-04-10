@@ -76,7 +76,7 @@ std::unique_ptr<FunctionDeclaration> Parser::parseFunctionDeclaration() {
     else if (meta.lakara == Grammar::Lakara::VIDHI_LIN) decl->lakara = "Vidhi-Lin";
     else decl->lakara = "Unknown";
     
-    decl->ipada = (meta.pada == Grammar::Pada::PARASMAIPADA) ? "Parasmaipada" : "Atmanepada";
+    decl->pada = (meta.pada == Grammar::Pada::PARASMAIPADA) ? "Parasmaipada" : "Atmanepada";
     decl->body = parseBlock();
     return decl;
 }

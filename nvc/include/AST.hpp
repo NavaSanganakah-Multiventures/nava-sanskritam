@@ -55,6 +55,7 @@ class VariableDeclaration : public Statement {
 public:
     std::string id;
     std::unique_ptr<Expression> init;
+    int vachana = 1;
     ASTNodeType getType() const override { return ASTNodeType::VariableDeclaration; }
 };
 
@@ -62,6 +63,7 @@ class ConstantDeclaration : public Statement {
 public:
     std::string id;
     std::unique_ptr<Expression> init;
+    int vachana = 1;
     ASTNodeType getType() const override { return ASTNodeType::ConstantDeclaration; }
 };
 

@@ -42,6 +42,9 @@ private:
     llvm::Value* generateFunctionDeclaration(FunctionDeclaration* node);
     llvm::Value* generateObjectLiteral(ObjectLiteral* node);
     llvm::Value* generateMemberAccess(MemberAccess* node);
+    
+    llvm::Value* generateDarshanamBlock(DarshanamBlock* node);
+    llvm::Value* generateDrishyamElement(DrishyamElement* node);
 
     llvm::AllocaInst* createEntryBlockAlloca(llvm::Function* theFunction, const std::string& varName);
     llvm::Function* getPrintf();
