@@ -5,8 +5,7 @@
     "nodejs_compat"
   ],
   "assets": {
-    "directory": "nava-platform/.vercel/output/static",
-    "binding": "ASSETS"
+    "directory": "nava-platform/.vercel/output/static"
   },
   "observability": {
     "enabled": true
