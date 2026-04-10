@@ -9,3 +9,5 @@ test_parser_c*
 time_test*
 vibhakti_test*
 nvc/src/runtime.c
+nvc/build-wasm/
+emsdk/

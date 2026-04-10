@@ -12,7 +12,7 @@ add_library(nava_core STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/Lexer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/Parser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/Grammar.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/core/SandhiPass.cpp
+
 )
 
 if (EMSCRIPTEN)
@@ -39,6 +39,7 @@ else()
     add_executable(nvc
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cli/main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/cli/CodeGen.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/core/SandhiPass.cpp
     )
 
     # Link Core and LLVM
