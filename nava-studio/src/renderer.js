@@ -1,12 +1,14 @@
 const { ipcRenderer } = window.nodeRequire ? window.nodeRequire('electron') : require('electron');
+const fs = window.nodeRequire ? window.nodeRequire('fs') : require('fs');
+const path = window.nodeRequire ? window.nodeRequire('path') : require('path');
 
 let editor;
+let currentFilePath = null;
 
 // Load Monaco Editor
 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs' } });
 
 require(['vs/editor/editor.main'], function () {
-    // Define Nava Sanskritam Language
     monaco.languages.register({ id: 'nava' });
     monaco.languages.setMonarchTokensProvider('nava', {
         tokenizer: {
@@ -27,14 +29,45 @@ require(['vs/editor/editor.main'], function () {
         automaticLayout: true,
         minimap: { enabled: false }
     });
+
+    // Initial Scan
+    updateFileExplorer();
 });
+
+// File Explorer Logic
+function updateFileExplorer() {
+    const cwd = process.cwd();
+    const fileListMsg = document.getElementById('file-list');
+    fileListMsg.innerHTML = '';
+
+    fs.readdir(cwd, (err, files) => {
+        if (err) return;
+        
+        files.filter(f => f.endsWith('.ns')).forEach(file => {
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.innerText = '📄 ' + file;
+            div.onclick = () => loadFile(path.join(cwd, file));
+            fileListMsg.appendChild(div);
+        });
+    });
+}
+
+function loadFile(filePath) {
+    const content = fs.readFileSync(filePath, 'utf8');
+    editor.setValue(content);
+    currentFilePath = filePath;
+    
+    // UI Feedback
+    document.querySelectorAll('.file-item').forEach(el => el.classList.remove('active'));
+    event.target.classList.add('active');
+}
 
 // Run Button Event
 document.getElementById('run-btn').addEventListener('click', () => {
     const code = editor.getValue();
-    const outputContainer = document.getElementById('output-container');
-    
-    outputContainer.innerText = 'Compiling... (संकलनं भवति...)';
+    const output = document.getElementById('terminal-output');
+    output.innerText = 'संकलनं भवति... (Compiling...)';
     
     ipcRenderer.send('run-code', code);
 });
@@ -42,17 +75,23 @@ document.getElementById('run-btn').addEventListener('click', () => {
 // Save Button Event
 document.getElementById('save-btn').addEventListener('click', () => {
     const code = editor.getValue();
-    ipcRenderer.send('save-file', code);
+    if (currentFilePath) {
+        fs.writeFileSync(currentFilePath, code);
+        const output = document.getElementById('terminal-output');
+        output.innerText += '\nसञ्चिका सुरक्षिता! (File Saved!)';
+    } else {
+        ipcRenderer.send('save-file', code);
+    }
 });
 
 // Receive Result
 ipcRenderer.on('run-result', (event, result) => {
-    const outputContainer = document.getElementById('output-container');
+    const output = document.getElementById('terminal-output');
     if (result.success) {
-        outputContainer.style.color = '#10b981';
-        outputContainer.innerText = result.output;
+        output.style.color = '#10b981';
+        output.innerText = 'सफलता (Result):\n' + result.output;
     } else {
-        outputContainer.style.color = '#ef4444';
-        outputContainer.innerText = 'त्रुटि (Error):\n' + result.output;
+        output.style.color = '#ef4444';
+        output.innerText = 'त्रुटि (Error):\n' + result.output;
     }
 });

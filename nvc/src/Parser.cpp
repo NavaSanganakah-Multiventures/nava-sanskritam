@@ -52,8 +52,8 @@ std::unique_ptr<Statement> Parser::parseStatement() {
 }
 
 std::unique_ptr<FunctionDeclaration> Parser::parseFunctionDeclaration() {
-    Token idToken = consume(TokenType::IDENTIFIER, "Expected function name.");
-    consume(TokenType::PUNCTUATION, "Expected '(' after function name.", "(");
+    Token idToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: क्रिया-नाम अपेक्षितम् (Expected function name).");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '(' अपेक्षितम् (Expected '(' after name).", "(");
     std::vector<std::string> params;
     if (!check(TokenType::PUNCTUATION, ")")) {
         do {
@@ -168,7 +168,7 @@ std::unique_ptr<LoopStatement> Parser::parseLoopStatement() {
             assign->right = std::move(value);
             init = std::move(assign);
         } else {
-            throw std::runtime_error("Invalid initialization in loop.");
+            throw std::runtime_error("व्याकरण-त्रुटिः: अमान्यः आरम्भः (Invalid initialization).");
         }
     }
     consume(TokenType::PUNCTUATION, "Expected ';' after loop initialization.", ";");
@@ -394,7 +394,7 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
         consume(TokenType::PUNCTUATION, "Expected ')' after expression.", ")");
         return expr;
     }
-    throw std::runtime_error("Parser Error: Unexpected token '" + peek().value + "' at line " + std::to_string(peek().line) + ", col " + std::to_string(peek().col));
+    throw std::runtime_error("व्याकरण-त्रुटिः: अनुचितः शब्दः '" + peek().value + "' (Unexpected token) - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
 }
 
 std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
@@ -515,5 +515,5 @@ Token Parser::advance() {
 
 Token Parser::consume(TokenType type, const std::string& message, const std::string& value) {
     if (check(type, value)) return advance();
-    throw std::runtime_error("Parser Error: " + message + " Found '" + peek().value + "' at line " + std::to_string(peek().line) + ", col " + std::to_string(peek().col));
+    throw std::runtime_error("व्याकरण-त्रुटिः: " + message + " - प्राप्तः '" + peek().value + "' - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
 }
