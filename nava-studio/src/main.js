@@ -34,7 +34,9 @@ app.on('window-all-closed', () => {
 // IPC Handler to run Nava compiler
 ipcMain.on('run-code', (event, code) => {
   const tempFilePath = path.join(app.getPath('temp'), 'temp.ns');
-  const binPath = path.join(__dirname, 'bin/nvc.exe');
+  const binPath = app.isPackaged 
+      ? path.join(process.resourcesPath, 'bin', 'nvc.exe') 
+      : path.join(__dirname, '..', 'bin', 'nvc.exe');
   
   fs.writeFileSync(tempFilePath, code);
 
