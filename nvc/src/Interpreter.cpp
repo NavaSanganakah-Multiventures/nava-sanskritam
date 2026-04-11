@@ -1,5 +1,13 @@
 #include "Interpreter.hpp"
 #include <iostream>
+#include <cstdlib>
+
+static bool isNumeric(const std::string& str, double& out) {
+    if (str.empty()) return false;
+    char* end = nullptr;
+    out = std::strtod(str.c_str(), &end);
+    return end != str.c_str();
+}
 
 std::string Interpreter::evaluate(Program* program) {
     outputBuffer = "";
@@ -49,10 +57,11 @@ void Interpreter::visit(ASTNode* node) {
         auto ifStmt = static_cast<IfStatement*>(node);
         std::string condStr = evaluateExpression(ifStmt->condition.get());
         bool condition = false;
-        try {
-            condition = std::stod(condStr) != 0;
-        } catch (...) {
-            condition = !condStr.empty();
+        double val;
+        if (isNumeric(condStr, val)) {
+            condition = (val != 0);
+        } else {
+            condition = !condStr.empty() && condStr != "0";
         }
 
         if (condition) {
@@ -75,10 +84,11 @@ void Interpreter::visit(ASTNode* node) {
             if (loopStmt->test) {
                 std::string condStr = evaluateExpression(loopStmt->test.get());
                 bool condition = false;
-                try {
-                    condition = std::stod(condStr) != 0;
-                } catch (...) {
-                    condition = !condStr.empty();
+                double val;
+                if (isNumeric(condStr, val)) {
+                    condition = (val != 0);
+                } else {
+                    condition = !condStr.empty() && condStr != "0";
                 }
                 if (!condition) break;
             }
@@ -130,10 +140,8 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         std::string leftStr = evaluateExpression(bin->left.get());
         std::string rightStr = evaluateExpression(bin->right.get());
         
-        try {
-            double l = std::stod(leftStr);
-            double r = std::stod(rightStr);
-            
+        double l, r;
+        if (isNumeric(leftStr, l) && isNumeric(rightStr, r)) {
             if (bin->op == "+") return std::to_string(l + r);
             if (bin->op == "-") return std::to_string(l - r);
             if (bin->op == "*") return std::to_string(l * r);
@@ -146,8 +154,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
             if (bin->op == "<=") return (l <= r) ? "1" : "0";
             if (bin->op == "==") return (l == r) ? "1" : "0";
             if (bin->op == "!=") return (l != r) ? "1" : "0";
-            
-        } catch (...) {
+        } else {
             if (bin->op == "+") return leftStr + rightStr; // string concat
             if (bin->op == "==") return (leftStr == rightStr) ? "1" : "0";
             if (bin->op == "!=") return (leftStr != rightStr) ? "1" : "0";
@@ -183,21 +190,20 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                 std::string aStr = evaluateExpression(call->arguments[0].get());
                 std::string bStr = evaluateExpression(call->arguments[1].get());
                 std::string cStr = evaluateExpression(call->arguments[2].get());
-                try {
-                    double a = std::stod(aStr);
-                    double b = std::stod(bStr);
-                    double c = std::stod(cStr);
+                double a, b, c;
+                if (isNumeric(aStr, a) && isNumeric(bStr, b) && isNumeric(cStr, c) && a != 0) {
                     return std::to_string((b * c) / a);
-                } catch (...) { }
+                }
             }
             return "0";
         } else if (call->callee->name == "नियमः") {
             if (call->arguments.size() >= 1) {
                 std::string condStr = evaluateExpression(call->arguments[0].get());
                 bool condition = false;
-                try {
-                    condition = std::stod(condStr) != 0;
-                } catch (...) {
+                double val;
+                if (isNumeric(condStr, val)) {
+                    condition = (val != 0);
+                } else {
                     condition = !condStr.empty() && condStr != "0";
                 }
                 if (!condition) {
@@ -214,11 +220,10 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
             if (call->arguments.size() == 2) {
                 std::string lStr = evaluateExpression(call->arguments[0].get());
                 std::string rStr = evaluateExpression(call->arguments[1].get());
-                try {
-                    double l = std::stod(lStr);
-                    double r = std::stod(rStr);
+                double l, r;
+                if (isNumeric(lStr, l) && isNumeric(rStr, r)) {
                     return std::to_string(l + r);
-                } catch (...) {
+                } else {
                     return lStr + rStr;
                 }
             }
@@ -226,10 +231,10 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         } else if (call->callee->name == "वर्गः") {
             if (call->arguments.size() == 1) {
                 std::string aStr = evaluateExpression(call->arguments[0].get());
-                try {
-                    double a = std::stod(aStr);
+                double a;
+                if (isNumeric(aStr, a)) {
                     return std::to_string(a * a);
-                } catch (...) { }
+                }
             }
             return "0";
         } else {
