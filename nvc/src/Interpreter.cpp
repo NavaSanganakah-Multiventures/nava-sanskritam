@@ -39,6 +39,7 @@ void Interpreter::visit(ASTNode* node) {
         auto blockStmt = static_cast<BlockStatement*>(node);
         for (const auto& stmt : blockStmt->body) {
             visit(stmt.get());
+            if (hasReturned) break;
         }
     } else if (type == ASTNodeType::IfStatement) {
         auto ifStmt = static_cast<IfStatement*>(node);
@@ -89,8 +90,17 @@ void Interpreter::visit(ASTNode* node) {
                 }
             }
         }
+    } else if (type == ASTNodeType::ReturnStatement) {
+        auto retStmt = static_cast<ReturnStatement*>(node);
+        if (retStmt->argument) {
+            returnValue = evaluateExpression(retStmt->argument.get());
+        } else {
+            returnValue = "";
+        }
+        hasReturned = true;
     } else if (type == ASTNodeType::FunctionDeclaration) {
-        // Functions mock
+        auto funcDecl = static_cast<FunctionDeclaration*>(node);
+        functions[funcDecl->id] = funcDecl;
     }
 }
 
@@ -148,7 +158,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         if (environment.find(key) != environment.end()) {
             return environment[key];
         }
-        return "न-प्राप्तम् (Not Found: " + key + ")";
+        return "न-प्राप्तम्: " + key;
     } else if (type == ASTNodeType::CallExpression) {
         auto call = static_cast<CallExpression*>(expr);
         if (call->callee->name == "वद") {
@@ -158,7 +168,81 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
             }
             outputBuffer += res + "\n";
             return res;
+        } else if (call->callee->name == "त्रैराशिकम्") {
+            if (call->arguments.size() == 3) {
+                std::string aStr = evaluateExpression(call->arguments[0].get());
+                std::string bStr = evaluateExpression(call->arguments[1].get());
+                std::string cStr = evaluateExpression(call->arguments[2].get());
+                try {
+                    double a = std::stod(aStr);
+                    double b = std::stod(bStr);
+                    double c = std::stod(cStr);
+                    return std::to_string((b * c) / a);
+                } catch (...) {}
+            }
+            return "0";
+        } else if (call->callee->name == "नियमः") {
+            if (call->arguments.size() >= 1) {
+                std::string condStr = evaluateExpression(call->arguments[0].get());
+                bool condition = false;
+                try {
+                    condition = std::stod(condStr) != 0;
+                } catch (...) {
+                    condition = !condStr.empty() && condStr != "0";
+                }
+                if (!condition) {
+                    std::string msg = "नियम-भङ्गः (Assertion Failed)";
+                    if (call->arguments.size() > 1) {
+                        msg = evaluateExpression(call->arguments[1].get());
+                    }
+                    std::cerr << "TRAP: " << msg << std::endl;
+                    exit(1);
+                }
+            }
+            return "1";
+        } else if (call->callee->name == "गणनम्") {
+            if (call->arguments.size() == 2) {
+                std::string lStr = evaluateExpression(call->arguments[0].get());
+                std::string rStr = evaluateExpression(call->arguments[1].get());
+                try {
+                    double l = std::stod(lStr);
+                    double r = std::stod(rStr);
+                    return std::to_string(l + r);
+                } catch (...) {
+                    return lStr + rStr;
+                }
+            }
+            return "0";
+        } else if (call->callee->name == "वर्गः") {
+            if (call->arguments.size() == 1) {
+                std::string aStr = evaluateExpression(call->arguments[0].get());
+                try {
+                    double a = std::stod(aStr);
+                    return std::to_string(a * a);
+                } catch (...) {}
+            }
+            return "0";
         } else {
+            if (functions.find(call->callee->name) != functions.end()) {
+                auto funcDecl = functions[call->callee->name];
+                std::map<std::string, std::string> oldEnv = environment;
+                for (size_t i = 0; i < funcDecl->params.size() && i < call->arguments.size(); ++i) {
+                    environment[funcDecl->params[i]] = evaluateExpression(call->arguments[i].get());
+                }
+
+                bool oldHasReturned = hasReturned;
+                std::string oldReturnValue = returnValue;
+                hasReturned = false;
+                returnValue = "";
+
+                visit(funcDecl->body.get());
+
+                std::string result = returnValue;
+                hasReturned = oldHasReturned;
+                returnValue = oldReturnValue;
+                environment = oldEnv;
+                return result;
+            }
             // Simulated function call evaluating arguments
             return "Call to " + call->callee->name;
         }

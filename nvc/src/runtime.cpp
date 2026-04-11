@@ -9,8 +9,16 @@ double समय() {
     return std::chrono::duration<double>(now.time_since_epoch()).count();
 }
 
-double गणन(double a, double b) {
+double गणनम्(double a, double b) {
     return a + b;
+}
+
+double त्रैराशिकम्(double a, double b, double c) {
+    return (b * c) / a;
+}
+
+double वर्गः(double a) {
+    return a * a;
 }
 
 double ज्या(double x) {

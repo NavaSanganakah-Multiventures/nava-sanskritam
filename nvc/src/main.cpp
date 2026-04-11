@@ -81,15 +81,15 @@ int main(int argc, char* argv[]) {
     }
 
     if (filename.empty()) {
-        std::cerr << "Usage: nvc <file.ns> [--target web/wasm] [--run]\n";
-        std::cerr << "(Press Enter to exit)\n";
+        std::cerr << "उपयोगः: nvc <file.ns> [--target web/wasm] [--run]\n";
+        std::cerr << "(निर्गन्तुं Enter नुदन्तु)\n";
         std::cin.get();
         return 1;
     }
 
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Could not open file: " << filename << "\n";
+        std::cerr << "सञ्चिका उद्घाटयितुम् अशक्तः: " << filename << "\n";
         return 1;
     }
 
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
         
         if (targetWeb) {
             std::string json = codegen.exportAsJSON(ast.get());
-            std::cout << "Exporting Darshakam Web Bundle...\n";
+            std::cout << "दर्शकम्-वेब-सञ्चयं निर्यात्यते...\n";
             #ifdef _WIN32
                 std::system("mkdir web_output");
             #else
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
             htmlOut << SUL_WEB_TEMPLATE; htmlOut.close();
             std::ofstream jsOut("web_output/SanskritRuntime.js");
             jsOut << SUL_RUNTIME_JS; jsOut.close();
-            std::cout << "NVC Web Suite Generated in 'web_output/'\n";
+            std::cout << "एनवीसी-वेब-समूहः 'web_output/' इत्यत्र जनितः\n";
             return 0;
         }
 
@@ -144,28 +144,34 @@ int main(int argc, char* argv[]) {
         if (targetWasm) {
             outputFilename = filename.substr(0, filename.find_last_of('.')) + ".wasm.o";
             codegen.writeObject(outputFilename);
-            std::cout << "Successfully compiled WebAssembly object to " << outputFilename << "\n";
+            std::cout << "वेब-असेम्बली-ऑब्जेक्ट् सफलतापूर्वकं सङ्कलितम् अत्र " << outputFilename << "\n";
             return 0;
         }
 
         outputFilename = filename.substr(0, filename.find_last_of('.')) + ".o";
         codegen.writeObject(outputFilename);
-        std::cout << "Successfully compiled to " << outputFilename << "\n";
+        std::cout << "सफलतापूर्वकं सङ्कलितम् अत्र " << outputFilename << "\n";
 
     } catch (const std::exception& e) {
-        std::cerr << "Compilation Error: " << e.what() << "\n";
+        std::cerr << "सङ्कलन-त्रुटिः: " << e.what() << "\n";
         return 1;
     }
 
     std::string binaryName = filename.substr(0, filename.find_last_of('.'));
-    std::string command = "clang++ -no-pie " + outputFilename + " nvc/build/libnvc_runtime.a -o " + binaryName;
+    // Check local build path versus execution context
+    std::string runtimePath = "build/libnvc_runtime.a";
+    std::ifstream f(runtimePath.c_str());
+    if (!f.good()) {
+        runtimePath = "nvc/build/libnvc_runtime.a"; // Fallback to workspace root execution
+    }
+    std::string command = "clang++ -no-pie " + outputFilename + " " + runtimePath + " -o " + binaryName;
     int linkResult = std::system(command.c_str());
 
     if (linkResult == 0) {
-        std::cout << "Successfully linked executable to " << binaryName << "\n";
+        std::cout << "एक्जीक्यूटेबल् सफलतापूर्वकं लिङ्क् कृतम् अत्र " << binaryName << "\n";
         std::remove(outputFilename.c_str());
     } else {
-        std::cerr << "Linking failed.\n";
+        std::cerr << "लिङ्किङ् विफलम्।\n";
         return 1;
     }
 #endif
@@ -191,7 +197,7 @@ extern "C" {
             return output.c_str();
         } catch (const std::exception& e) {
             static std::string err;
-            err = std::string("त्रुटि (Error): ") + e.what();
+            err = std::string("त्रुटिः: ") + e.what();
             return err.c_str();
         }
     }

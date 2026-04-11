@@ -52,18 +52,18 @@ std::unique_ptr<Statement> Parser::parseStatement() {
 }
 
 std::unique_ptr<FunctionDeclaration> Parser::parseFunctionDeclaration() {
-    Token idToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: क्रिया-नाम अपेक्षितम् (Expected function name).");
-    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '(' अपेक्षितम् (Expected '(' after name).", "(");
+    Token idToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: क्रिया-नाम अपेक्षितम् ");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '(' अपेक्षितम् ", "(");
     std::vector<std::string> params;
     if (!check(TokenType::PUNCTUATION, ")")) {
         do {
             if (!params.empty()) {
-                consume(TokenType::PUNCTUATION, "Expected ',' between parameters.", ",");
+                consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: मापदण्डानां मध्ये ',' अपेक्षितम् ", ",");
             }
-            params.push_back(grammar.toUtf8(grammar.analyzeSubanta(grammar.toUtf32(consume(TokenType::IDENTIFIER, "Expected parameter name.").value)).root));
+            params.push_back(grammar.toUtf8(grammar.analyzeSubanta(grammar.toUtf32(consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: मापदण्ड-नाम अपेक्षितम् ").value)).root));
         } while (check(TokenType::PUNCTUATION, ","));
     }
-    consume(TokenType::PUNCTUATION, "Expected ')' after parameters.", ")");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: मापदण्डानन्तरं ')' अपेक्षितम् ", ")");
 
     auto meta = grammar.analyzeTinanta(grammar.toUtf32(idToken.value));
     auto decl = std::make_unique<FunctionDeclaration>();
@@ -83,17 +83,22 @@ std::unique_ptr<FunctionDeclaration> Parser::parseFunctionDeclaration() {
 
 std::unique_ptr<Statement> Parser::parseReturnStatement() {
     auto value = parseExpression();
-    consume(TokenType::PUNCTUATION, "Expected ';' after return value.", ";");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: फलात् परं ';' अपेक्षितम् ", ";");
     auto stmt = std::make_unique<ReturnStatement>();
     stmt->argument = std::move(value);
     return stmt;
 }
 
 std::unique_ptr<VariableDeclaration> Parser::parseVariableDeclaration() {
-    Token idToken = consume(TokenType::IDENTIFIER, "Expected variable name after 'अस्ति'.");
-    consume(TokenType::OPERATOR, "Expected '=' after variable name.", "=");
+    Token idToken;
+    if (check(TokenType::IDENTIFIER) || check(TokenType::KEYWORD)) {
+        idToken = advance();
+    } else {
+        throw std::runtime_error("व्याकरण-त्रुटिः: 'अस्ति' पदानन्तरं चर-नाम अपेक्षितम् ");
+    }
+    consume(TokenType::OPERATOR, "व्याकरण-त्रुटिः: '=' अपेक्षितम् ", "=");
     auto init = parseExpression();
-    consume(TokenType::PUNCTUATION, "Expected ';' after variable declaration.", ";");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
 
     auto decl = std::make_unique<VariableDeclaration>();
     decl->id = stripVibhakti(idToken.value, nullptr);
@@ -102,10 +107,10 @@ std::unique_ptr<VariableDeclaration> Parser::parseVariableDeclaration() {
 }
 
 std::unique_ptr<ConstantDeclaration> Parser::parseConstantDeclaration() {
-    Token idToken = consume(TokenType::IDENTIFIER, "Expected variable name after 'नित्य'.");
-    consume(TokenType::OPERATOR, "Expected '=' after variable name.", "=");
+    Token idToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: 'नित्य' पदानन्तरं स्थिर-नाम अपेक्षितम् ");
+    consume(TokenType::OPERATOR, "व्याकरण-त्रुटिः: '=' अपेक्षितम् ", "=");
     auto init = parseExpression();
-    consume(TokenType::PUNCTUATION, "Expected ';' after constant declaration.", ";");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
 
     auto decl = std::make_unique<ConstantDeclaration>();
     decl->id = stripVibhakti(idToken.value, nullptr);
@@ -114,30 +119,30 @@ std::unique_ptr<ConstantDeclaration> Parser::parseConstantDeclaration() {
 }
 
 std::unique_ptr<PrintStatement> Parser::parsePrintStatement() {
-    consume(TokenType::PUNCTUATION, "Expected '(' after 'वद'.", "(");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '(' अपेक्षितम् ", "(");
     auto stmt = std::make_unique<PrintStatement>();
     
     if (!check(TokenType::PUNCTUATION, ")")) {
         do {
             if (!stmt->expressions.empty()) {
-                consume(TokenType::PUNCTUATION, "Expected ',' between print expressions.", ",");
+                consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ',' अपेक्षितम् ", ",");
             }
             stmt->expressions.push_back(parseExpression());
         } while (check(TokenType::PUNCTUATION, ","));
     }
     
-    consume(TokenType::PUNCTUATION, "Expected ')' after print expressions.", ")");
-    consume(TokenType::PUNCTUATION, "Expected ';' after print statement.", ";");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ')' अपेक्षितम् ", ")");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
 
     return stmt;
 }
 
 std::unique_ptr<IfStatement> Parser::parseIfStatement() {
-    consume(TokenType::PUNCTUATION, "Expected '(' after 'यदि'.", "(");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '(' अपेक्षितम् ", "(");
     auto cond = parseExpression();
-    consume(TokenType::PUNCTUATION, "Expected ')' after condition.", ")");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ')' अपेक्षितम् ", ")");
 
-    consume(TokenType::KEYWORD, "Expected 'तर्हि' after condition in if statement.", "तर्हि");
+    consume(TokenType::KEYWORD, "व्याकरण-त्रुटिः: 'तर्हि' अपेक्षितम् ", "तर्हि");
 
     std::unique_ptr<Statement> cons;
     if (check(TokenType::PUNCTUATION, "{")) {
@@ -163,35 +168,35 @@ std::unique_ptr<IfStatement> Parser::parseIfStatement() {
 }
 
 std::unique_ptr<LoopStatement> Parser::parseLoopStatement() {
-    consume(TokenType::PUNCTUATION, "Expected '(' after 'चक्र'.", "(");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '(' अपेक्षितम् ", "(");
 
     std::unique_ptr<ASTNode> init = nullptr;
     if (!check(TokenType::PUNCTUATION, ";")) {
         if (check(TokenType::IDENTIFIER)) {
             Token idToken = consume(TokenType::IDENTIFIER, "");
-            consume(TokenType::OPERATOR, "Expected '=' in loop initialization.", "=");
+            consume(TokenType::OPERATOR, "व्याकरण-त्रुटिः: '=' अपेक्षितम् ", "=");
             auto value = parseExpression();
             auto assign = std::make_unique<Assignment>();
             assign->left = stripVibhakti(idToken.value, nullptr);
             assign->right = std::move(value);
             init = std::move(assign);
         } else {
-            throw std::runtime_error("व्याकरण-त्रुटिः: अमान्यः आरम्भः (Invalid initialization).");
+            throw std::runtime_error("व्याकरण-त्रुटिः: अमान्यः आरम्भः ");
         }
     }
-    consume(TokenType::PUNCTUATION, "Expected ';' after loop initialization.", ";");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
 
     std::unique_ptr<Expression> test = nullptr;
     if (!check(TokenType::PUNCTUATION, ";")) {
         test = parseExpression();
     }
-    consume(TokenType::PUNCTUATION, "Expected ';' after loop condition.", ";");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
 
     std::unique_ptr<ASTNode> update = nullptr;
     if (!check(TokenType::PUNCTUATION, ")")) {
         if (check(TokenType::IDENTIFIER)) {
             Token idToken = consume(TokenType::IDENTIFIER, "");
-            consume(TokenType::OPERATOR, "Expected '=' in loop update.", "=");
+            consume(TokenType::OPERATOR, "व्याकरण-त्रुटिः: '=' अपेक्षितम् ", "=");
             auto value = parseExpression();
             auto assign = std::make_unique<Assignment>();
             assign->left = stripVibhakti(idToken.value, nullptr);
@@ -199,7 +204,7 @@ std::unique_ptr<LoopStatement> Parser::parseLoopStatement() {
             update = std::move(assign);
         }
     }
-    consume(TokenType::PUNCTUATION, "Expected ')' after loop update.", ")");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ')' अपेक्षितम् ", ")");
 
     std::unique_ptr<Statement> body;
     if (check(TokenType::PUNCTUATION, "{")) {
@@ -223,7 +228,7 @@ std::unique_ptr<Statement> Parser::parseExpressionStatement() {
     
     if (match(TokenType::OPERATOR, "=")) {
         auto right = parseExpression();
-        consume(TokenType::PUNCTUATION, "Expected ';' after assignment.", ";");
+        consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
 
         auto assign = std::make_unique<Assignment>();
         
@@ -234,7 +239,7 @@ std::unique_ptr<Statement> Parser::parseExpressionStatement() {
             auto member = static_cast<MemberAccess*>(expr.get());
             assign->left = static_cast<Identifier*>(member->object.get())->name + "." + member->property;
         } else {
-            throw std::runtime_error("व्याकरण-त्रुटिः: अमान्यः निर्देशः (Invalid assignment target).");
+            throw std::runtime_error("व्याकरण-त्रुटिः: अमान्यः निर्देशः ");
         }
         
         assign->right = std::move(right);
@@ -243,19 +248,19 @@ std::unique_ptr<Statement> Parser::parseExpressionStatement() {
         return stmt;
     }
 
-    consume(TokenType::PUNCTUATION, "Expected ';' after expression.", ";");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
     auto stmt = std::make_unique<ExpressionStatement>();
     stmt->expression = std::move(expr);
     return stmt;
 }
 
 std::unique_ptr<BlockStatement> Parser::parseBlock() {
-    consume(TokenType::PUNCTUATION, "Expected '{'.", "{");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '{' अपेक्षितम् ", "{");
     auto block = std::make_unique<BlockStatement>();
     while (!check(TokenType::PUNCTUATION, "}") && !isAtEnd()) {
         block->body.push_back(parseStatement());
     }
-    consume(TokenType::PUNCTUATION, "Expected '}'.", "}");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '}' अपेक्षितम् ", "}");
     return block;
 }
 
@@ -347,7 +352,7 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
         lit->isString = true;
         return lit;
     }
-    if (match(TokenType::IDENTIFIER)) {
+    if (match(TokenType::IDENTIFIER) || match(TokenType::KEYWORD, "नियमः") || match(TokenType::KEYWORD, "फलम्")) {
         std::string role;
         Token idToken = previous();
         Grammar::WordMeta meta = grammar.analyzeSubanta(grammar.toUtf32(idToken.value));
@@ -370,7 +375,7 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
         // SUL v12.0: Native Shashti (Genitive) Property Access
         if (expr->role == "Shashti") {
             if (check(TokenType::IDENTIFIER)) {
-                auto propToken = consume(TokenType::IDENTIFIER, "Expected property name after Shashti declension.");
+                auto propToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: षष्ठीविभक्तेः पश्चात् गुण-नाम अपेक्षितम् ");
                 auto member = std::make_unique<MemberAccess>();
                 member->object = std::move(expr);
                 member->property = propToken.value;
@@ -393,27 +398,27 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
             if (!check(TokenType::PUNCTUATION, ")")) {
                 do {
                     if (!call->arguments.empty()) {
-                        consume(TokenType::PUNCTUATION, "Expected ',' between arguments.", ",");
+                        consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ',' अपेक्षितम् ", ",");
                     }
                     call->arguments.push_back(parseExpression());
                 } while (check(TokenType::PUNCTUATION, ","));
             }
-            consume(TokenType::PUNCTUATION, "Expected ')' after arguments.", ")");
+            consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ')' अपेक्षितम् ", ")");
             return call;
         }
         return expr;
     }
     if (match(TokenType::PUNCTUATION, "(")) {
         auto expr = parseExpression();
-        consume(TokenType::PUNCTUATION, "Expected ')' after expression.", ")");
+        consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ')' अपेक्षितम् ", ")");
         return expr;
     }
-    throw std::runtime_error("व्याकरण-त्रुटिः: अनुचितः शब्दः '" + peek().value + "' (Unexpected token) - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
+    throw std::runtime_error("व्याकरण-त्रुटिः: अनुचितः शब्दः '" + peek().value + "'  - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
 }
 
 std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
-    Token idToken = consume(TokenType::IDENTIFIER, "Expected Darshanam name.");
-    consume(TokenType::PUNCTUATION, "Expected '{' after Darshanam name.", "{");
+    Token idToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: दर्शन-नाम अपेक्षितम् ");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: दर्शन-नामनः पश्चात् '{' अपेक्षितम् ", "{");
     
     auto block = std::make_unique<DarshanamBlock>();
     block->id = idToken.value;
@@ -425,12 +430,12 @@ std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
             advance(); // Skip unknown for now
         }
     }
-    consume(TokenType::PUNCTUATION, "Expected '}' after Darshanam block.", "}");
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '}' अपेक्षितम् ", "}");
     return block;
 }
 
 std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
-    Token typeToken = consume(TokenType::IDENTIFIER, "Expected widget type (e.g. Button).");
+    Token typeToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: वस्तु-प्रकारः अपेक्षितम् ");
     auto element = std::make_unique<DrishyamElement>();
     element->type = typeToken.value;
 
@@ -440,7 +445,7 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
         if (match(TokenType::PUNCTUATION, ",")) {
             element->pos.push_back(parseExpression());
         }
-        consume(TokenType::PUNCTUATION, "Expected ')' after coordinates.", ")");
+        consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: अक्षांशानन्तरं ')' अपेक्षितम् ", ")");
     }
 
     if (match(TokenType::PUNCTUATION, "{")) {
@@ -451,20 +456,20 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
                 // Recursive nesting of children
                 element->children.push_back(parseDrishyamElement());
             } else {
-                Token key = consume(TokenType::IDENTIFIER, "Expected attribute name.");
-                consume(TokenType::PUNCTUATION, "Expected ':' after attribute.", ":");
+                Token key = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: गुण-नाम अपेक्षितम् ");
+                consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: गुण-नामनः पश्चात् ':' अपेक्षितम् ", ":");
                 
                 if (key.value == "नाम") {
-                    element->label = consume(TokenType::STRING, "Expected label string.").value;
+                    element->label = consume(TokenType::STRING, "व्याकरण-त्रुटिः: पाठ्य-नाम अपेक्षितम् ").value;
                 } else if (key.value == "रङ्गः") {
-                    element->color = consume(TokenType::IDENTIFIER, "Expected color name.").value;
+                    element->color = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: रङ्ग-नाम अपेक्षितम् ").value;
                 } else if (key.value == "स्रोतस") {
-                    element->source = consume(TokenType::STRING, "Expected source URL.").value;
+                    element->source = consume(TokenType::STRING, "व्याकरण-त्रुटिः: स्रोतस-लिङ्क अपेक्षितम् ").value;
                 }
                 if (check(TokenType::PUNCTUATION, ";")) advance();
             }
         }
-        consume(TokenType::PUNCTUATION, "Expected '}' after Drishyam attributes.", "}");
+        consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: गुणानां पश्चात् '}' अपेक्षितम् ", "}");
     }
     return element;
 }
@@ -529,5 +534,5 @@ Token Parser::advance() {
 
 Token Parser::consume(TokenType type, const std::string& message, const std::string& value) {
     if (check(type, value)) return advance();
-    throw std::runtime_error("व्याकरण-त्रुटिः: " + message + " - प्राप्तः '" + peek().value + "' - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
+    throw std::runtime_error(message + " - प्राप्तम् '" + peek().value + "' - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
 }

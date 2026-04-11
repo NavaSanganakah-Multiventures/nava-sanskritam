@@ -118,7 +118,7 @@ std::string Lexer::readString(const std::string& quoteChar) {
         advance(charStr.length());
     }
     if (pos >= input.length()) {
-        throw std::runtime_error("पद-सङ्केत-त्रुटिः: अपूर्णः शब्दः (Unterminated string) - पङ्क्तिः " + std::to_string(startLine) + ", स्तम्भः " + std::to_string(startCol));
+        throw std::runtime_error("पद-सङ्केत-त्रुटिः: अपूर्णः शब्दः  - पङ्क्तिः " + std::to_string(startLine) + ", स्तम्भः " + std::to_string(startCol));
     }
     advance(quoteChar.length()); // skip closing quote
     return str;
@@ -172,6 +172,12 @@ std::vector<Token> Lexer::tokenize() {
 
         if (isOperatorChar(charStr)) {
             std::string op = readOperator();
+            if (op == "//") {
+                while (pos < input.length() && currentChar() != "\n") {
+                    advance(currentChar().length());
+                }
+                continue;
+            }
             tokens.push_back({TokenType::OPERATOR, op, line, col});
             continue;
         }
@@ -202,7 +208,7 @@ std::vector<Token> Lexer::tokenize() {
             continue;
         }
 
-        throw std::runtime_error("पद-सङ्केत-त्रुटिः: अनुचितः वर्णः '" + charStr + "' (Unexpected character) - पङ्क्तिः " + std::to_string(line) + ", स्तम्भः " + std::to_string(col));
+        throw std::runtime_error("पद-सङ्केत-त्रुटिः: अनुचितः वर्णः '" + charStr + "'  - पङ्क्तिः " + std::to_string(line) + ", स्तम्भः " + std::to_string(col));
     }
 
     tokens.push_back({TokenType::END_OF_FILE, "EOF", line, col});
