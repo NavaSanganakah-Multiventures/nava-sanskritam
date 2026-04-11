@@ -614,7 +614,7 @@ void CodeGen::writeObject(const std::string& filename) {
     module->setTargetTriple(targetTriple);
 
     std::string error;
-    auto target = llvm::TargetRegistry::lookupTarget(targetTriple.getTriple(), error);
+    auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error);
 
     if (!target) {
         throw std::runtime_error(error);
@@ -625,7 +625,7 @@ void CodeGen::writeObject(const std::string& filename) {
 
     llvm::TargetOptions opt;
     std::optional<llvm::Reloc::Model> rm;
-    auto theTargetMachine = target->createTargetMachine(targetTriple.getTriple(), cpu, features, opt, rm);
+    auto theTargetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, rm);
 
     module->setDataLayout(theTargetMachine->createDataLayout());
 
