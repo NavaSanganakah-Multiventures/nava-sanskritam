@@ -434,8 +434,14 @@ std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
             block->elements.push_back(parseChittramElement());
         } else if (match(TokenType::KEYWORD, "प्रविष्टिः")) {
             block->elements.push_back(parsePrashtihElement());
+        } else if (match(TokenType::IDENTIFIER, "पाठः")) {
+            block->elements.push_back(parseDrishyamElement("Text"));
+        } else if (match(TokenType::IDENTIFIER, "बटनम्")) {
+            block->elements.push_back(parseDrishyamElement("Button"));
+        } else if (match(TokenType::PUNCTUATION, ";")) {
+            continue; // Skip extra semicolons
         } else {
-            advance(); // Skip unknown for now
+            advance(); // Skip unknown
         }
     }
     consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '}' अपेक्षितम् ", "}");
@@ -453,30 +459,9 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforc
     }
 
     if (match(TokenType::PUNCTUATION, "(")) {
-        // Parse x, y coordinates
-        element->pos.push_back(parseExpression());
-        if (match(TokenType::PUNCTUATION, ",")) {
-            element->pos.push_back(parseExpression());
-        }
-        consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: अक्षांशानन्तरं ')' अपेक्षितम् ", ")");
-    }
-
-    if (match(TokenType::PUNCTUATION, "{")) {
-        while (!check(TokenType::PUNCTUATION, "}")) {
-                if (match(TokenType::KEYWORD, "दृश्यम्")) {
-                    element->children.push_back(parseDrishyamElement());
-                } else if (match(TokenType::KEYWORD, "मंजूषा")) {
-                    element->children.push_back(parseManjushaElement());
-                } else if (match(TokenType::KEYWORD, "सूची")) {
-                    element->children.push_back(parseSuchiElement());
-                } else if (match(TokenType::KEYWORD, "चित्त्रम्")) {
-                    element->children.push_back(parseChittramElement());
-                } else if (match(TokenType::KEYWORD, "प्रविष्टिः")) {
-                    element->children.push_back(parsePrashtihElement());
-                } else {
-                    Token key = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: गुण-नाम अपेक्षितम् ");
-                consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: गुण-नामनः पश्चात् ':' अपेक्षितम् ", ":");
-                
+        while (!check(TokenType::PUNCTUATION, ")")) {
+            Token key = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: गुण-नाम अपेक्षितम् ");
+            if (match(TokenType::PUNCTUATION, ":")) {
                 if (key.value == "नाम" || key.value == "label") {
                     element->label = consume(TokenType::STRING, "व्याकरण-त्रुटिः: पाठ्य-नाम अपेक्षितम् ").value;
                 } else if (key.value == "रङ्गः" || key.value == "रंग" || key.value == "color") {
@@ -487,12 +472,44 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforc
                     }
                 } else if (key.value == "स्रोतस" || key.value == "source") {
                     element->source = consume(TokenType::STRING, "व्याकरण-त्रुटिः: स्रोतस-लिङ्क अपेक्षितम् ").value;
+                } else {
+                    parseExpression(); // Handle unknown attributes generically
                 }
-                if (check(TokenType::PUNCTUATION, ";")) advance();
+            } else {
+                // If it isn't a key:value pair, fallback for coordinates
+            }
+            if (match(TokenType::PUNCTUATION, ",")) continue;
+        }
+        consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: गुणानां पश्चात् ')' अपेक्षितम् ", ")");
+    }
+
+    if (match(TokenType::PUNCTUATION, "{")) {
+        while (!check(TokenType::PUNCTUATION, "}")) {
+            if (match(TokenType::KEYWORD, "दृश्यम्")) {
+                element->children.push_back(parseDrishyamElement());
+            } else if (match(TokenType::KEYWORD, "मंजूषा")) {
+                element->children.push_back(parseManjushaElement());
+            } else if (match(TokenType::KEYWORD, "सूची")) {
+                element->children.push_back(parseSuchiElement());
+            } else if (match(TokenType::KEYWORD, "चित्त्रम्")) {
+                element->children.push_back(parseChittramElement());
+            } else if (match(TokenType::KEYWORD, "प्रविष्टिः")) {
+                element->children.push_back(parsePrashtihElement());
+            } else if (match(TokenType::IDENTIFIER, "पाठः")) {
+                element->children.push_back(parseDrishyamElement("Text"));
+            } else if (match(TokenType::IDENTIFIER, "बटनम्")) {
+                element->children.push_back(parseDrishyamElement("Button"));
+            } else if (match(TokenType::PUNCTUATION, ";")) {
+                continue; // Skip extra semicolons
+            } else {
+                advance(); // Skip unknown
             }
         }
-        consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: गुणानां पश्चात् '}' अपेक्षितम् ", "}");
+        consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: बाल-वस्तूनां पश्चात् '}' अपेक्षितम् ", "}");
+    } else {
+        match(TokenType::PUNCTUATION, ";"); // End basic elements properly
     }
+
     return element;
 }
 
