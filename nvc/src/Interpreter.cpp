@@ -101,8 +101,10 @@ void Interpreter::visit(ASTNode* node) {
         }
         hasReturned = true;
     } else if (type == ASTNodeType::FunctionDeclaration) {
-        auto funcDecl = static_cast<FunctionDeclaration*>(node);
         functions[funcDecl->id] = funcDecl;
+    } else if (type == ASTNodeType::DarshanamBlock) {
+        auto darshanam = static_cast<DarshanamBlock*>(node);
+        outputBuffer += "[" + serializeDarshanam(darshanam) + "]";
     }
 }
 
@@ -252,4 +254,37 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         }
     }
     return "";
+}
+
+std::string Interpreter::serializeDarshanam(DarshanamBlock* block) {
+    if (!block) return "{}";
+    std::string json = "{\n";
+    json += "  \"id\": \"" + block->id + "\",\n";
+    json += "  \"elements\": [\n";
+    for (size_t i = 0; i < block->elements.size(); ++i) {
+        if (block->elements[i]) {
+            json += "    " + serializeUI(block->elements[i].get());
+            if (i < block->elements.size() - 1) json += ",\n";
+        }
+    }
+    json += "\n  ]\n}";
+    return json;
+}
+
+std::string Interpreter::serializeUI(DrishyamElement* element) {
+    if (!element) return "{}";
+    std::string json = "{\n";
+    json += "  \"type\": \"" + element->type + "\",\n";
+    json += "  \"label\": \"" + element->label + "\",\n";
+    json += "  \"color\": \"" + element->color + "\",\n";
+    json += "  \"source\": \"" + element->source + "\",\n";
+    json += "  \"children\": [\n";
+    for (size_t i = 0; i < element->children.size(); ++i) {
+        if (element->children[i]) {
+            json += "    " + serializeUI(element->children[i].get());
+            if (i < element->children.size() - 1) json += ",\n";
+        }
+    }
+    json += "\n  ]\n}";
+    return json;
 }

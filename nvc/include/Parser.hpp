@@ -37,7 +37,7 @@ private:
     std::unique_ptr<BlockStatement> parseBlock();
     
     std::unique_ptr<DarshanamBlock> parseDarshanamBlock();
-    std::unique_ptr<DrishyamElement> parseDrishyamElement();
+    std::unique_ptr<DrishyamElement> parseDrishyamElement(std::string enforcedType = "");
     std::unique_ptr<DrishyamElement> parseManjushaElement();
     std::unique_ptr<DrishyamElement> parseSuchiElement();
     std::unique_ptr<DrishyamElement> parseChittramElement();

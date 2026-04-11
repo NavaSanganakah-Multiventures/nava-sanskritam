@@ -18,4 +18,10 @@ private:
 
     void visit(ASTNode* node);
     std::string evaluateExpression(Expression* expr);
+
+    // Darshanam JSON Serialization for Web Playground
+    std::string serializeDarshanam(DarshanamBlock* block);
+    std::string serializeUI(DrishyamElement* element);
+
+    llvm::Value* generateCallExpression(CallExpression* node); // Not used in Interpreter but part of structure
 };

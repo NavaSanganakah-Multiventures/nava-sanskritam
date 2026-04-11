@@ -426,6 +426,14 @@ std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
     while (!check(TokenType::PUNCTUATION, "}")) {
         if (match(TokenType::KEYWORD, "दृश्यम्")) {
             block->elements.push_back(parseDrishyamElement());
+        } else if (match(TokenType::KEYWORD, "मंजूषा")) {
+            block->elements.push_back(parseManjushaElement());
+        } else if (match(TokenType::KEYWORD, "सूची")) {
+            block->elements.push_back(parseSuchiElement());
+        } else if (match(TokenType::KEYWORD, "चित्त्रम्")) {
+            block->elements.push_back(parseChittramElement());
+        } else if (match(TokenType::KEYWORD, "प्रविष्टिः")) {
+            block->elements.push_back(parsePrashtihElement());
         } else {
             advance(); // Skip unknown for now
         }
@@ -434,10 +442,15 @@ std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
     return block;
 }
 
-std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
-    Token typeToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: वस्तु-प्रकारः अपेक्षितम् ");
+std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforcedType) {
     auto element = std::make_unique<DrishyamElement>();
-    element->type = typeToken.value;
+    
+    if (enforcedType.empty()) {
+        Token typeToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: वस्तु-प्रकारः अपेक्षितम् ");
+        element->type = typeToken.value;
+    } else {
+        element->type = enforcedType;
+    }
 
     if (match(TokenType::PUNCTUATION, "(")) {
         // Parse x, y coordinates
@@ -450,13 +463,18 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
 
     if (match(TokenType::PUNCTUATION, "{")) {
         while (!check(TokenType::PUNCTUATION, "}")) {
-            if (match(TokenType::KEYWORD, "दृश्यम्") || 
-                match(TokenType::KEYWORD, "मंजूषा") || 
-                match(TokenType::KEYWORD, "सूची")) {
-                // Recursive nesting of children
-                element->children.push_back(parseDrishyamElement());
-            } else {
-                Token key = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: गुण-नाम अपेक्षितम् ");
+                if (match(TokenType::KEYWORD, "दृश्यम्")) {
+                    element->children.push_back(parseDrishyamElement());
+                } else if (match(TokenType::KEYWORD, "मंजूषा")) {
+                    element->children.push_back(parseManjushaElement());
+                } else if (match(TokenType::KEYWORD, "सूची")) {
+                    element->children.push_back(parseSuchiElement());
+                } else if (match(TokenType::KEYWORD, "चित्त्रम्")) {
+                    element->children.push_back(parseChittramElement());
+                } else if (match(TokenType::KEYWORD, "प्रविष्टिः")) {
+                    element->children.push_back(parsePrashtihElement());
+                } else {
+                    Token key = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: गुण-नाम अपेक्षितम् ");
                 consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: गुण-नामनः पश्चात् ':' अपेक्षितम् ", ":");
                 
                 if (key.value == "नाम") {
@@ -475,27 +493,19 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement() {
 }
 
 std::unique_ptr<DrishyamElement> Parser::parseManjushaElement() {
-    auto element = std::make_unique<DrishyamElement>();
-    element->type = "Box";
-    return parseDrishyamElement(); 
+    return parseDrishyamElement("Box"); 
 }
 
 std::unique_ptr<DrishyamElement> Parser::parseSuchiElement() {
-    auto element = std::make_unique<DrishyamElement>();
-    element->type = "List";
-    return parseDrishyamElement();
+    return parseDrishyamElement("List");
 }
 
 std::unique_ptr<DrishyamElement> Parser::parseChittramElement() {
-    auto element = std::make_unique<DrishyamElement>();
-    element->type = "Image";
-    return parseDrishyamElement();
+    return parseDrishyamElement("Image");
 }
 
 std::unique_ptr<DrishyamElement> Parser::parsePrashtihElement() {
-    auto element = std::make_unique<DrishyamElement>();
-    element->type = "Input";
-    return parseDrishyamElement();
+    return parseDrishyamElement("Input");
 }
 
 bool Parser::isAtEnd() const {
