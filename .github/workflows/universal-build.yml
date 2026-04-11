@@ -1,0 +1,220 @@
+name: Universal Nava Compiler (NVC) Build
+
+on:
+  push:
+    branches: [ "*" ]
+    tags: [ "v*.*.*" ]
+  pull_request:
+    branches: [ "*" ]
+
+jobs:
+  build-desktop:
+    name: Build Desktop (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: nvc-linux
+            cmake_args: ""
+          - os: macos-latest
+            artifact_name: nvc-macos
+            cmake_args: ""
+          - os: windows-latest
+            artifact_name: nvc-windows
+            cmake_args: "-G Ninja -DCMAKE_BUILD_TYPE=Release"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSYS2 and LLVM (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-llvm
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+          update: true
+
+      - name: Setup Dependencies (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y llvm-15 llvm-15-dev clang libffi-dev libtinfo-dev libzstd-dev cmake
+
+      - name: Setup Dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install llvm@15 cmake
+          echo "LLVM_DIR=$(brew --prefix llvm@15)/lib/cmake/llvm" >> $GITHUB_ENV
+
+      - name: Configure CMake (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          mkdir -p nvc/build
+          cd nvc/build
+          cmake .. -DCMAKE_BUILD_TYPE=Release ${{ matrix.cmake_args }}
+
+      - name: Build (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: cmake --build nvc/build -j4
+
+      - name: Configure CMake & Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          cd nvc
+          mkdir -p build
+          cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+          ninja
+          ldd nvc.exe | grep '\/mingw64\/bin\/' | awk '{ print $3 }' | xargs -I '{}' cp '{}' .
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            nvc/build/nvc
+            nvc/build/nvc.exe
+            nvc/build/*.dll
+
+  build-wasm:
+    name: Build WebAssembly (WASM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.53
+
+      - name: Configure CMake & Build (WASM)
+        run: |
+          mkdir -p nvc/build-wasm
+          cd nvc/build-wasm
+          emcmake cmake .. -DEMSCRIPTEN=ON -DCMAKE_BUILD_TYPE=Release
+          emmake make -j4
+
+      - name: Upload WASM Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvc-wasm
+          path: |
+            nvc/build-wasm/nvc.js
+            nvc/build-wasm/nvc.wasm
+
+  build-mobile:
+    name: Build Mobile (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - target: android
+            os: ubuntu-latest
+          - target: ios
+            os: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Dependencies (Android)
+        if: matrix.target == 'android'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y llvm-15 llvm-15-dev clang cmake ninja-build
+
+      - name: Setup Dependencies (iOS)
+        if: matrix.target == 'ios'
+        run: |
+          brew install llvm@15 cmake
+          echo "LLVM_DIR=$(brew --prefix llvm@15)/lib/cmake/llvm" >> $GITHUB_ENV
+
+      - name: Configure CMake & Build (Android)
+        if: matrix.target == 'android'
+        run: |
+          mkdir -p nvc/build-android
+          cd nvc/build-android
+          # Basic cross-compilation config for Android NDK
+          cmake .. \
+            -DCMAKE_SYSTEM_NAME=Android \
+            -DCMAKE_SYSTEM_VERSION=21 \
+            -DCMAKE_ANDROID_ARCH_ABI=arm64-v8a \
+            -DCMAKE_ANDROID_NDK=$ANDROID_NDK_LATEST_HOME \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build . -j4
+
+      - name: Configure CMake & Build (iOS)
+        if: matrix.target == 'ios'
+        run: |
+          mkdir -p nvc/build-ios
+          cd nvc/build-ios
+          # Basic cross-compilation config for iOS
+          cmake .. \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_SYSROOT=$(xcrun --sdk iphoneos --show-sdk-path) \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build . -j4
+
+      - name: Upload Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvc-${{ matrix.target }}
+          path: |
+            nvc/build-android/nvc
+            nvc/build-ios/nvc
+
+  release:
+    name: Create Release
+    needs: [build-desktop, build-wasm, build-mobile]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Package Assets
+        run: |
+          mkdir -p release-assets
+          # Linux
+          if [ -d artifacts/nvc-linux ]; then
+            tar -czvf release-assets/nvc-linux-x64.tar.gz -C artifacts/nvc-linux nvc
+          fi
+          # macOS
+          if [ -d artifacts/nvc-macos ]; then
+            tar -czvf release-assets/nvc-macos-x64.tar.gz -C artifacts/nvc-macos nvc
+          fi
+          # Windows
+          if [ -d artifacts/nvc-windows ]; then
+            cd artifacts/nvc-windows
+            zip -r ../../release-assets/nvc-windows-x64.zip nvc.exe *.dll
+            cd ../../
+          fi
+          # WASM
+          if [ -d artifacts/nvc-wasm ]; then
+            tar -czvf release-assets/nvc-wasm.tar.gz -C artifacts/nvc-wasm nvc.js nvc.wasm
+          fi
+          # Android
+          if [ -d artifacts/nvc-android ]; then
+            tar -czvf release-assets/nvc-android-arm64.tar.gz -C artifacts/nvc-android nvc
+          fi
+          # iOS
+          if [ -d artifacts/nvc-ios ]; then
+            tar -czvf release-assets/nvc-ios-arm64.tar.gz -C artifacts/nvc-ios nvc
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
