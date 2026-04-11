@@ -101,6 +101,7 @@ void Interpreter::visit(ASTNode* node) {
         }
         hasReturned = true;
     } else if (type == ASTNodeType::FunctionDeclaration) {
+        auto funcDecl = static_cast<FunctionDeclaration*>(node);
         functions[funcDecl->id] = funcDecl;
     } else if (type == ASTNodeType::DarshanamBlock) {
         auto darshanam = static_cast<DarshanamBlock*>(node);
