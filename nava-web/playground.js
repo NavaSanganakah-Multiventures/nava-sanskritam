@@ -56,7 +56,11 @@ require(['vs/editor/editor.main'], function() {
 
 let nvcModule = null;
 
-// WASM Compiler Integration
+/**
+ * WASM Compiler Integration (नव्या-सङ्कलकः)
+ * Initializes the C++ WebAssembly module which is responsible for compiling
+ * Nava Sanskritam code into output/JSON right within the browser.
+ */
 if (typeof NavaCompiler === 'function') {
     NavaCompiler().then(instance => {
         nvcModule = instance;
@@ -66,7 +70,10 @@ if (typeof NavaCompiler === 'function') {
     });
 }
 
-// UI Rendering Logic (Darshanam)
+/**
+ * UI Rendering Logic (दर्शनम् - Darshanam)
+ * Provides styling classes mapping for Sanskrit colors into Tailwind CSS classes.
+ */
 const colorMap = { 
     "रक्तवर्णः": "bg-red-500 text-white", 
     "नीलवर्णः": "bg-blue-600 text-white shadow-blue-500/20", 
@@ -77,35 +84,75 @@ const colorMap = {
     "None": "" 
 };
 
+/**
+ * Creates dynamic DOM elements based on the JSON AST of the Nava Script.
+ * @param {Object} node - AST node parsed from C++ compiler output
+ * @returns {HTMLElement|null} - Document element equivalent of the node
+ */
 function createDrishyam(node) {
     if (!node || !node.type) return null;
     const type = node.type.toLowerCase(); 
     let el;
     
+    // Container Components
     if (type === "box" || type === "मंजूषा") { 
         el = document.createElement("div"); 
         el.className = `p-8 rounded-3xl shadow-2xl flex flex-col gap-6 m-2 transition-all duration-500 ${colorMap[node.color] || "bg-white/10 backdrop-blur-xl border border-white/20"}`; 
     }
+    else if (type === "row" || type === "पङ्क्तिः") {
+        el = document.createElement("div");
+        el.className = `flex flex-row flex-wrap gap-4 items-center justify-center m-2 ${colorMap[node.color] || "bg-transparent"}`;
+    }
+    else if (type === "column" || type === "स्तम्भः") {
+        el = document.createElement("div");
+        el.className = `flex flex-col gap-4 m-2 ${colorMap[node.color] || "bg-transparent"}`;
+    }
+    // Interactive Components
     else if (type === "button" || type === "बटनम्") { 
         el = document.createElement("button"); 
         el.innerText = node.label || node.name || "बटनम्"; 
         el.className = `px-8 py-4 rounded-2xl font-bold transition-all shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 ${colorMap[node.color] || "bg-amber-500 text-black"}`; 
+        el.onclick = () => alert(`बटन-क्लिकः (Clicked): ${el.innerText}`);
     }
-    else if (type === "text" || type === "पाठः" || type === "सूची") { 
+    // Text/Display Components
+    else if (type === "text" || type === "पाठः") {
         el = document.createElement("p"); 
         el.innerText = node.label || node.name || "पाठः"; 
         el.className = `text-xl font-semibold tracking-wide`; 
     }
+    else if (type === "list" || type === "सूची") {
+        el = document.createElement("ul");
+        el.className = "list-disc list-inside bg-black/20 p-4 rounded-xl border border-white/10";
+        // If list elements are given directly in a 'items' array
+        if (node.items && Array.isArray(node.items)) {
+            node.items.forEach(item => {
+                const li = document.createElement("li");
+                li.innerText = item;
+                li.className = "text-lg text-slate-300 py-1";
+                el.appendChild(li);
+            });
+        } else {
+             // Fallback for visual testing if children are passed instead
+             const fallbackText = document.createElement("li");
+             fallbackText.innerText = node.label || node.name || "सूची-बिन्दुः";
+             el.appendChild(fallbackText);
+        }
+    }
     else if (type === "image" || type === "चित्त्रम्") { 
         el = document.createElement("img"); 
-        el.src = node.source || node.स्रोतस || "https://api.placeholder.com/300x150"; 
+        el.src = node.source || node.स्रोतस || "https://via.placeholder.com/300x150";
         el.className = "rounded-2xl object-cover shadow-2xl w-full max-w-lg h-auto border-4 border-white/10"; 
     }
+    // Input Components
     else if (type === "input" || type === "प्रविष्टिः") { 
         el = document.createElement("input"); 
         el.placeholder = node.label || node.name || "लिखतु..."; 
         el.className = "px-6 py-4 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:ring-4 focus:ring-amber-500/50 transition-all placeholder:text-slate-500"; 
+        el.addEventListener("input", (e) => {
+            console.log("Input Changed:", e.target.value);
+        });
     }
+    // Unknown Components
     else { 
         el = document.createElement("div"); 
         el.innerText = "अज्ञात-घटकः: " + node.type; 
@@ -121,6 +168,13 @@ function createDrishyam(node) {
     return el;
 }
 
+/**
+ * Extracts JSON structure from the given string payload.
+ * It is used to separate the C++ compiler's standard terminal output
+ * from the JSON abstract syntax tree (AST) specifically meant for UI rendering.
+ * @param {string} str - Raw string from compiler output
+ * @returns {string|null} - Parsed JSON string or null if none found
+ */
 function extractJson(str) {
     const firstBracket = str.indexOf('[');
     const firstBrace = str.indexOf('{');
