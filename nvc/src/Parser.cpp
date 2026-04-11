@@ -477,11 +477,15 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforc
                     Token key = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: गुण-नाम अपेक्षितम् ");
                 consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: गुण-नामनः पश्चात् ':' अपेक्षितम् ", ":");
                 
-                if (key.value == "नाम") {
+                if (key.value == "नाम" || key.value == "label") {
                     element->label = consume(TokenType::STRING, "व्याकरण-त्रुटिः: पाठ्य-नाम अपेक्षितम् ").value;
-                } else if (key.value == "रङ्गः") {
-                    element->color = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: रङ्ग-नाम अपेक्षितम् ").value;
-                } else if (key.value == "स्रोतस") {
+                } else if (key.value == "रङ्गः" || key.value == "रंग" || key.value == "color") {
+                    if (check(TokenType::STRING)) {
+                         element->color = consume(TokenType::STRING, "").value;
+                    } else {
+                         element->color = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: रङ्ग-नाम अपेक्षितम् ").value;
+                    }
+                } else if (key.value == "स्रोतस" || key.value == "source") {
                     element->source = consume(TokenType::STRING, "व्याकरण-त्रुटिः: स्रोतस-लिङ्क अपेक्षितम् ").value;
                 }
                 if (check(TokenType::PUNCTUATION, ";")) advance();

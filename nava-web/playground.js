@@ -186,9 +186,19 @@ document.getElementById('run-btn').addEventListener('click', async () => {
                 }
             }
         } catch (err) {
+            console.error("NVC Fatal Error:", err);
             load.classList.add('hidden');
-            out.className = "font-mono text-rose-500";
-            out.innerText = "Fatal इञ्जन-दोषः: " + err.message;
+            out.className = "font-mono text-rose-500 whitespace-pre-wrap bg-rose-500/10 p-4 rounded-xl border border-rose-500/20";
+            
+            let errMsg = err.message || err;
+            if (typeof err === 'number') {
+                errMsg = "WASM Runtime Exception (Signal: " + err + "). This usually means a crash inside the C++ engine.";
+            }
+            
+            out.innerText = "🚨 Fatal इञ्जन-दोषः:\n" + errMsg;
+            if (err.stack) {
+                out.innerText += "\n\n[Stack Trace]\n" + err.stack;
+            }
         }
     } else {
         await new Promise(r => setTimeout(r, 800));
