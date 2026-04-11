@@ -1,2 +1,0 @@
-/usr/bin/ar qc libnvc_runtime.a CMakeFiles/nvc_runtime.dir/src/runtime.cpp.o
-/usr/bin/ranlib libnvc_runtime.a

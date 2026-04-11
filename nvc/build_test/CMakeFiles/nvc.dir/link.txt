@@ -1,1 +1,0 @@
-/usr/bin/c++  -fno-rtti -O3 -DNDEBUG CMakeFiles/nvc.dir/src/main.cpp.o CMakeFiles/nvc.dir/src/Lexer.cpp.o CMakeFiles/nvc.dir/src/Parser.cpp.o CMakeFiles/nvc.dir/src/Grammar.cpp.o CMakeFiles/nvc.dir/src/CodeGen.cpp.o CMakeFiles/nvc.dir/src/SandhiPass.cpp.o CMakeFiles/nvc.dir/src/Interpreter.cpp.o -o nvc  -Wl,-rpath,/usr/lib/llvm-15/lib /usr/lib/llvm-15/lib/libLLVM-15.so.1
