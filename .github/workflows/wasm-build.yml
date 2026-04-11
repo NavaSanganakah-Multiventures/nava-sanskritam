@@ -28,7 +28,8 @@ jobs:
 
       - name: Build WASM
         run: |
-          mkdir -p nava-web
+          # The source nava-web/ contains frontend files (index.html, playground.js)
+          # We build and copy nvc.js/wasm into it
           cd build-wasm
           emmake make -j4
           cp nvc.js ../nava-web/nvc.js

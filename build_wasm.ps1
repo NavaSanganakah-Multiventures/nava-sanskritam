@@ -1,6 +1,6 @@
 # Nava Sanskritam WASM Build Script
 $buildDir = "build-wasm"
-$outputDir = "wasm"
+$outputDir = "nava-web"
 
 if (-not (Test-Path $buildDir)) {
     mkdir $buildDir
@@ -17,9 +17,9 @@ Write-Host "🚩 Compiling NVC to WebAssembly..." -ForegroundColor Yellow
 emmake make -j4
 
 # Copy to Web Playground Folder
-Write-Host "🚩 Updating Web Playground..." -ForegroundColor Yellow
-cp nvc.js "../wasm/nvc.js"
-cp nvc.wasm "../wasm/nvc.wasm"
+Write-Host "🚩 Updating Web Playground (nava-web)..." -ForegroundColor Yellow
+cp nvc.js "../nava-web/nvc.js"
+cp nvc.wasm "../nava-web/nvc.wasm"
 
 # Copy to Nava Studio Folder
 Write-Host "🚩 Updating Nava Studio..." -ForegroundColor Yellow
