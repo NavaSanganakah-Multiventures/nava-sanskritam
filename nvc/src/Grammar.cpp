@@ -256,13 +256,27 @@ char32_t Grammar::getSavarnaLong(char32_t c) {
 }
 
 std::u32string Grammar::toUtf32(const std::string& utf8) {
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
     return convert.from_bytes(utf8);
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 }
 
 std::string Grammar::toUtf8(const std::u32string& utf32) {
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
     return convert.to_bytes(utf32);
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 }
 
 std::u32string Grammar::processAnubandha(SupPratyaya p) {

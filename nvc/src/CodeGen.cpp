@@ -5,7 +5,11 @@
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/IR/LegacyPassManager.h>
+#if LLVM_VERSION_MAJOR >= 17
 #include <llvm/TargetParser/Host.h>
+#else
+#include <llvm/Support/Host.h>
+#endif
 #include <llvm/IR/Intrinsics.h>
 #include <stdexcept>
 #include <iostream>

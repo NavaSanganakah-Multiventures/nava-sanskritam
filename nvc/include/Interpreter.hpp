@@ -1,6 +1,6 @@
+#pragma once
 #include "AST.hpp"
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -11,7 +11,6 @@ public:
 private:
     std::map<std::string, std::string> environment;
     std::map<std::string, FunctionDeclaration*> functions;
-    std::set<std::string> constants;
     std::string outputBuffer;
     bool hasReturned = false;
     std::string returnValue = "";

@@ -64,7 +64,7 @@ require(['vs/editor/editor.main'], function () {
     monaco.languages.setMonarchTokensProvider('nava', {
         tokenizer: {
             root: [
-                [/\b(अस्ति|वद|यदि|तर्हि|चक्र|अन्यथा|फलम्|विधिः|नित्य|दर्शनम्|दृश्यम्|मंजूषा|सूची|चित्त्रम्|प्रविष्टिः|क्रिया|सूत्रम्|योगः)\b/, 'keyword'],
+                [/\b(अस्ति|वद|यदि|तर्हि|चक्र|अन्यथा|फलम्|विधिः|नित्य)\b/, 'keyword'],
                 [/"[^"]*"/, 'string'],
                 [/\b\d+\b/, 'number'],
                 [/\/\/.*/, 'comment'],
@@ -73,7 +73,7 @@ require(['vs/editor/editor.main'], function () {
     });
 
     editor = monaco.editor.create(document.getElementById('editor-container'), {
-        value: '// नमस्ते! नव-सङ्कृतम् कोडं लिखतु...\n\nवद("🚩 नमनम् नव-सङ्गणक-शालातः!");\n',
+        value: '// नमस्ते! नव-सङ्स्कृतम् कोडं लिखतु...\n\nवद("🚩 नमनम् नव-सङ्गणक-शालातः!");\n',
         language: 'nava', theme: 'vs-dark', fontSize: 16, automaticLayout: true, minimap: { enabled: false }
     });
 
@@ -100,25 +100,14 @@ require(['vs/editor/editor.main'], function () {
     // Sanskrit IntelliSense (Autocomplete)
     monaco.languages.registerCompletionItemProvider('nava', {
         provideCompletionItems: (model, position) => {
-            const keywords = ['अस्ति', 'वद', 'यदि', 'तर्हि', 'चक्र', 'अन्यथा', 'फलम्', 'विधिः', 'नित्य', 'दर्शनम्', 'दृश्यम्', 'मंजूषा', 'सूची', 'चित्त्रम्', 'प्रविष्टिः', 'क्रिया', 'सूत्रम्', 'योगः'];
-            const libraryFunctions = ['त्रैराशिकम्', 'नियमः', 'गणनम्', 'वर्गः'];
-            
+            const keywords = ['अस्ति', 'वद', 'यदि', 'तर्हि', 'चक्र', 'अन्यथा', 'फलम्', 'विधिः', 'नित्य'];
             const suggestions = keywords.map(kw => ({
                 label: kw,
                 kind: monaco.languages.CompletionItemKind.Keyword,
                 insertText: kw
             }));
 
-            libraryFunctions.forEach(fn => {
-                suggestions.push({
-                    label: fn,
-                    kind: monaco.languages.CompletionItemKind.Function,
-                    insertText: fn + '()',
-                    detail: 'मानक-पुस्तकालय-विधिः (Standard Library Function)'
-                });
-            });
-
-            // Dynamic Variable Suggestions
+            // Dynamic Variable Suggestions: Scan for 'अस्ति ' or 'नित्य '
             const text = model.getValue();
             const varRegex = /(?:अस्ति|नित्य)\s+([^\s;=]+)/g;
             let match;
