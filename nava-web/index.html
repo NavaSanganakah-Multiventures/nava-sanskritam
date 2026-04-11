@@ -19,22 +19,25 @@
         <!-- HEADER -->
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-amber-500/20">न</div>
+                <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center text-3xl shadow-2xl shadow-amber-500/40 font-bold text-black transform -rotate-3 select-none">न</div>
                 <div>
-                    <h1 class="text-2xl font-bold sanskrit-font tracking-wide">नव्या-क्रीडाङ्गणम्</h1>
-                    <p class="text-slate-400 text-sm">Nava Sanskritam Web IDE v2.5</p>
+                    <h1 class="text-3xl font-black sanskrit-font tracking-tighter text-white">नव्या-क्रीडाङ्गणम्</h1>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <p class="text-slate-400 text-xs font-medium uppercase tracking-widest">Nava Engine v2.5 Online</p>
+                    </div>
                 </div>
             </div>
             <div class="flex gap-4">
-                <button onclick="runCode()" class="bg-amber-500 hover:bg-amber-600 text-black px-8 py-2.5 rounded-full font-bold transition-all transform hover:-translate-y-1 active:scale-95 shadow-xl shadow-amber-500/20">
-                    चलाओ (RUN)
+                <button id="run-btn" class="group relative px-10 py-3 bg-amber-500 hover:bg-amber-400 text-black rounded-full font-black text-lg transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl shadow-amber-500/30 overflow-hidden">
+                    <span class="relative z-10">चलाओ (RUN)</span>
+                    <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 </button>
             </div>
         </header>
 
         <!-- MAIN GRID -->
-        <!-- MAIN GRID -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- EDITOR -->
             <div class="glass p-1 rounded-2xl">
                 <div id="monaco-editor-container" style="height: calc(100vh - 250px);"></div>
