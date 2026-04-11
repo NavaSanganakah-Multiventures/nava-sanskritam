@@ -80,76 +80,45 @@
 
             <section class="glass p-8 rounded-2xl">
                 <h2 class="text-3xl font-bold text-white mb-6 border-b border-white/10 pb-4 flex items-center gap-3">
-                    <span class="text-amber-500">🚀</span> मुख्य घटक (Core Components)
+                    <span class="text-emerald-400">🎨</span> दर्शनम् (UI Components)
                 </h2>
+                <p class="mb-6">Nava Sanskritam का उपयोग करके आप आसानी से वेब UI बना सकते हैं। यहाँ कुछ मुख्य घटक और उनके उदाहरण दिए गए हैं:</p>
+
                 <div class="space-y-6">
+                    <!-- UI Example 1 -->
                     <div class="bg-black/30 p-6 rounded-xl border border-white/5 hover:border-amber-500/30 transition-colors">
-                        <h3 class="text-2xl font-bold text-amber-400 mb-3 font-mono">1. index.html</h3>
-                        <p>यह मुख्य वेब पेज है जिसमें यूजर इंटरफ़ेस (UI) परिभाषित है। यह Tailwind CSS का उपयोग करके डिज़ाइन किया गया है और दो मुख्य भागों में विभाजित है: बायां भाग (Monaco Editor) और दायां भाग (कंसोल आउटपुट और लाइव UI - दर्शनम्)।</p>
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold text-amber-400 font-mono mb-3">मंजूषा (Box / Div)</h3>
+                                <p class="mb-3">एक सामान्य कंटेनर जो अन्य घटकों को रखता है।</p>
+                                <div class="bg-[#1e1e1e] p-4 rounded-lg font-mono text-sm border border-white/10">
+                                    <span class="text-amber-400">दर्शनम्</span> {<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-amber-400">मंजूषा</span> {<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-amber-400">पाठः</span> <span class="text-green-400">"नमस्ते विश्व!"</span>;<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                                    }
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- UI Example 2 -->
                     <div class="bg-black/30 p-6 rounded-xl border border-white/5 hover:border-amber-500/30 transition-colors">
-                        <h3 class="text-2xl font-bold text-amber-400 mb-3 font-mono">2. playground.js</h3>
-                        <p class="mb-2">यह मुख्य जावास्क्रिप्ट फाइल है जो पूरे वेब प्लेग्राउंड के तर्क (logic) को संभालती है।</p>
-                        <ul class="list-disc list-inside space-y-2 ml-4 text-slate-400">
-                            <li>इसमें <strong>Monaco Editor</strong> का सेटअप है, जो सिंटैक्स हाइलाइटिंग प्रदान करता है।</li>
-                            <li>यह <strong>WebAssembly (`nvc.wasm`)</strong> मॉड्यूल को लोड और प्रारंभ करता है।</li>
-                            <li><strong>`createDrishyam` फ़ंक्शन:</strong> यह फ़ंक्शन JSON आउटपुट को लेता है और उसे वास्तविक HTML DOM एलिमेंट्स में बदलता है।</li>
-                        </ul>
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold text-amber-400 font-mono mb-3">पङ्क्तिः और स्तम्भः (Row & Col)</h3>
+                                <p class="mb-3">घटकों को क्षैतिज (Horizontal) या ऊर्ध्वाधर (Vertical) रूप में व्यवस्थित करने के लिए।</p>
+                                <div class="bg-[#1e1e1e] p-4 rounded-lg font-mono text-sm border border-white/10">
+                                    <span class="text-amber-400">दर्शनम्</span> {<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-amber-400">पङ्क्तिः</span> {<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-amber-400">बटनम्</span> <span class="text-green-400">"स्वीकार करें"</span>;<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-amber-400">बटनम्</span> <span class="text-green-400">"रद्द करें"</span>;<br>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                                    }
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="bg-black/30 p-6 rounded-xl border border-white/5 hover:border-amber-500/30 transition-colors">
-                        <h3 class="text-2xl font-bold text-amber-400 mb-3 font-mono">3. nvc.wasm & nvc.js</h3>
-                        <p>यह C++ में लिखे गए मुख्य Nava Compiler (`nvc`) का WebAssembly (WASM) संकलित रूप है। ब्राउज़र में कोड निष्पादन सीधे क्लाइंट-साइड पर होता है।</p>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <h2 class="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-                    <span class="text-blue-400">⚙️</span> यह कैसे काम करता है? (Workflow)
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="glass p-6 rounded-xl text-center flex flex-col items-center gap-4 relative">
-                        <div class="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center text-2xl">📝</div>
-                        <h4 class="text-white font-bold text-lg">1. कोड इनपुट</h4>
-                        <p class="text-sm text-slate-400">उपयोगकर्ता Monaco Editor में Nava Sanskritam कोड लिखता है।</p>
-                        <div class="hidden lg:block absolute right-[-15px] top-1/2 text-white/20">→</div>
-                    </div>
-                    <div class="glass p-6 rounded-xl text-center flex flex-col items-center gap-4 relative">
-                        <div class="w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center text-2xl">⚡</div>
-                        <h4 class="text-white font-bold text-lg">2. सङ्कलन</h4>
-                        <p class="text-sm text-slate-400">WASM बाइंडिंग के माध्यम से कोड C++ कंपाइलर को भेजा जाता है।</p>
-                        <div class="hidden lg:block absolute right-[-15px] top-1/2 text-white/20">→</div>
-                    </div>
-                    <div class="glass p-6 rounded-xl text-center flex flex-col items-center gap-4 relative">
-                        <div class="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center text-2xl">🔍</div>
-                        <h4 class="text-white font-bold text-lg">3. JSON निष्कर्षण</h4>
-                        <p class="text-sm text-slate-400">कंपाइलर UI संरचना का वर्णन करते हुए JSON आउटपुट लौटाता है।</p>
-                        <div class="hidden lg:block absolute right-[-15px] top-1/2 text-white/20">→</div>
-                    </div>
-                    <div class="glass p-6 rounded-xl text-center flex flex-col items-center gap-4">
-                        <div class="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center text-2xl">🎨</div>
-                        <h4 class="text-white font-bold text-lg">4. रेंडरिंग</h4>
-                        <p class="text-sm text-slate-400">`createDrishyam` फ़ंक्शन HTML घटक बनाता है और उन्हें रेंडर करता है।</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="glass p-8 rounded-2xl">
-                <h2 class="text-3xl font-bold text-white mb-6 border-b border-white/10 pb-4 flex items-center gap-3">
-                    <span class="text-emerald-400">🎨</span> दर्शनम् (Live UI Components)
-                </h2>
-                <p class="mb-6">`createDrishyam` फ़ंक्शन Nava के UI घटकों को निम्नलिखित HTML घटकों में मैप करता है:</p>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-                    <div class="bg-white/5 p-4 rounded-lg font-mono"><span class="text-amber-400">मंजूषा</span> (Box) → &lt;div&gt;</div>
-                    <div class="bg-white/5 p-4 rounded-lg font-mono"><span class="text-amber-400">पङ्क्तिः</span> (Row) → &lt;div&gt;</div>
-                    <div class="bg-white/5 p-4 rounded-lg font-mono"><span class="text-amber-400">स्तम्भः</span> (Col) → &lt;div&gt;</div>
-                    <div class="bg-white/5 p-4 rounded-lg font-mono"><span class="text-blue-400">बटनम्</span> (Btn) → &lt;button&gt;</div>
-                    <div class="bg-white/5 p-4 rounded-lg font-mono"><span class="text-emerald-400">पाठः</span> (Text) → &lt;p&gt;</div>
-                    <div class="bg-white/5 p-4 rounded-lg font-mono"><span class="text-emerald-400">सूची</span> (List) → &lt;ul&gt;</div>
-                    <div class="bg-white/5 p-4 rounded-lg font-mono"><span class="text-purple-400">चित्त्रम्</span> (Img) → &lt;img&gt;</div>
-                    <div class="bg-white/5 p-4 rounded-lg font-mono col-span-2 md:col-span-1"><span class="text-pink-400">प्रविष्टिः</span> (Input) → &lt;input&gt;</div>
                 </div>
             </section>
 
