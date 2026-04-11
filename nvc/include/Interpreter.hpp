@@ -1,3 +1,5 @@
+#pragma once
+
 #include "AST.hpp"
 #include <map>
 #include <set>
@@ -23,5 +25,7 @@ private:
     std::string serializeDarshanam(DarshanamBlock* block);
     std::string serializeUI(DrishyamElement* element);
 
+#ifndef EMSCRIPTEN
     llvm::Value* generateCallExpression(CallExpression* node); // Not used in Interpreter but part of structure
+#endif
 };
