@@ -1,0 +1,7 @@
+/app/nvc/build_test/CMakeFiles/intrinsics_gen.dir
+/app/nvc/build_test/CMakeFiles/omp_gen.dir
+/app/nvc/build_test/CMakeFiles/acc_gen.dir
+/app/nvc/build_test/CMakeFiles/nvc_runtime.dir
+/app/nvc/build_test/CMakeFiles/nvc.dir
+/app/nvc/build_test/CMakeFiles/edit_cache.dir
+/app/nvc/build_test/CMakeFiles/rebuild_cache.dir

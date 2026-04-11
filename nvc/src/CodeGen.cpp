@@ -5,8 +5,12 @@
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/IR/LegacyPassManager.h>
-#include <llvm/TargetParser/Host.h>
 #include <llvm/IR/Intrinsics.h>
+#if LLVM_VERSION_MAJOR >= 17
+#include <llvm/TargetParser/Host.h>
+#else
+#include <llvm/Support/Host.h>
+#endif
 #include <optional>
 #include <stdexcept>
 #include <iostream>
@@ -312,7 +316,7 @@ llvm::Value* CodeGen::generateBinaryExpression(BinaryExpression* node) {
     if (node->op == "==") return builder->CreateFCmpUEQ(L, R, "cmptmp");
     if (node->op == "!=") return builder->CreateFCmpUNE(L, R, "cmptmp");
     if (node->op == "^") {
-        llvm::Function* powF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
+        llvm::Function* powF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
         return builder->CreateCall(powF, {L, R}, "powtmp");
     }
 
@@ -425,7 +429,7 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         builder->SetInsertPoint(failBB);
         
         // Native Trap / Panic
-        llvm::Function* trap = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::trap);
+        llvm::Function* trap = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::trap);
         builder->CreateCall(trap, {});
         builder->CreateUnreachable();
         
@@ -435,15 +439,15 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
 
     // SUL v18.0: Native Math Intrinsics (Jya, Kojya, Vargamulam)
     if (mangledName == "ज्या" || mangledName == "jya") {
-        llvm::Function* sinF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
+        llvm::Function* sinF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
         return builder->CreateCall(sinF, {argsV[0]}, "sintmp");
     }
     if (mangledName == "कोज्या" || mangledName == "kojya") {
-        llvm::Function* cosF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
+        llvm::Function* cosF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
         return builder->CreateCall(cosF, {argsV[0]}, "costmp");
     }
     if (mangledName == "वर्गमूलम्" || mangledName == "vargamulam") {
-        llvm::Function* sqrtF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
+        llvm::Function* sqrtF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
         return builder->CreateCall(sqrtF, {argsV[0]}, "sqrttmp");
     }
     if (mangledName == "त्रैराशिकम्" || mangledName == "गणनम्" || mangledName == "वर्गः") {
@@ -611,7 +615,7 @@ void CodeGen::writeObject(const std::string& filename) {
 
     std::string targetTripleStr = targetWasm ? "wasm32-unknown-unknown" : llvm::sys::getDefaultTargetTriple();
     llvm::Triple targetTriple(targetTripleStr);
-    module->setTargetTriple(targetTriple);
+    module->setTargetTriple(targetTriple.getTriple());
 
     std::string error;
     auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error);
@@ -624,8 +628,12 @@ void CodeGen::writeObject(const std::string& filename) {
     auto features = "";
 
     llvm::TargetOptions opt;
+#if LLVM_VERSION_MAJOR >= 16
     std::optional<llvm::Reloc::Model> rm;
-    auto theTargetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, rm);
+#else
+    llvm::Optional<llvm::Reloc::Model> rm;
+#endif
+    auto theTargetMachine = target->createTargetMachine(targetTriple.getTriple(), cpu, features, opt, rm);
 
     module->setDataLayout(theTargetMachine->createDataLayout());
 
@@ -637,7 +645,11 @@ void CodeGen::writeObject(const std::string& filename) {
     }
 
     llvm::legacy::PassManager pass;
+#if LLVM_VERSION_MAJOR >= 18
     auto fileType = llvm::CodeGenFileType::ObjectFile;
+#else
+    auto fileType = llvm::CGFT_ObjectFile;
+#endif
 
     if (theTargetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
         throw std::runtime_error("लक्ष्य-यन्त्रम् एतादृशं सञ्चिकां निर्गन्तुं न शक्नोति");
