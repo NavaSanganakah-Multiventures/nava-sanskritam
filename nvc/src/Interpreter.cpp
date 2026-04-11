@@ -22,7 +22,9 @@ void Interpreter::visit(ASTNode* node) {
     } else if (type == ASTNodeType::ConstantDeclaration) {
         auto constDecl = static_cast<ConstantDeclaration*>(node);
         if (constDecl->init) {
-            environment[constDecl->id] = evaluateExpression(constDecl->init.get());
+            std::string val = evaluateExpression(constDecl->init.get());
+            environment[constDecl->id] = val;
+            constants.insert(constDecl->id);
         }
     } else if (type == ASTNodeType::PrintStatement) {
         auto printStmt = static_cast<PrintStatement*>(node);
@@ -148,6 +150,9 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         return leftStr + bin->op + rightStr;
     } else if (type == ASTNodeType::Assignment) {
         auto assign = static_cast<Assignment*>(expr);
+        if (constants.count(assign->left)) {
+            throw std::runtime_error("त्रुटिः: नित्य-चरस्य मूल्यं अपरिवर्तनीयम् (Constant is immutable: " + assign->left + ")");
+        }
         std::string val = evaluateExpression(assign->right.get());
         environment[assign->left] = val;
         return val;
@@ -158,7 +163,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         if (environment.find(key) != environment.end()) {
             return environment[key];
         }
-        return "न-प्राप्तम्: " + key;
+        return "न-प्राप्तम् (Property not found: " + key + ")";
     } else if (type == ASTNodeType::CallExpression) {
         auto call = static_cast<CallExpression*>(expr);
         if (call->callee->name == "वद") {
@@ -178,7 +183,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                     double b = std::stod(bStr);
                     double c = std::stod(cStr);
                     return std::to_string((b * c) / a);
-                } catch (...) {}
+                } catch (...) { }
             }
             return "0";
         } else if (call->callee->name == "नियमः") {
@@ -219,7 +224,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                 try {
                     double a = std::stod(aStr);
                     return std::to_string(a * a);
-                } catch (...) {}
+                } catch (...) { }
             }
             return "0";
         } else {
@@ -243,7 +248,6 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                 environment = oldEnv;
                 return result;
             }
-            // Simulated function call evaluating arguments
             return "Call to " + call->callee->name;
         }
     }
