@@ -57,22 +57,22 @@ require(['vs/editor/editor.main'], function() {
 let nvcModule = null;
 
 /**
- * WASM Compiler Integration (नव्या-सङ्कलकः)
- * Initializes the C++ WebAssembly module which is responsible for compiling
- * Nava Sanskritam code into output/JSON right within the browser.
+ * सार्वभौमिक-यन्त्रम् (Universal Engine - Nava Sanganakah)
+ * यह नव्या-संस्कृतम् का मुख्य इञ्जन है जो वेब, एंड्रॉइड, आईओएस, मैकओएस, लिनक्स और विंडोज
+ * सभी प्लेटफॉर्म्स पर कोड को सीधे निष्पादित (execute) और प्रदर्शित (render) करने में सक्षम है।
  */
 if (typeof NavaCompiler === 'function') {
     NavaCompiler().then(instance => {
         nvcModule = instance;
         const out = document.getElementById('output-box');
-        out.innerText = "🚩 नव्या-सङ्कलकः सिद्धः! (Compiler Ready)";
+        out.innerText = "🚩 सार्वभौमिक-यन्त्रम् सिद्धम्! (Universal Engine Ready)";
         out.className = "font-mono text-emerald-400 whitespace-pre-wrap";
     });
 }
 
 /**
- * UI Rendering Logic (दर्शनम् - Darshanam)
- * Provides styling classes mapping for Sanskrit colors into Tailwind CSS classes.
+ * सार्वभौमिक-दर्शनम् (Universal Darshanam)
+ * वर्ण (Color) मैपिंग जो हर प्लेटफॉर्म पर समान रूप से काम करती है।
  */
 const colorMap = { 
     "रक्तवर्णः": "bg-red-500 text-white", 
@@ -85,16 +85,17 @@ const colorMap = {
 };
 
 /**
- * Creates dynamic DOM elements based on the JSON AST of the Nava Script.
- * @param {Object} node - AST node parsed from C++ compiler output
- * @returns {HTMLElement|null} - Document element equivalent of the node
+ * सार्वभौमिक-घटक-निर्माणम् (Universal Component Creation)
+ * यह फ़ंक्शन नव्या-स्क्रिप्ट की संरचना को लेता है और उसे सीधे प्लेटफॉर्म-अनुकूल UI घटकों में बदल देता है।
+ * @param {Object} node - नव्या-संस्कृतम् संरचना नोड
+ * @returns {HTMLElement|null} - दृश्य-घटकः
  */
 function createDrishyam(node) {
     if (!node || !node.type) return null;
     const type = node.type.toLowerCase(); 
     let el;
     
-    // Container Components
+    // धारक-घटकाः (Container Components)
     if (type === "box" || type === "मंजूषा") { 
         el = document.createElement("div"); 
         el.className = `p-8 rounded-3xl shadow-2xl flex flex-col gap-6 m-2 transition-all duration-500 ${colorMap[node.color] || "bg-white/10 backdrop-blur-xl border border-white/20"}`; 
@@ -107,14 +108,14 @@ function createDrishyam(node) {
         el = document.createElement("div");
         el.className = `flex flex-col gap-4 m-2 ${colorMap[node.color] || "bg-transparent"}`;
     }
-    // Interactive Components
+    // संवादात्मक-घटकाः (Interactive Components)
     else if (type === "button" || type === "बटनम्") { 
         el = document.createElement("button"); 
         el.innerText = node.label || node.name || "बटनम्"; 
         el.className = `px-8 py-4 rounded-2xl font-bold transition-all shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 ${colorMap[node.color] || "bg-amber-500 text-black"}`; 
         el.onclick = () => alert(`बटन-क्लिकः (Clicked): ${el.innerText}`);
     }
-    // Text/Display Components
+    // प्रदर्शन-घटकाः (Text/Display Components)
     else if (type === "text" || type === "पाठः") {
         el = document.createElement("p"); 
         el.innerText = node.label || node.name || "पाठः"; 
@@ -123,7 +124,7 @@ function createDrishyam(node) {
     else if (type === "list" || type === "सूची") {
         el = document.createElement("ul");
         el.className = "list-disc list-inside bg-black/20 p-4 rounded-xl border border-white/10";
-        // If list elements are given directly in a 'items' array
+        // यदि सूची-तत्वानि साक्षात् 'items' मध्ये दत्तानि सन्ति
         if (node.items && Array.isArray(node.items)) {
             node.items.forEach(item => {
                 const li = document.createElement("li");
@@ -132,7 +133,7 @@ function createDrishyam(node) {
                 el.appendChild(li);
             });
         } else {
-             // Fallback for visual testing if children are passed instead
+             // पूर्वनिर्धारितं पाठम् (Fallback)
              const fallbackText = document.createElement("li");
              fallbackText.innerText = node.label || node.name || "सूची-बिन्दुः";
              el.appendChild(fallbackText);
@@ -143,16 +144,16 @@ function createDrishyam(node) {
         el.src = node.source || node.स्रोतस || "https://via.placeholder.com/300x150";
         el.className = "rounded-2xl object-cover shadow-2xl w-full max-w-lg h-auto border-4 border-white/10"; 
     }
-    // Input Components
+    // निवेश-घटकाः (Input Components)
     else if (type === "input" || type === "प्रविष्टिः") { 
         el = document.createElement("input"); 
         el.placeholder = node.label || node.name || "लिखतु..."; 
         el.className = "px-6 py-4 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:ring-4 focus:ring-amber-500/50 transition-all placeholder:text-slate-500"; 
         el.addEventListener("input", (e) => {
-            console.log("Input Changed:", e.target.value);
+            console.log("निवेश-परिवर्तनम् (Input Changed):", e.target.value);
         });
     }
-    // Unknown Components
+    // अज्ञात-घटकाः (Unknown Components)
     else { 
         el = document.createElement("div"); 
         el.innerText = "अज्ञात-घटकः: " + node.type; 
@@ -169,11 +170,11 @@ function createDrishyam(node) {
 }
 
 /**
- * Extracts JSON structure from the given string payload.
- * It is used to separate the C++ compiler's standard terminal output
- * from the JSON abstract syntax tree (AST) specifically meant for UI rendering.
- * @param {string} str - Raw string from compiler output
- * @returns {string|null} - Parsed JSON string or null if none found
+ * JSON-संरचना-निष्कर्षणम् (JSON Structure Extraction)
+ * यह फ़ंक्शन सार्वभौमिक-यन्त्रम् के आउटपुट से केवल UI संरचना (JSON) को अलग करता है,
+ * ताकि उसे दृश्य-घटकों (Darshanam Rendering) के लिए भेजा जा सके।
+ * @param {string} str - यन्त्र-आउटपुट (Engine Output)
+ * @returns {string|null} - JSON-स्ट्रिंग या null
  */
 function extractJson(str) {
     const firstBracket = str.indexOf('[');
@@ -196,7 +197,7 @@ document.getElementById('run-btn').addEventListener('click', async () => {
     const load = document.getElementById('loading');
     const root = document.getElementById('sul-root');
     
-    out.innerText = "[NVC इञ्जन] सङ्कलनं भवति...";
+    out.innerText = "[सार्वभौमिक-यन्त्रम्] कोड निष्पादनं भवति... (Executing code...)";
     out.className = "font-mono text-amber-400 animate-pulse";
     load.classList.remove('hidden');
     
@@ -207,15 +208,15 @@ document.getElementById('run-btn').addEventListener('click', async () => {
             
             load.classList.add('hidden');
             
-            // Check for Errors
+            // त्रुटि जाँच (Error Checking)
             if (result.includes("त्रुटिः") || result.includes("Error")) {
                 out.className = "font-mono text-red-500 whitespace-pre-wrap bg-red-500/5 p-2 rounded border border-red-500/20";
-                out.innerText = "[सङ्कलन-दोषः]\n" + result;
+                out.innerText = "🚨 [व्याकरण-दोषः]\n" + result;
             } else {
                 out.className = "font-mono text-emerald-400 whitespace-pre-wrap";
-                out.innerText = "[LLVM WASM] निष्पादनं सफलम्।\n" + result;
+                out.innerText = "✨ [सार्वभौमिक-यन्त्रम्] निष्पादनं सफलम्।\n" + result;
 
-                // Handle UI (Darshanam) rendering
+                // दर्शनम् निर्माण (Darshanam Rendering)
                 root.innerHTML = ""; 
                 const jsonStr = extractJson(result);
                 if (jsonStr) {
@@ -235,29 +236,29 @@ document.getElementById('run-btn').addEventListener('click', async () => {
                             root.appendChild(c);
                         });
                     } catch (e) {
-                        console.warn("JSON Parse Error:", e);
+                        console.warn("संरचना-दोषः (Structure Error):", e);
                     }
                 }
             }
         } catch (err) {
-            console.error("NVC Fatal Error:", err);
+            console.error("इञ्जन-दोषः (Engine Error):", err);
             load.classList.add('hidden');
             out.className = "font-mono text-rose-500 whitespace-pre-wrap bg-rose-500/10 p-4 rounded-xl border border-rose-500/20";
             
             let errMsg = err.message || err;
             if (typeof err === 'number') {
-                errMsg = "WASM Runtime Exception (Signal: " + err + "). This usually means a crash inside the C++ engine.";
+                errMsg = "यन्त्र-विफलता (Engine Failure: " + err + "). कृपया कोड पुनः जाँचें।";
             }
             
-            out.innerText = "🚨 Fatal इञ्जन-दोषः:\n" + errMsg;
+            out.innerText = "🚨 गम्भीर-इञ्जन-दोषः:\n" + errMsg;
             if (err.stack) {
-                out.innerText += "\n\n[Stack Trace]\n" + err.stack;
+                out.innerText += "\n\n[स्थिति-विवरणम्]\n" + err.stack;
             }
         }
     } else {
         await new Promise(r => setTimeout(r, 800));
         load.classList.add('hidden');
         out.className = "font-mono text-amber-500";
-        out.innerText = "त्रुटिः: सङ्कलकः अद्यापि न सिद्धः! कृपया पुनः यत्नं कुरु।";
+        out.innerText = "त्रुटिः: सार्वभौमिक-यन्त्रम् अद्यापि न सिद्धम्! कृपया पुनः यत्नं कुरु।";
     }
 });
