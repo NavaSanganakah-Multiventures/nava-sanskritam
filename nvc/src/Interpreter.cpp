@@ -3,6 +3,8 @@
 
 std::string Interpreter::evaluate(Program* program) {
     outputBuffer = "";
+    hasReturned = false;
+    returnValue = "";
     for (const auto& stmt : program->body) {
         visit(stmt.get());
     }
