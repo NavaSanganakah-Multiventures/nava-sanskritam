@@ -16,50 +16,69 @@
 </head>
 <body class="p-6">
     <div class="max-w-7xl mx-auto">
-        <!-- HEADER -->
+        <!-- HEADER: Title and Run Button -->
         <header class="flex justify-between items-center mb-8">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center text-3xl shadow-2xl shadow-amber-500/40 font-bold text-black transform -rotate-3 select-none">न</div>
+                <!-- App Logo -->
+                <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center text-3xl shadow-2xl shadow-amber-500/40 font-bold text-black transform -rotate-3 select-none" title="Nava Logo">न</div>
                 <div>
-                    <h1 class="text-3xl font-black sanskrit-font tracking-tighter text-white">नव्या-क्रीडाङ्गणम्</h1>
-                    <div class="flex items-center gap-2">
+                    <!-- App Title -->
+                    <h1 class="text-3xl font-black sanskrit-font tracking-tighter text-white" title="Nava Web Playground">नव्या-क्रीडाङ्गणम्</h1>
+                    <div class="flex items-center gap-2" title="Engine Status: Online">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <p class="text-slate-400 text-xs font-medium uppercase tracking-widest">Nava Engine v2.5 Online</p>
                     </div>
                 </div>
             </div>
-            <div class="flex gap-4">
-                <button id="run-btn" class="group relative px-10 py-3 bg-amber-500 hover:bg-amber-400 text-black rounded-full font-black text-lg transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl shadow-amber-500/30 overflow-hidden">
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-4">
+                <!-- Documentation Link -->
+                <a href="docs.html" class="hidden md:flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white rounded-full font-semibold transition-all border border-white/10 hover:border-white/20" title="Read Official Documentation">
+                    <span>📚</span> दस्तावेज़ (Docs)
+                </a>
+
+                <!-- Run Button -->
+                <button id="run-btn" class="group relative px-10 py-3 bg-amber-500 hover:bg-amber-400 text-black rounded-full font-black text-lg transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl shadow-amber-500/30 overflow-hidden" title="Compile and Run Code">
                     <span class="relative z-10">चलाओ (RUN)</span>
                     <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 </button>
             </div>
         </header>
 
-        <!-- MAIN GRID -->
+        <!-- MAIN GRID: Split view for Editor and Output -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- EDITOR -->
-            <div class="glass p-1 rounded-2xl">
-                <div id="monaco-editor-container" style="height: calc(100vh - 250px);"></div>
+            <!-- LEFT PANEL: Monaco Editor Container -->
+            <div class="glass p-1 rounded-2xl shadow-lg border border-white/10" title="Write your Nava Sanskritam code here">
+                <div id="monaco-editor-container" style="height: calc(100vh - 250px);" class="rounded-xl overflow-hidden"></div>
             </div>
 
-            <!-- OUTPUT & DARSHANAM -->
+            <!-- RIGHT PANEL: Console Output & Live UI (Darshanam) -->
             <div class="flex flex-col gap-6">
-                <!-- CONSOLE OUTPUT -->
-                <div class="glass p-6 rounded-2xl min-h-[150px]">
-                    <h2 class="text-amber-500 font-bold mb-4 flex items-center gap-2">
-                        <span>🚩</span> निर्गम-पटलम् (OUTPUT)
-                    </h2>
-                    <div id="loading" class="hidden text-slate-400 text-sm mb-2 animate-pulse">सङ्कलनं भवति...</div>
-                    <pre id="output-box" class="font-mono text-emerald-400 whitespace-pre-wrap">🚩 नव्या-सङ्कलकस्य प्रतीक्षायाम्...</pre>
+
+                <!-- TOP SECTION: CONSOLE OUTPUT (Terminal) -->
+                <div class="glass p-6 rounded-2xl min-h-[150px] shadow-lg border border-white/10 flex flex-col" title="Compiler Output and Errors">
+                    <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
+                        <h2 class="text-amber-500 font-bold flex items-center gap-2">
+                            <span>🚩</span> निर्गम-पटलम् (OUTPUT)
+                        </h2>
+                    </div>
+                    <!-- Loading Indicator -->
+                    <div id="loading" class="hidden text-amber-300 text-sm mb-2 animate-pulse font-mono border-l-2 border-amber-500 pl-2">सङ्कलनं भवति... (Compiling...)</div>
+                    <!-- Output Text Area -->
+                    <pre id="output-box" class="font-mono text-emerald-400 whitespace-pre-wrap flex-1 overflow-y-auto max-h-[300px]">🚩 नव्या-सङ्कलकस्य प्रतीक्षायाम्... (Waiting for Compiler...)</pre>
                 </div>
 
-                <!-- LIVE UI (DARSHANAM) -->
-                <div class="glass p-6 rounded-2xl flex-1 min-h-[300px]">
-                    <h2 class="text-blue-400 font-bold mb-4 flex items-center gap-2">
-                        <span>🎨</span> साक्षात्-दर्शनम् (LIVE UI)
-                    </h2>
-                    <div id="sul-root" class="bg-black/30 rounded-xl p-4 min-h-[200px] border border-white/5"></div>
+                <!-- BOTTOM SECTION: LIVE UI (DARSHANAM) -->
+                <div class="glass p-6 rounded-2xl flex-1 min-h-[300px] shadow-lg border border-white/10 flex flex-col" title="Live UI Preview generated by the Compiler">
+                    <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
+                        <h2 class="text-blue-400 font-bold flex items-center gap-2">
+                            <span>🎨</span> साक्षात्-दर्शनम् (LIVE UI)
+                        </h2>
+                    </div>
+                    <!-- Root container where `createDrishyam` will inject HTML elements -->
+                    <div id="sul-root" class="bg-black/30 rounded-xl p-4 min-h-[250px] border border-white/5 flex-1 overflow-y-auto relative">
+                        <div class="absolute inset-0 flex items-center justify-center text-slate-500/50 pointer-events-none">UI Preview Area</div>
+                    </div>
                 </div>
             </div>
         </div>
