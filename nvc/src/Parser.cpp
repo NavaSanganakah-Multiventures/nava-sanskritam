@@ -480,7 +480,14 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforc
             Token key = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: गुण-नाम अपेक्षितम् ");
             if (match(TokenType::PUNCTUATION, ":")) {
                 if (key.value == "नाम" || key.value == "label") {
-                    element->label = consume(TokenType::STRING, "व्याकरण-त्रुटिः: पाठ्य-नाम अपेक्षितम् ").value;
+                    if (check(TokenType::STRING)) {
+                        auto lit = std::make_unique<Literal>();
+                        lit->value = consume(TokenType::STRING, "").value;
+                        lit->isString = true;
+                        element->label = std::move(lit);
+                    } else {
+                        element->label = parseExpression();
+                    }
                 } else if (key.value == "रङ्गः" || key.value == "रंग" || key.value == "color") {
                     if (check(TokenType::STRING)) {
                          element->color = consume(TokenType::STRING, "").value;

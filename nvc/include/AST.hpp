@@ -159,7 +159,7 @@ class DrishyamElement : public Statement {
 public:
     std::string type; // "Button", "Text", "Box", "List", "Image", "Input"
     std::vector<std::unique_ptr<Expression>> pos; // x, y, w, h
-    std::string label;
+    std::unique_ptr<Expression> label;
     std::string color;
     std::string source; // For Image/Media
     std::vector<std::unique_ptr<DrishyamElement>> children; // Recursive nesting

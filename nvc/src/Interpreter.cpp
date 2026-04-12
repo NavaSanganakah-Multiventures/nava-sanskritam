@@ -283,7 +283,11 @@ std::string Interpreter::serializeUI(DrishyamElement* element) {
     if (!element) return "{}";
     std::string json = "{\n";
     json += "  \"type\": \"" + element->type + "\",\n";
-    json += "  \"label\": \"" + element->label + "\",\n";
+    std::string labelStr = "";
+    if (element->label) {
+        labelStr = evaluateExpression(element->label.get());
+    }
+    json += "  \"label\": \"" + labelStr + "\",\n";
     json += "  \"color\": \"" + element->color + "\",\n";
     json += "  \"source\": \"" + element->source + "\",\n";
     json += "  \"children\": [\n";
