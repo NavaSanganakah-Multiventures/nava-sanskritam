@@ -12,7 +12,7 @@ std::unique_ptr<Program> Parser::parse() {
     return program;
 }
 
-std::string Parser::stripVibhakti(std::string id, std::string* role) {
+std::string Parser::stripVibhakti(std::string id, std::string* role, int* vachana, std::string* ling) {
     std::u32string u32id = grammar.toUtf32(id);
     Grammar::WordMeta meta = grammar.analyzeSubanta(u32id);
     
@@ -26,6 +26,16 @@ std::string Parser::stripVibhakti(std::string id, std::string* role) {
             case Grammar::Vibhakti::SHASHTI: *role = "Shashti"; break;
             case Grammar::Vibhakti::SAPTAMI: *role = "Adhikarana"; break;
             default: *role = "None"; break;
+        }
+    }
+    
+    if (vachana) *vachana = meta.vachana;
+    if (ling) {
+        switch (meta.ling) {
+            case Grammar::Ling::PULLINGA: *ling = "Pullinga"; break;
+            case Grammar::Ling::STRILINGA: *ling = "Strilinga"; break;
+            case Grammar::Ling::NAPUNSAKA: *ling = "Napunsaka"; break;
+            default: *ling = "Unknown"; break;
         }
     }
     
@@ -101,7 +111,7 @@ std::unique_ptr<VariableDeclaration> Parser::parseVariableDeclaration() {
     consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
 
     auto decl = std::make_unique<VariableDeclaration>();
-    decl->id = stripVibhakti(idToken.value, nullptr);
+    decl->id = stripVibhakti(idToken.value, nullptr, &decl->vachana, &decl->ling);
     decl->init = std::move(init);
     return decl;
 }
@@ -113,7 +123,7 @@ std::unique_ptr<ConstantDeclaration> Parser::parseConstantDeclaration() {
     consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
 
     auto decl = std::make_unique<ConstantDeclaration>();
-    decl->id = stripVibhakti(idToken.value, nullptr);
+    decl->id = stripVibhakti(idToken.value, nullptr, &decl->vachana, &decl->ling);
     decl->init = std::move(init);
     return decl;
 }
@@ -371,6 +381,13 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
             default: expr->role = "None"; break;
         }
         expr->vachana = meta.vachana;
+        
+        switch (meta.ling) {
+            case Grammar::Ling::PULLINGA: expr->ling = "Pullinga"; break;
+            case Grammar::Ling::STRILINGA: expr->ling = "Strilinga"; break;
+            case Grammar::Ling::NAPUNSAKA: expr->ling = "Napunsaka"; break;
+            default: expr->ling = "Unknown"; break;
+        }
 
         // SUL v12.0: Native Shashti (Genitive) Property Access
         if (expr->role == "Shashti") {

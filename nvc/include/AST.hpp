@@ -56,6 +56,7 @@ public:
     std::string id;
     std::unique_ptr<Expression> init;
     int vachana = 1;
+    std::string ling = "Unknown";
     ASTNodeType getType() const override { return ASTNodeType::VariableDeclaration; }
 };
 
@@ -64,6 +65,7 @@ public:
     std::string id;
     std::unique_ptr<Expression> init;
     int vachana = 1;
+    std::string ling = "Unknown";
     ASTNodeType getType() const override { return ASTNodeType::ConstantDeclaration; }
 };
 
@@ -128,7 +130,8 @@ class Identifier : public Expression {
 public:
     std::string name;
     std::string role; // "Karta", "Karma", "Shashti", etc.
-    int vachana;      // 1: single, 2: dual, 3: plural
+    int vachana = 1;  // 1: single, 2: dual, 3: plural
+    std::string ling = "Unknown";
     ASTNodeType getType() const override { return ASTNodeType::Identifier; }
 };
 

@@ -30,6 +30,13 @@ public:
         PANCHAMI, SHASHTI, SAPTAMI, SAMBODHANA, UNKNOWN 
     };
 
+    enum class Ling {
+        PULLINGA,   // Masculine
+        STRILINGA,  // Feminine
+        NAPUNSAKA,  // Neuter
+        UNKNOWN
+    };
+
     enum class SupPratyaya {
         SU, AU, JAS, AM, AUT, SHAS, TA, BHYAM, BHIS, 
         NGE, BHYAM2, BHYAS, NGASI, BHYAM3, BHYAS2, 
@@ -49,6 +56,7 @@ public:
         Vibhakti vibhakti;
         SupPratyaya pratyaya;
         int vachana; // 1: singular, 2: dual, 3: plural
+        Ling ling;
     };
 
     struct VerbMeta {
@@ -62,6 +70,7 @@ public:
 
     static WordMeta analyzeSubanta(const std::u32string& word);
     static VerbMeta analyzeTinanta(const std::u32string& word);
+    static std::vector<std::u32string> analyzeSamas(const std::u32string& word);
     static std::u32string processAnubandha(SupPratyaya p);
     static std::u32string applyVikarana(std::u32string root, Gana g);
     static std::u32string toUtf32(const std::string& utf8);

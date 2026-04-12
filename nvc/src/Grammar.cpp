@@ -303,40 +303,43 @@ std::u32string Grammar::processAnubandha(SupPratyaya p) {
 }
 
 Grammar::WordMeta Grammar::analyzeSubanta(const std::u32string& word) {
-    WordMeta meta = { word, Vibhakti::PRATHAMA, SupPratyaya::SU, 1 };
+    WordMeta meta = { word, Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::UNKNOWN };
     if (word.empty()) return meta;
 
     // Ordered list of Pada-Siddhi transformations (v12.0 Table)
-    struct SuffixMap { std::u32string transformed; Vibhakti v; SupPratyaya p; int n; };
+    struct SuffixMap { std::u32string transformed; Vibhakti v; SupPratyaya p; int n; Ling l; };
     static const std::vector<SuffixMap> suffixes = {
         // Prathama (Karta)
-        { U"ः", Vibhakti::PRATHAMA, SupPratyaya::SU, 1 },
-        { U"औ", Vibhakti::PRATHAMA, SupPratyaya::AU, 2 },
-        { U"आः", Vibhakti::PRATHAMA, SupPratyaya::JAS, 3 },
+        { U"ः", Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::PULLINGA },
+        { U"औ", Vibhakti::PRATHAMA, SupPratyaya::AU, 2, Ling::PULLINGA },
+        { U"आः", Vibhakti::PRATHAMA, SupPratyaya::JAS, 3, Ling::PULLINGA },
+        { U"आ", Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::STRILINGA },
+        { U"ई", Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::STRILINGA },
+        { U"अम्", Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::NAPUNSAKA },
         // Dwitiya (Karma)
-        { U"म्", Vibhakti::DWITIYA, SupPratyaya::AM, 1 },
-        { U"औ", Vibhakti::DWITIYA, SupPratyaya::AUT, 2 },
-        { U"आन्", Vibhakti::DWITIYA, SupPratyaya::SHAS, 3 },
+        { U"म्", Vibhakti::DWITIYA, SupPratyaya::AM, 1, Ling::NAPUNSAKA },
+        { U"औ", Vibhakti::DWITIYA, SupPratyaya::AUT, 2, Ling::PULLINGA },
+        { U"आन्", Vibhakti::DWITIYA, SupPratyaya::SHAS, 3, Ling::PULLINGA },
         // Tritiya (Karana)
-        { U"एण", Vibhakti::TRITIYA, SupPratyaya::TA, 1 },
-        { U"आभ्याम्", Vibhakti::TRITIYA, SupPratyaya::BHYAM, 2 },
-        { U"ऐः", Vibhakti::TRITIYA, SupPratyaya::BHIS, 3 },
+        { U"एण", Vibhakti::TRITIYA, SupPratyaya::TA, 1, Ling::PULLINGA },
+        { U"आभ्याम्", Vibhakti::TRITIYA, SupPratyaya::BHYAM, 2, Ling::PULLINGA },
+        { U"ऐः", Vibhakti::TRITIYA, SupPratyaya::BHIS, 3, Ling::PULLINGA },
         // Chaturthi (Sampradana)
-        { U"आय", Vibhakti::CHATURTHI, SupPratyaya::NGE, 1 },
-        { U"आभ्याम्", Vibhakti::CHATURTHI, SupPratyaya::BHYAM2, 2 },
-        { U"एभ्यः", Vibhakti::CHATURTHI, SupPratyaya::BHYAS, 3 },
+        { U"आय", Vibhakti::CHATURTHI, SupPratyaya::NGE, 1, Ling::PULLINGA },
+        { U"आभ्याम्", Vibhakti::CHATURTHI, SupPratyaya::BHYAM2, 2, Ling::PULLINGA },
+        { U"एभ्यः", Vibhakti::CHATURTHI, SupPratyaya::BHYAS, 3, Ling::PULLINGA },
         // Panchami (Apadana)
-        { U"आत्", Vibhakti::PANCHAMI, SupPratyaya::NGASI, 1 },
-        { U"आभ्याम्", Vibhakti::PANCHAMI, SupPratyaya::BHYAM3, 2 },
-        { U"एभ्यः", Vibhakti::PANCHAMI, SupPratyaya::BHYAS2, 3 },
+        { U"आत्", Vibhakti::PANCHAMI, SupPratyaya::NGASI, 1, Ling::PULLINGA },
+        { U"आभ्याम्", Vibhakti::PANCHAMI, SupPratyaya::BHYAM3, 2, Ling::PULLINGA },
+        { U"एभ्यः", Vibhakti::PANCHAMI, SupPratyaya::BHYAS2, 3, Ling::PULLINGA },
         // Shashti (Pointer Access)
-        { U"स्य", Vibhakti::SHASHTI, SupPratyaya::NGAS, 1 },
-        { U"योः", Vibhakti::SHASHTI, SupPratyaya::OS, 2 },
-        { U"आणाम्", Vibhakti::SHASHTI, SupPratyaya::AM2, 3 },
+        { U"स्य", Vibhakti::SHASHTI, SupPratyaya::NGAS, 1, Ling::PULLINGA },
+        { U"योः", Vibhakti::SHASHTI, SupPratyaya::OS, 2, Ling::PULLINGA },
+        { U"आणाम्", Vibhakti::SHASHTI, SupPratyaya::AM2, 3, Ling::PULLINGA },
         // Saptami (Base Allocator)
-        { U"ए", Vibhakti::SAPTAMI, SupPratyaya::NGI, 1 },
-        { U"योः", Vibhakti::SAPTAMI, SupPratyaya::OS2, 2 },
-        { U"एषु", Vibhakti::SAPTAMI, SupPratyaya::SUP, 3 }
+        { U"ए", Vibhakti::SAPTAMI, SupPratyaya::NGI, 1, Ling::PULLINGA },
+        { U"योः", Vibhakti::SAPTAMI, SupPratyaya::OS2, 2, Ling::PULLINGA },
+        { U"एषु", Vibhakti::SAPTAMI, SupPratyaya::SUP, 3, Ling::PULLINGA }
     };
 
     for (const auto& s : suffixes) {
@@ -345,9 +348,35 @@ Grammar::WordMeta Grammar::analyzeSubanta(const std::u32string& word) {
             meta.vibhakti = s.v;
             meta.pratyaya = s.p;
             meta.vachana = s.n;
+            meta.ling = s.l;
             return meta;
         }
     }
 
     return meta;
+}
+
+std::vector<std::u32string> Grammar::analyzeSamas(const std::u32string& word) {
+    // SUL v19.0: Basic Samas-Vigraha (Splitting)
+    // For now, look for a join point where a common root ends.
+    // This is a stub for a more complex dictionary-based splitter.
+    std::vector<std::u32string> parts;
+    if (word.length() < 4) {
+        parts.push_back(word);
+        return parts;
+    }
+    
+    // Check for 'Deva-Alaya' like joins or vowel combinations
+    // Just a placeholder split for now:
+    for (size_t i = 2; i < word.length() - 2; ++i) {
+        // Mock logic: split at common vowel junctions if word is long
+        if (word[i] == 0x093E || word[i] == 0x0940) { // AA or II
+             parts.push_back(word.substr(0, i));
+             parts.push_back(word.substr(i));
+             return parts;
+        }
+    }
+
+    parts.push_back(word);
+    return parts;
 }

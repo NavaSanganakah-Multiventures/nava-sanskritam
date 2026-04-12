@@ -141,7 +141,13 @@ llvm::Value* CodeGen::generateVariableDeclaration(VariableDeclaration* node) {
     }
 
     llvm::AllocaInst* alloca = createEntryBlockAlloca(theFunction, node->id);
-    // Explicitly re-create alloca if type is different
+    // Explicitly re-create alloca if type is different (SUL v12.0)
+    // Gender (Ling) based memory optimization: Napunsaka types can be smaller if needed
+    if (node->ling == "Napunsaka" && node->vachana == 1) {
+        // Example: Napunsaka singular might use float instead of double to save space
+        // For now, keep as double but this hook exists for optimization
+    }
+
     if (allocType != llvm::Type::getDoubleTy(*context)) {
         llvm::IRBuilder<> tmpBuilder(&theFunction->getEntryBlock(), theFunction->getEntryBlock().begin());
         alloca = tmpBuilder.CreateAlloca(allocType, nullptr, node->id);
@@ -500,7 +506,8 @@ llvm::Value* CodeGen::generateFunctionDeclaration(FunctionDeclaration* node) {
 }
 
 llvm::Value* CodeGen::generateDarshanamBlock(DarshanamBlock* node) {
-    // SUL UI Factory Call: SUL_UI_CreateWindow(id)
+    // SUL v20.0: Native Darshanam UI Factory
+    // Ensure we are calling the native Window Factory, not a web stub.
     llvm::Function* createWin = module->getFunction("SUL_UI_CreateWindow");
     if (!createWin) {
         std::vector<llvm::Type*> args = { llvm::PointerType::getUnqual(*context) };

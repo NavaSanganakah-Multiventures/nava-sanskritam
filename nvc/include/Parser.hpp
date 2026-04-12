@@ -23,7 +23,7 @@ private:
     Token advance();
     Token consume(TokenType type, const std::string& message, const std::string& value = "");
 
-    std::string stripVibhakti(std::string id, std::string* role);
+    std::string stripVibhakti(std::string id, std::string* role = nullptr, int* vachana = nullptr, std::string* ling = nullptr);
 
     std::unique_ptr<Statement> parseStatement();
     std::unique_ptr<FunctionDeclaration> parseFunctionDeclaration();
