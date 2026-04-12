@@ -14,6 +14,7 @@ private:
     std::vector<Token> tokens;
     size_t pos;
     Grammar grammar;
+    std::unordered_map<std::string, bool> isStringSymbol;
 
     bool isAtEnd() const;
     Token peek() const;

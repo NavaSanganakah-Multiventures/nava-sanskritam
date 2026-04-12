@@ -1,0 +1,18 @@
+// 🚩 Nava Sanskritam: Vyakaran-Strict Enforcement Test 🚩
+
+// १. शुद्ध-प्रयोगः (Valid: Sanskrit name in Prathama + Number)
+अस्ति मूल्यम् = १०८;
+
+// २. शुद्ध-प्रयोगः (Valid: Sanskrit name in Prathama + String)
+अस्ति सन्देशः = "नमस्ते विश्वम्";
+
+// ३. अशुद्ध-प्रयोगः: प्रकार-भेदः (Invalid: Number variable getting String)
+// मूल्यम् = "त्रुटिः"; // Uncomment to see Type Mismatch Error
+
+// ४. अशुद्ध-प्रयोगः: नाम-भेदः (Invalid: English names blocked)
+// अस्ति x = 5; // Uncomment to see Naming Error
+
+// ५. अशुद्ध-प्रयोगः: विभक्ति-भेदः (Invalid: Non-Prathama names blocked)
+// अस्ति बालकेन = 5; // Uncomment to see Grammatical Case Error
+
+वद("व्याकरण-शुद्धता-परीक्षणम् पूर्णम्।");

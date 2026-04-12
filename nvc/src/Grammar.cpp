@@ -302,6 +302,22 @@ std::u32string Grammar::processAnubandha(SupPratyaya p) {
     }
 }
 
+bool Grammar::isPureSanskrit(const std::u32string& word) {
+    for (char32_t c : word) {
+        // Devanagari range is U+0900 to U+097F
+        if (c < 0x0900 || c > 0x097F) return false;
+    }
+    return !word.empty();
+}
+
+bool Grammar::isValidVyakaranName(const std::u32string& word) {
+    if (!isPureSanskrit(word)) return false;
+    WordMeta meta = analyzeSubanta(word);
+    // Ideally variable names should be in Prathama (Nominative)
+    // to represent a "thing" or "entity" in the grammar system.
+    return meta.vibhakti == Vibhakti::PRATHAMA;
+}
+
 Grammar::WordMeta Grammar::analyzeSubanta(const std::u32string& word) {
     WordMeta meta = { word, Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::UNKNOWN };
     if (word.empty()) return meta;

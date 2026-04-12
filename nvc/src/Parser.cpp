@@ -106,6 +106,13 @@ std::unique_ptr<VariableDeclaration> Parser::parseVariableDeclaration() {
     } else {
         throw std::runtime_error("व्याकरण-त्रुटिः: 'अस्ति' पदानन्तरं चर-नाम अपेक्षितम् ");
     }
+
+    std::u32string u32id = grammar.toUtf32(idToken.value);
+    if (!grammar.isValidVyakaranName(u32id)) {
+        throw std::runtime_error("व्याकरण-त्रुटिः: '" + idToken.value + "' अशुद्धं नाम (Grammatically invalid name). " +
+                                 "नाम केवलं संस्कृत-देवनागरी-लिप्यां प्रथमा-विभक्तौ एव भवेत्।");
+    }
+
     consume(TokenType::OPERATOR, "व्याकरण-त्रुटिः: '=' अपेक्षितम् ", "=");
     auto init = parseExpression();
     consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: ';' अपेक्षितम् ", ";");
@@ -113,6 +120,16 @@ std::unique_ptr<VariableDeclaration> Parser::parseVariableDeclaration() {
     auto decl = std::make_unique<VariableDeclaration>();
     decl->id = stripVibhakti(idToken.value, nullptr, &decl->vachana, &decl->ling);
     decl->init = std::move(init);
+
+    // Strict Type Tracking
+    bool isStr = false;
+    if (decl->init->getType() == ASTNodeType::Literal) {
+        isStr = static_cast<Literal*>(decl->init.get())->isString;
+    } else if (decl->init->getType() == ASTNodeType::Identifier) {
+        isStr = isStringSymbol[static_cast<Identifier*>(decl->init.get())->name];
+    }
+    isStringSymbol[decl->id] = isStr;
+
     return decl;
 }
 
@@ -252,6 +269,20 @@ std::unique_ptr<Statement> Parser::parseExpressionStatement() {
             throw std::runtime_error("व्याकरण-त्रुटिः: अमान्यः निर्देशः ");
         }
         
+        bool isStr = false;
+        if (right->getType() == ASTNodeType::Literal) {
+            isStr = static_cast<Literal*>(right.get())->isString;
+        } else if (right->getType() == ASTNodeType::Identifier) {
+            isStr = isStringSymbol[static_cast<Identifier*>(right.get())->name];
+        }
+
+        if (isStringSymbol.count(assign->left) && isStringSymbol[assign->left] != isStr) {
+            std::string expected = isStringSymbol[assign->left] ? "पाठ्यांशः (String)" : "संख्या (Number)";
+            std::string actual = isStr ? "पाठ्यांशः (String)" : "संख्या (Number)";
+            throw std::runtime_error("व्याकरण-त्रुटिः: '" + assign->left + "' प्रकार-भेदः (Type Mismatch). " +
+                                     "अपेक्षितम्: " + expected + ", किन्तु प्राप्तम्: " + actual);
+        }
+
         assign->right = std::move(right);
         auto stmt = std::make_unique<ExpressionStatement>();
         stmt->expression = std::move(assign);

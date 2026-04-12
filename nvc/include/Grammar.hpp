@@ -68,6 +68,8 @@ public:
         Gana gana;
     };
 
+    static bool isPureSanskrit(const std::u32string& word);
+    static bool isValidVyakaranName(const std::u32string& word);
     static WordMeta analyzeSubanta(const std::u32string& word);
     static VerbMeta analyzeTinanta(const std::u32string& word);
     static std::vector<std::u32string> analyzeSamas(const std::u32string& word);
