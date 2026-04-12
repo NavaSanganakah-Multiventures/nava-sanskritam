@@ -541,7 +541,24 @@ llvm::Value* CodeGen::generateDrishyamElement(DrishyamElement* node) {
 
     std::vector<llvm::Value*> argsV;
     argsV.push_back(builder->CreateGlobalString(node->type));
-    argsV.push_back(builder->CreateGlobalString(node->label.empty() ? "" : node->label));
+    
+    // Evaluate Label Expression (SUL v21.0 Binding Logic)
+    llvm::Value* labelVal = nullptr;
+    if (node->label) {
+        labelVal = generateNode(node->label.get());
+        if (labelVal->getType()->isDoubleTy()) {
+            // Helper to convert Double to String at runtime
+            llvm::Function* toString = module->getFunction("SUL_Runtime_DoubleToString");
+            if (!toString) {
+                std::vector<llvm::Type*> args = { llvm::Type::getDoubleTy(*context) };
+                llvm::FunctionType* FT = llvm::FunctionType::get(llvm::PointerType::getUnqual(*context), args, false);
+                toString = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "SUL_Runtime_DoubleToString", module.get());
+            }
+            labelVal = builder->CreateCall(toString, { labelVal });
+        }
+    }
+    
+    argsV.push_back(labelVal ? labelVal : builder->CreateGlobalString(""));
     
     // Position
     if (node->pos.size() >= 2) {
@@ -594,7 +611,16 @@ void CodeGen::serializeUI(DrishyamElement* node, std::stringstream& ss, int inde
     std::string pad(indent, ' ');
     ss << pad << "{\n";
     ss << pad << "  \"type\": \"" << node->type << "\",\n";
-    ss << pad << "  \"label\": \"" << node->label << "\",\n";
+    
+    // Serialize Label (Literal string or placeholder for variables)
+    std::string labelStr = "";
+    if (node->label && node->label->getType() == ASTNodeType::Literal) {
+        labelStr = static_cast<Literal*>(node->label.get())->value;
+    } else if (node->label && node->label->getType() == ASTNodeType::Identifier) {
+        labelStr = "{" + static_cast<Identifier*>(node->label.get())->name + "}";
+    }
+    ss << pad << "  \"label\": \"" << labelStr << "\",\n";
+    
     ss << pad << "  \"color\": \"" << node->color << "\",\n";
     ss << pad << "  \"source\": \"" << node->source << "\",\n";
     
