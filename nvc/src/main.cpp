@@ -201,11 +201,6 @@ EM_JS(const char*, SUL_RestCall, (const char* url, const char* method), {
     }
     return 0;
 });
-#else
-extern "C" const char* SUL_RestCall(const char* url, const char* method) {
-    return "{\"error\": \"Offline - Networking not available in Desktop CLI\"}";
-}
-#endif
 
 extern "C" {
     EMSCRIPTEN_KEEPALIVE
@@ -229,5 +224,9 @@ extern "C" {
             return err.c_str();
         }
     }
+}
+#else
+extern "C" const char* SUL_RestCall(const char* url, const char* method) {
+    return "{\"error\": \"Offline - Networking not available in Desktop CLI\"}";
 }
 #endif
