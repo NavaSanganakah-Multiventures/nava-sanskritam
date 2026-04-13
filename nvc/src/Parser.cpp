@@ -109,7 +109,7 @@ std::unique_ptr<VariableDeclaration> Parser::parseVariableDeclaration() {
 
     std::u32string u32id = grammar.toUtf32(idToken.value);
     if (!grammar.isValidVyakaranName(u32id)) {
-        throw std::runtime_error("व्याकरण-त्रुटिः: '" + idToken.value + "' अशुद्धं नाम (Grammatically invalid name). " +
+        throw std::runtime_error("व्याकरण-त्रुटिः: '" + idToken.value + "' अशुद्धं नाम। " +
                                  "नाम केवलं संस्कृत-देवनागरी-लिप्यां प्रथमा-विभक्तौ एव भवेत्।");
     }
 
@@ -277,9 +277,9 @@ std::unique_ptr<Statement> Parser::parseExpressionStatement() {
         }
 
         if (isStringSymbol.count(assign->left) && isStringSymbol[assign->left] != isStr) {
-            std::string expected = isStringSymbol[assign->left] ? "पाठ्यांशः (String)" : "संख्या (Number)";
-            std::string actual = isStr ? "पाठ्यांशः (String)" : "संख्या (Number)";
-            throw std::runtime_error("व्याकरण-त्रुटिः: '" + assign->left + "' प्रकार-भेदः (Type Mismatch). " +
+            std::string expected = isStringSymbol[assign->left] ? "पाठ्यांशः" : "संख्या";
+            std::string actual = isStr ? "पाठ्यांशः" : "संख्या";
+            throw std::runtime_error("व्याकरण-त्रुटिः: '" + assign->left + "' प्रकार-भेदः। " +
                                      "अपेक्षितम्: " + expected + ", किन्तु प्राप्तम्: " + actual);
         }
 
@@ -508,6 +508,10 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforc
 
     if (match(TokenType::PUNCTUATION, "(")) {
         while (!check(TokenType::PUNCTUATION, ")")) {
+            if (check(TokenType::NUMBER)) {
+                advance();
+                if (match(TokenType::PUNCTUATION, ",")) continue;
+            } else {
             Token key = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: गुण-नाम अपेक्षितम् ");
             if (match(TokenType::PUNCTUATION, ":")) {
                 if (key.value == "नाम" || key.value == "label") {
@@ -527,6 +531,7 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforc
                 }
             } else {
                 // If it isn't a key:value pair, fallback for coordinates
+            }
             }
             if (match(TokenType::PUNCTUATION, ",")) continue;
         }

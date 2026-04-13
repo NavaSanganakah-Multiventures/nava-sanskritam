@@ -170,7 +170,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
     } else if (type == ASTNodeType::Assignment) {
         auto assign = static_cast<Assignment*>(expr);
         if (constants.count(assign->left)) {
-            throw std::runtime_error("त्रुटिः: नित्य-चरस्य मूल्यं अपरिवर्तनीयम् (Constant is immutable: " + assign->left + ")");
+            throw std::runtime_error("त्रुटिः: नित्य-चरस्य मूल्यं अपरिवर्तनीयम् (" + assign->left + ")");
         }
         std::string val = evaluateExpression(assign->right.get());
         environment[assign->left] = val;
@@ -253,9 +253,9 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                 }
                 // Native Fetch Bridge
                 const char* res = SUL_RestCall(url.c_str(), method.c_str());
-                return res ? std::string(res) : "सम्पर्क-विफलम् (Network Error)";
+                return res ? std::string(res) : "सम्पर्क-विफलम्";
             }
-            return "त्रुटिः: आह्वान-विधौ सङ्केतः अपेक्षितः (URL required)";
+            return "त्रुटिः: आह्वान-विधौ सङ्केतः अपेक्षितः";
         } else {
             if (functions.find(call->callee->name) != functions.end()) {
                 auto funcDecl = functions[call->callee->name];
@@ -277,7 +277,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                 environment = oldEnv;
                 return result;
             }
-            return "Call to " + call->callee->name;
+            return "आह्वानम् " + call->callee->name;
         }
     }
     return "";

@@ -61,7 +61,7 @@ function createDrishyam(node) {
 async function initSUL() {
     try { const response = await fetch('darshanam.json'); const data = await response.json(); const root = document.getElementById('sul-root');
         data.forEach(d => { const c = document.createElement("div"); c.id = d.id; c.className = "w-full max-w-4xl mx-auto py-10"; d.elements.forEach(e => { c.appendChild(createDrishyam(e)); }); root.appendChild(c); });
-    } catch (err) { console.error("SUL Runtime Error:", err); }
+    } catch (err) { console.error("SUL चालन-त्रुटिः:", err); }
 }
 window.onload = initSUL;
 )JS";
@@ -202,7 +202,7 @@ EM_JS(const char*, SUL_RestCall, (const char* url, const char* method), {
             return ptr;
         }
     } catch (e) {
-        console.error("Nava Sanskritam API Error:", e);
+        console.error("नव-संस्कृतम् API-त्रुटिः:", e);
     }
     return 0;
 });

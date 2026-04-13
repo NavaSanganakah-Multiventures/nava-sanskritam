@@ -12,4 +12,4 @@
 अस्ति ख = कस्य + १०; // Using Declined form in expression
 वद(ख);
 
-"सुप्रुत्पन्नः! (Sup Pratyayas identified)" वद;
+वद("सुप्रुत्पन्नः! (Sup Pratyayas identified)");
