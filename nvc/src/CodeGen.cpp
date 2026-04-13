@@ -318,7 +318,7 @@ llvm::Value* CodeGen::generateBinaryExpression(BinaryExpression* node) {
     if (node->op == "==") return builder->CreateFCmpUEQ(L, R, "cmptmp");
     if (node->op == "!=") return builder->CreateFCmpUNE(L, R, "cmptmp");
     if (node->op == "^") {
-        #if LLVM_VERSION_MAJOR >= 18
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* powF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
 #else
         llvm::Function* powF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
@@ -435,7 +435,7 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         builder->SetInsertPoint(failBB);
         
         // Native Trap / Panic
-        #if LLVM_VERSION_MAJOR >= 18
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* trap = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::trap);
 #else
         llvm::Function* trap = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::trap);
@@ -449,7 +449,7 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
 
     // SUL v18.0: Native Math Intrinsics (Jya, Kojya, Vargamulam)
     if (mangledName == "ज्या" || mangledName == "jya") {
-        #if LLVM_VERSION_MAJOR >= 18
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* sinF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
 #else
         llvm::Function* sinF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
@@ -457,7 +457,7 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         return builder->CreateCall(sinF, {argsV[0]}, "sintmp");
     }
     if (mangledName == "कोज्या" || mangledName == "kojya") {
-        #if LLVM_VERSION_MAJOR >= 18
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* cosF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
 #else
         llvm::Function* cosF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
@@ -465,7 +465,7 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         return builder->CreateCall(cosF, {argsV[0]}, "costmp");
     }
     if (mangledName == "वर्गमूलम्" || mangledName == "vargamulam") {
-        #if LLVM_VERSION_MAJOR >= 18
+#if LLVM_VERSION_MAJOR >= 18
         llvm::Function* sqrtF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
 #else
         llvm::Function* sqrtF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
