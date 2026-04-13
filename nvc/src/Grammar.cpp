@@ -255,6 +255,8 @@ char32_t Grammar::getSavarnaLong(char32_t c) {
     return c;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 std::u32string Grammar::toUtf32(const std::string& utf8) {
     try {
         std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
@@ -272,6 +274,7 @@ std::string Grammar::toUtf8(const std::u32string& utf32) {
         return ""; // Fallback to empty
     }
 }
+#pragma GCC diagnostic pop
 
 std::u32string Grammar::processAnubandha(SupPratyaya p) {
     // SUL v12.0: Pāṇinian Anubandha-Lopa (It-removal)

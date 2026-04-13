@@ -29,8 +29,9 @@ if (EMSCRIPTEN)
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Interpreter.cpp)
     add_executable(nvc ${SRC_FILES})
     
-    # Export compileSanskrit to JS and allow cwrap/UTF8ToString
-    set_target_properties(nvc PROPERTIES LINK_FLAGS "-fexceptions -s DISABLE_EXCEPTION_CATCHING=0 -s ASSERTIONS=1 -s EXPORTED_RUNTIME_METHODS=['cwrap','UTF8ToString'] -s EXPORTED_FUNCTIONS=['_compileSanskrit'] -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME='NavaCompiler' -s ENVIRONMENT='web,worker,node'")
+    # Optimization and Size reduction for WASM
+    set_target_properties(nvc PROPERTIES LINK_FLAGS "-fexceptions -O3 -s DISABLE_EXCEPTION_CATCHING=0 -s ASSERTIONS=0 -s EXPORTED_RUNTIME_METHODS=['cwrap','UTF8ToString'] -s EXPORTED_FUNCTIONS=['_compileSanskrit'] -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME='NavaCompiler' -s ENVIRONMENT='web,worker,node'")
+    target_compile_options(nvc PRIVATE -O3 -Os)
 else()
     set(SRC_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp

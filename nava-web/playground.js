@@ -82,29 +82,32 @@ function createDrishyam(node) {
     const type = node.type.toLowerCase(); 
     let el;
     
+    // Premium UI Styling Tokens
+    const baseStyle = "transition-all duration-300 transform ";
+    
     if (type === "box" || type === "मंजूषा") { 
         el = document.createElement("div"); 
-        el.className = `p-8 rounded-3xl shadow-2xl flex flex-col gap-6 m-2 transition-all duration-500 ${colorMap[node.color] || "bg-white/10 backdrop-blur-xl border border-white/20"}`; 
+        el.className = `${baseStyle} p-10 rounded-[2.5rem] shadow-2xl flex flex-col gap-6 m-4 backdrop-blur-2xl border border-white/10 ${colorMap[node.color] || "bg-white/5"}`; 
     }
     else if (type === "button" || type === "बटनम्") { 
         el = document.createElement("button"); 
-        el.innerText = node.label || node.name || "बटनम्"; 
-        el.className = `px-8 py-4 rounded-2xl font-bold transition-all shadow-lg hover:shadow-2xl hover:scale-105 active:scale-95 ${colorMap[node.color] || "bg-amber-500 text-black"}`; 
+        el.innerText = node.label || "बटनम्"; 
+        el.className = `${baseStyle} px-10 py-5 rounded-2xl font-bold tracking-widest shadow-xl hover:shadow-cyan-500/20 hover:scale-[1.02] active:scale-95 ${colorMap[node.color] || "bg-gradient-to-r from-cyan-600 to-blue-700 text-white"}`; 
     }
     else if (type === "text" || type === "पाठः" || type === "सूची") { 
         el = document.createElement("p"); 
-        el.innerText = node.label || node.name || "पाठः"; 
-        el.className = `text-xl font-semibold tracking-wide`; 
+        el.innerText = node.label || "पाठः"; 
+        el.className = `text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60`; 
     }
     else if (type === "image" || type === "चित्त्रम्") { 
         el = document.createElement("img"); 
-        el.src = node.source || node.स्रोतस || "https://api.placeholder.com/300x150"; 
-        el.className = "rounded-2xl object-cover shadow-2xl w-full max-w-lg h-auto border-4 border-white/10"; 
+        el.src = node.source || "https://api.placeholder.com/600x400"; 
+        el.className = "rounded-3xl object-cover shadow-2xl w-full border border-white/10 hover:border-cyan-500/30 transition-all"; 
     }
     else if (type === "input" || type === "प्रविष्टिः") { 
         el = document.createElement("input"); 
-        el.placeholder = node.label || node.name || "लिखतु..."; 
-        el.className = "px-6 py-4 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:ring-4 focus:ring-amber-500/50 transition-all placeholder:text-slate-500"; 
+        el.placeholder = node.label || "लिखतु..."; 
+        el.className = "px-8 py-5 rounded-2xl bg-black/40 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all placeholder:text-slate-500 text-lg"; 
     }
     else { 
         el = document.createElement("div"); 
