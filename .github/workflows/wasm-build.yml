@@ -49,3 +49,14 @@ jobs:
           else
             echo "No changes in WASM binaries, skipping push."
           fi
+
+      - name: Push to External Preview Repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: 'nava-web'
+          destination-github-username: 'navasanganakah'
+          destination-repository-name: 'ns-language-preview-view'
+          user-email: github-actions[bot]@users.noreply.github.com
+          target-branch: main
