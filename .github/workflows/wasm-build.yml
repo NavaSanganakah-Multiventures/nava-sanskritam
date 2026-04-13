@@ -35,8 +35,15 @@ jobs:
           cp nvc.js ../nava-web/nvc.js
           cp nvc.wasm ../nava-web/nvc.wasm
 
-      - name: Upload NVC Web Playground Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: nvc-web-playground
-          path: nava-web/
+      - name: Deploy WASM to Repository
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add nava-web/nvc.js nava-web/nvc.wasm
+          # Only commit if there are changes to avoid empty commits
+          if [ -n "$(git status --porcelain nava-web/)" ]; then
+            git commit -m "build: update WASM binaries for playground [skip ci]"
+            git push
+          else
+            echo "No changes in WASM binaries, skipping push."
+          fi
