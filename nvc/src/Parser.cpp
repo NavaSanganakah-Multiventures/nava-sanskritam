@@ -543,6 +543,14 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforc
                 element->children.push_back(parseSuchiElement());
             } else if (match(TokenType::KEYWORD, "चित्त्रम्")) {
                 element->children.push_back(parseChittramElement());
+            } else if (match(TokenType::KEYWORD, "चलच्चित्रम्")) {
+                element->children.push_back(parseDrishyamElement("Video"));
+            } else if (match(TokenType::KEYWORD, "अभिलेखः")) {
+                element->children.push_back(parseDrishyamElement("Document"));
+            } else if (match(TokenType::KEYWORD, "समयः")) {
+                element->children.push_back(parseDrishyamElement("Clock"));
+            } else if (match(TokenType::KEYWORD, "कालमापकः")) {
+                element->children.push_back(parseDrishyamElement("Timer"));
             } else if (match(TokenType::KEYWORD, "प्रविष्टिः")) {
                 element->children.push_back(parsePrashtihElement());
             } else if (match(TokenType::IDENTIFIER, "पाठः")) {

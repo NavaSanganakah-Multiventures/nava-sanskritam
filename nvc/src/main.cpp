@@ -41,6 +41,7 @@ const char* SUL_WEB_TEMPLATE = R"HTML(
 const char* SUL_RUNTIME_JS = R"JS(
 const colorMap = { "रक्तवर्णः": "bg-red-500 text-white", "नीलवर्णः": "bg-blue-600 text-white", "श्वेतवर्णः": "bg-white text-black border border-gray-200", "हरितवर्णः": "bg-green-500 text-white", "पीतवर्णः": "bg-yellow-400 text-black", "कृष्णवर्णः": "bg-black text-white", "None": "" };
 const textColorMap = { "रक्तवर्णः": "text-red-500", "नीलवर्णः": "text-blue-600", "श्वेतवर्णः": "text-white", "कृष्णवर्णः": "text-black" };
+const toDevanagari = (n) => n.toString().replace(/\d/g, d => "०१२३४५६७८९"[d]);
 function createDrishyam(node) {
     const type = node.type.toLowerCase(); let el;
     if (type === "box" || type === "मंजूषा") { el = document.createElement("div"); el.className = `p-6 rounded-2xl shadow-xl flex flex-col gap-4 m-2 transition-all duration-500 ${colorMap[node.color] || "bg-white/10 backdrop-blur-md border border-white/20"}`; }
@@ -48,6 +49,10 @@ function createDrishyam(node) {
     else if (type === "text" || type === "पाठः") { el = document.createElement("p"); el.innerText = node.label; el.className = `text-lg font-medium ${textColorMap[node.color] || "text-gray-200"}`; }
     else if (type === "image" || type === "चित्त्रम्") { el = document.createElement("img"); el.src = node.source || "https://api.placeholder.com/150"; el.className = "rounded-xl object-cover shadow-lg w-full max-w-md h-auto"; }
     else if (type === "input" || type === "प्रविष्टिः") { el = document.createElement("input"); el.placeholder = node.label || "लिखतु..."; el.className = "px-4 py-3 rounded-lg bg-white/5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"; }
+    else if (type === "video" || type === "चलच्चित्रम्") { el = document.createElement("video"); el.src = node.source; el.controls = true; el.className = "rounded-xl shadow-lg w-full max-w-md border border-white/10"; }
+    else if (type === "document" || type === "अभिलेखः") { el = document.createElement("iframe"); el.src = node.source; el.className = "w-full h-96 rounded-xl border border-white/20 shadow-2xl bg-white/5"; }
+    else if (type === "clock" || type === "समयः") { el = document.createElement("div"); el.className = `p-6 text-4xl font-bold font-mono tracking-widest text-center rounded-xl bg-black/40 border border-white/10 ${colorMap[node.color] || "text-blue-400"}`; const up = () => { const d = new Date(); const t = d.toLocaleTimeString('en-GB', { hour12: false }); el.innerText = toDevanagari(t); }; up(); setInterval(up, 1000); }
+    else if (type === "timer" || type === "कालमापकः") { el = document.createElement("div"); el.className = "text-2xl font-bold text-orange-500 animate-pulse"; el.innerText = "⏳ " + (node.label || "०:००"); }
     else if (type === "list" || type === "सूची") { el = document.createElement("div"); el.className = "flex flex-col gap-2 w-full"; }
     else { el = document.createElement("div"); el.innerText = "Unknown: " + node.type; el.className = "text-red-500"; }
     if (node.children) { node.children.forEach(child => { if (type === "list" || type === "सूची") { const w = document.createElement("div"); w.className = "p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-all cursor-pointer"; w.appendChild(createDrishyam(child)); el.appendChild(w); } else { el.appendChild(createDrishyam(child)); } }); }
