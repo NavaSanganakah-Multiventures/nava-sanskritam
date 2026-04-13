@@ -142,22 +142,22 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         
         double l, r;
         if (isNumeric(leftStr, l) && isNumeric(rightStr, r)) {
-            if (bin->op == "+") return std::to_string(l + r);
-            if (bin->op == "-") return std::to_string(l - r);
-            if (bin->op == "*") return std::to_string(l * r);
-            if (bin->op == "/") return std::to_string(l / r);
+            if (bin->op == "+") return Grammar::toDevanagariNumerals(l + r);
+            if (bin->op == "-") return Grammar::toDevanagariNumerals(l - r);
+            if (bin->op == "*") return Grammar::toDevanagariNumerals(l * r);
+            if (bin->op == "/") return Grammar::toDevanagariNumerals(l / r);
             
-            // Relational Operators
-            if (bin->op == ">") return (l > r) ? "1" : "0";
-            if (bin->op == "<") return (l < r) ? "1" : "0";
-            if (bin->op == ">=") return (l >= r) ? "1" : "0";
-            if (bin->op == "<=") return (l <= r) ? "1" : "0";
-            if (bin->op == "==") return (l == r) ? "1" : "0";
-            if (bin->op == "!=") return (l != r) ? "1" : "0";
+            // Relational Operators - Return Devanagari 1 for True, 0 for False
+            if (bin->op == ">") return (l > r) ? "१" : "०";
+            if (bin->op == "<") return (l < r) ? "१" : "०";
+            if (bin->op == ">=") return (l >= r) ? "१" : "०";
+            if (bin->op == "<=") return (l <= r) ? "१" : "०";
+            if (bin->op == "==") return (l == r) ? "१" : "०";
+            if (bin->op == "!=") return (l != r) ? "१" : "०";
         } else {
             if (bin->op == "+") return leftStr + rightStr; // string concat
-            if (bin->op == "==") return (leftStr == rightStr) ? "1" : "0";
-            if (bin->op == "!=") return (leftStr != rightStr) ? "1" : "0";
+            if (bin->op == "==") return (leftStr == rightStr) ? "१" : "०";
+            if (bin->op == "!=") return (leftStr != rightStr) ? "१" : "०";
         }
         return leftStr + bin->op + rightStr;
     } else if (type == ASTNodeType::Assignment) {

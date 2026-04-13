@@ -81,6 +81,10 @@ public:
     // Advanced Sandhi
     std::u32string applyVisargaSandhi(char32_t visarga, char32_t next);
 
+    // Numeral Conversion
+    static std::string toDevanagariNumerals(double val);
+    static std::string toDevanagariNumerals(const std::string& western);
+
 private:
     static const std::vector<std::u32string> shivaSutras;
     std::u32string utf8ToUtf32(const std::string& str);

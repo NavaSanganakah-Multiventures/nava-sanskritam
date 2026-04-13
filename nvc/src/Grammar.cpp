@@ -1,6 +1,7 @@
 #include "Grammar.hpp"
 #include <codecvt>
 #include <locale>
+#include <cstdio>
 
 const std::vector<std::u32string> Grammar::shivaSutras = {
     U"अइउण्", U"ऋलृक्", U"एओङ्", U"ऐऔच्", U"हयवरट्", U"लण्",
@@ -398,4 +399,38 @@ std::vector<std::u32string> Grammar::analyzeSamas(const std::u32string& word) {
 
     parts.push_back(word);
     return parts;
+}
+std::string Grammar::toDevanagariNumerals(double val) {
+    std::string s;
+    if (val == (long long)val) {
+        s = std::to_string((long long)val);
+    } else {
+        // Use clean formatting for decimals
+        char buf[64];
+        snprintf(buf, sizeof(buf), "%.4g", val); 
+        s = buf;
+    }
+    return toDevanagariNumerals(s);
+}
+
+std::string Grammar::toDevanagariNumerals(const std::string& western) {
+    std::string result = "";
+    for (char c : western) {
+        switch (c) {
+            case '0': result += "०"; break;
+            case '1': result += "१"; break;
+            case '2': result += "२"; break;
+            case '3': result += "३"; break;
+            case '4': result += "४"; break;
+            case '5': result += "५"; break;
+            case '6': result += "६"; break;
+            case '7': result += "७"; break;
+            case '8': result += "८"; break;
+            case '9': result += "९"; break;
+            case '.': result += "."; break;
+            case '-': result += "-"; break;
+            default: result += c; break;
+        }
+    }
+    return result;
 }
