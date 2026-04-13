@@ -41,7 +41,9 @@ void Interpreter::visit(ASTNode* node) {
         auto printStmt = static_cast<PrintStatement*>(node);
         std::string result = "";
         for (size_t i = 0; i < printStmt->expressions.size(); ++i) {
-            result += evaluateExpression(printStmt->expressions[i].get());
+            std::string val = evaluateExpression(printStmt->expressions[i].get());
+            // SUL v14.1: Final Output localization
+            result += Grammar::toDevanagariNumerals(val);
             if (i < printStmt->expressions.size() - 1) result += " ";
         }
         outputBuffer += result + "\n";
@@ -286,7 +288,8 @@ std::string Interpreter::serializeUI(DrishyamElement* element) {
     json += "  \"type\": \"" + element->type + "\",\n";
     std::string labelStr = "";
     if (element->label) {
-        labelStr = evaluateExpression(element->label.get());
+        // SUL v14.1: UI Label localization
+        labelStr = Grammar::toDevanagariNumerals(evaluateExpression(element->label.get()));
     }
     json += "  \"label\": \"" + labelStr + "\",\n";
     json += "  \"color\": \"" + element->color + "\",\n";
