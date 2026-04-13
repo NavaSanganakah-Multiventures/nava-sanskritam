@@ -179,6 +179,34 @@ int main(int argc, char* argv[]) {
 }
 
 #ifdef EMSCRIPTEN
+// EM_JS: Synchronous Fetch Bridge (Valid in Cloudflare/Web Workers)
+EM_JS(const char*, SUL_RestCall, (const char* url, const char* method), {
+    const urlStr = UTF8ToString(url);
+    const methodStr = UTF8ToString(method) || "GET";
+    
+    try {
+        const xhr = new XMLHttpRequest();
+        xhr.open(methodStr, urlStr, false); 
+        xhr.send(null);
+        
+        if (xhr.status >= 200 && xhr.status < 300) {
+            const res = xhr.responseText;
+            const length = lengthBytesUTF8(res) + 1;
+            const ptr = _malloc(length);
+            stringToUTF8(res, ptr, length);
+            return ptr;
+        }
+    } catch (e) {
+        console.error("Nava Sanskritam API Error:", e);
+    }
+    return 0;
+});
+#else
+extern "C" const char* SUL_RestCall(const char* url, const char* method) {
+    return "{\"error\": \"Offline - Networking not available in Desktop CLI\"}";
+}
+#endif
+
 extern "C" {
     EMSCRIPTEN_KEEPALIVE
     const char* compileSanskrit(const char* code) {

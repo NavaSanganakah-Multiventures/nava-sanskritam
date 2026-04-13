@@ -3,6 +3,10 @@
 #include <iostream>
 #include <cstdlib>
 
+extern "C" {
+    extern const char* SUL_RestCall(const char* url, const char* method);
+}
+
 static bool isNumeric(const std::string& str, double& out) {
     if (str.empty()) return false;
     char* end = nullptr;
@@ -240,6 +244,18 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                 }
             }
             return "0";
+        } else if (call->callee->name == "आह्वानम्") {
+            if (call->arguments.size() >= 1) {
+                std::string url = evaluateExpression(call->arguments[0].get());
+                std::string method = "GET";
+                if (call->arguments.size() >= 2) {
+                    method = evaluateExpression(call->arguments[1].get());
+                }
+                // Native Fetch Bridge
+                const char* res = SUL_RestCall(url.c_str(), method.c_str());
+                return res ? std::string(res) : "सम्पर्क-विफलम् (Network Error)";
+            }
+            return "त्रुटिः: आह्वान-विधौ सङ्केतः अपेक्षितः (URL required)";
         } else {
             if (functions.find(call->callee->name) != functions.end()) {
                 auto funcDecl = functions[call->callee->name];
