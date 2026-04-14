@@ -45,7 +45,7 @@ jobs:
           # Only commit if there are changes to avoid empty commits
           if [ -n "$(git status --porcelain nava-web/)" ]; then
             git commit -m "build: update WASM binaries for playground [skip ci]"
-            git push
+            git push origin HEAD:${{ github.ref_name }}
           else
             echo "No changes in WASM binaries, skipping push."
           fi
