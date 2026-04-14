@@ -11,6 +11,9 @@
 ## 🪷 Vedic Vision
 At **NavaSanganakah Multiventures**, we blend the ancient intelligence of Vedic sciences with modern high-performance computation. Panini's grammatical rules in the *Ashtadhyayi* lay out an algorithmic framework that predates modern computer science by millennia. 
 
+> [!TIP]
+> **🚩 विस्तृत मार्गदर्शिका (Detailed Guide):** [NAV_SANSKRITAM_GUIDE.md](file:///c:/Users/DHEERENDRA/Desktop/ns-language/NAV_SANSKRITAM_GUIDE.md) पर भाषा के सभी नियमों और घटकों (Components) की पूरी जानकारी प्राप्त करें।
+
 Nava Sanskritam (SUL) replaces standard sequential paradigms with concurrent, lakara-driven (tense-driven) async execution, vibhakti-based memory models, and native hardware compilation via **Nava Engine**.
 
 ## 🚀 The Nava Ecosystem

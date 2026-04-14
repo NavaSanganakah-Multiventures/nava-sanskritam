@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="sa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>मार्गदर्शिका | Nava Sanskritam Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Martel:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent: #f59e0b; --bg: #020617; }
+        body { background-color: var(--bg); color: #f8fafc; font-family: 'Outfit', sans-serif; overflow-x: hidden; }
+        .sanskrit { font-family: 'Martel', serif; }
+        .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); }
+        .sidebar-item:hover { background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent); }
+        .sidebar-item.active { background: rgba(245, 158, 11, 0.2); border-left: 4px solid var(--accent); }
+        code { font-family: 'Fira Code', monospace; color: #fbbf24; background: rgba(0,0,0,0.3); padding: 0.2rem 0.4rem; border-radius: 4px; }
+        pre { background: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem; overflow-x: auto; margin: 1.5rem 0; }
+        .glow-text { text-shadow: 0 0 20px rgba(245, 158, 11, 0.4); }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex">
+        <!-- SIDEBAR -->
+        <aside class="fixed left-0 top-0 h-screen w-72 glass border-r border-white/5 z-50 hidden lg:block overflow-y-auto">
+            <div class="p-8">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-xl font-bold text-black select-none">न</div>
+                    <span class="text-xl font-black tracking-tighter sanskrit">नव्या-docs</span>
+                </div>
+                
+                <nav class="space-y-1">
+                    <a href="#intro" class="sidebar-item active block px-4 py-3 rounded-r-lg transition-all font-medium text-slate-300 hover:text-white">परिचय (Introduction)</a>
+                    <a href="#founder" class="sidebar-item block px-4 py-3 rounded-r-lg transition-all font-medium text-slate-300 hover:text-white">संस्थापक (The Founder)</a>
+                    <a href="#logic" class="sidebar-item block px-4 py-3 rounded-r-lg transition-all font-medium text-slate-300 hover:text-white">अन्तः-करण (Logic)</a>
+                    <a href="#ui" class="sidebar-item block px-4 py-3 rounded-r-lg transition-all font-medium text-slate-300 hover:text-white">दर्शन-तन्त्रम् (UI)</a>
+                    <a href="#grammar" class="sidebar-item block px-4 py-3 rounded-r-lg transition-all font-medium text-slate-300 hover:text-white">व्याकरण (Grammar)</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="lg:ml-72 flex-1 p-8 lg:p-16">
+            <header class="flex justify-between items-center mb-16">
+                <a href="index.html" class="flex items-center gap-2 text-amber-500 hover:text-amber-400 font-bold transition-all">
+                    <span>←</span> क्रीडाङ्गणम् (Playground)
+                </a>
+            </header>
+
+            <section id="intro" class="max-w-4xl mb-24">
+                <span class="inline-block px-4 py-1 bg-amber-500/10 text-amber-500 text-xs font-bold tracking-widest uppercase mb-4 rounded-full border border-amber-500/20">Sanskrit Universal Language</span>
+                <h1 class="text-6xl font-black mb-6 glow-text sanskrit">नव संस्कृतम्</h1>
+                <p class="text-2xl text-slate-400 font-light leading-relaxed mb-8">
+                    'स्वदेशी, सूक्ष्म, संस्कृत' (SUL v19.0) — प्राचीन व्याकरण और आधुनिक गणन (Computing) का एक अद्भुत संगम।
+                </p>
+            </section>
+
+            <section id="founder" class="max-w-4xl mb-24 p-8 glass rounded-3xl border-l-4 border-amber-500">
+                <h2 class="text-3xl font-bold mb-6 flex items-center gap-3">
+                    <span class="text-amber-500">🏛️</span> संस्थापक एवं दृष्टि
+                </h2>
+                <p class="text-xl text-slate-300 leading-relaxed mb-6">
+                    **नव संस्कृतम्** भाषा का निर्माण **आचार्य पण्डित धीरेन्द्र त्रिपाठी** जी द्वारा किया गया है। वे **NavaSanganakah Multiventures Company** के संस्थापक हैं।
+                </p>
+                <blockquote class="italic text-2xl text-amber-400/80 font-serif sanskrit bg-white/5 p-6 rounded-2xl">
+                    "संस्कृतम् केवल मन्दिरेषु न, अपितु यन्त्रेषु अपि अस्तु।"
+                </blockquote>
+            </section>
+
+            <section id="logic" class="max-w-4xl mb-24">
+                <h2 class="text-4xl font-bold mb-10 flex items-center gap-4">
+                    <span class="text-blue-500">🚀</span> अन्तः-करण नियमावली
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass p-8 rounded-2xl hover:bg-white/5 transition-all">
+                        <h3 class="text-xl font-bold text-amber-500 mb-4 sanskrit">अस्ति (Asti)</h3>
+                        <p class="text-slate-400 mb-4">चर घोषणा (Variable Declaration) - मेमोरी में डेटा सुरक्षित करने के लिए।</p>
+                        <code>अस्ति मूल्यम् = १००;</code>
+                    </div>
+                    <div class="glass p-8 rounded-2xl hover:bg-white/5 transition-all">
+                        <h3 class="text-xl font-bold text-amber-500 mb-4 sanskrit">नित्य (Nitya)</h3>
+                        <p class="text-slate-400 mb-4">स्थिर मान (Constant) - अपरिवर्तनीय डेटा के लिए।</p>
+                        <code>नित्य प्रकाश_वेगः = २९९...;</code>
+                    </div>
+                </div>
+
+                <div class="mt-8 glass p-8 rounded-2xl">
+                    <h3 class="text-xl font-bold text-emerald-500 mb-4 sanskrit">विधिः / क्रिया (Functions)</h3>
+                    <p class="text-slate-400 mb-4">नया लॉजिक ब्लॉक बनाने के लिए।</p>
+                    <pre><span class="text-pink-400">विधिः</span> <span class="text-blue-400">योगः</span>(क, ख) {
+    <span class="text-pink-400">फलम्</span> क + ख;
+}</pre>
+                </div>
+
+                <div class="mt-8 glass p-8 rounded-2xl">
+                    <h3 class="text-xl font-bold text-purple-400 mb-4 sanskrit">आह्वानम् (Ahvannam)</h3>
+                    <p class="text-slate-400 mb-4">बाह्य सम्पर्क (API Fetch/Calls) के लिए।</p>
+                    <code>अस्ति डेटा = आह्वानम्("https://api...", "GET");</code>
+                </div>
+            </section>
+
+            <section id="ui" class="max-w-4xl mb-24">
+                <h2 class="text-4xl font-bold mb-10 flex items-center gap-4">
+                    <span class="text-emerald-500">🎨</span> दर्शन-तन्त्रम् (UI)
+                </h2>
+                <div class="space-y-6">
+                    <div class="flex gap-6 items-start">
+                        <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-2xl">🖼️</div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">दर्शनम् (Darshanam)</h3>
+                            <p class="text-slate-400">मुख्य स्क्रीन कंटेनर जो पूरे एप्लीकेशन व्यू को परिभाषित करता है।</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6 items-start">
+                        <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-2xl">📦</div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">मंजूषा (Manjusha)</h3>
+                            <p class="text-slate-400">लेआउट बॉक्स या कंटेनर जो डेटा को व्यवस्थित करता है।</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6 items-start">
+                        <div class="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-2xl">✨</div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2">दृश्यम् (Drishyam)</h3>
+                            <p class="text-slate-400">मूल घटक जैसे बटनम्, पाठः, चित्त्रम् आदि।</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="grammar" class="max-w-4xl mb-24">
+                <h2 class="text-4xl font-bold mb-10 flex items-center gap-4">
+                    <span class="text-pink-500">⚖️</span> व्याकरण एवं गणन
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left glass rounded-2xl">
+                        <thead>
+                            <tr class="border-b border-white/10">
+                                <th class="p-6 text-amber-500 uppercase text-xs font-bold tracking-widest">व्याकरण नियम</th>
+                                <th class="p-6 text-amber-500 uppercase text-xs font-bold tracking-widest">तकनीकी प्रभाव</th>
+                                <th class="p-6 text-amber-500 uppercase text-xs font-bold tracking-widest">उदाहरण</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5 text-slate-300">
+                            <tr>
+                                <td class="p-6 sanskrit">सुप्-षष्ठी (स्य)</td>
+                                <td class="p-6">पॉइंटर / प्रॉपर्टी एक्सेस</td>
+                                <td class="p-6"><code>रामस्य नाम</code></td>
+                            </tr>
+                            <tr>
+                                <td class="p-6 sanskrit">सुप्-चतुर्थी (आय)</td>
+                                <td class="p-6">इवेंट ट्रिगर</td>
+                                <td class="p-6"><code>प्रवेशाय</code></td>
+                            </tr>
+                            <tr>
+                                <td class="p-6 sanskrit">लृट्-लकार (इष्यति)</td>
+                                <td class="p-6">Async / Future</td>
+                                <td class="p-6"><code>गणयिष्यति</code></td>
+                            </tr>
+                            <tr>
+                                <td class="p-6 sanskrit">बहुवचन (न्ति)</td>
+                                <td class="p-6">Parallel Execution</td>
+                                <td class="p-6"><code>लिखन्ति</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <footer class="border-t border-white/5 pt-16 pb-8 text-slate-500 flex justify-between items-center">
+                <p>© 2026 NavaSanganakah Multiventures. All Rights Reserved.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-amber-500 transition-all">Twitter</a>
+                    <a href="#" class="hover:text-amber-500 transition-all">GitHub</a>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        // Smooth Scroll & Active Sidebar
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
