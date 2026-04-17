@@ -5,7 +5,11 @@
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/IR/LegacyPassManager.h>
+#if LLVM_VERSION_MAJOR >= 17
 #include <llvm/TargetParser/Host.h>
+#else
+#include <llvm/Support/Host.h>
+#endif
 #include <llvm/IR/Intrinsics.h>
 #include <optional>
 #include <stdexcept>
@@ -319,9 +323,9 @@ llvm::Value* CodeGen::generateBinaryExpression(BinaryExpression* node) {
     if (node->op == "!=") return builder->CreateFCmpUNE(L, R, "cmptmp");
     if (node->op == "^") {
 #if LLVM_VERSION_MAJOR >= 18
-        llvm::Function* powF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
+    llvm::Function* powF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
 #else
-        llvm::Function* powF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
+    llvm::Function* powF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::pow, {L->getType()});
 #endif
         return builder->CreateCall(powF, {L, R}, "powtmp");
     }
@@ -436,9 +440,9 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         
         // Native Trap / Panic
 #if LLVM_VERSION_MAJOR >= 18
-        llvm::Function* trap = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::trap);
+    llvm::Function* trap = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::trap);
 #else
-        llvm::Function* trap = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::trap);
+    llvm::Function* trap = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::trap);
 #endif
         builder->CreateCall(trap, {});
         builder->CreateUnreachable();
@@ -450,25 +454,25 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
     // SUL v18.0: Native Math Intrinsics (Jya, Kojya, Vargamulam)
     if (mangledName == "ज्या" || mangledName == "jya") {
 #if LLVM_VERSION_MAJOR >= 18
-        llvm::Function* sinF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
+    llvm::Function* sinF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
 #else
-        llvm::Function* sinF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
+    llvm::Function* sinF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
 #endif
         return builder->CreateCall(sinF, {argsV[0]}, "sintmp");
     }
     if (mangledName == "कोज्या" || mangledName == "kojya") {
 #if LLVM_VERSION_MAJOR >= 18
-        llvm::Function* cosF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
+    llvm::Function* cosF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
 #else
-        llvm::Function* cosF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
+    llvm::Function* cosF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
 #endif
         return builder->CreateCall(cosF, {argsV[0]}, "costmp");
     }
     if (mangledName == "वर्गमूलम्" || mangledName == "vargamulam") {
 #if LLVM_VERSION_MAJOR >= 18
-        llvm::Function* sqrtF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
+    llvm::Function* sqrtF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
 #else
-        llvm::Function* sqrtF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
+    llvm::Function* sqrtF = llvm::Intrinsic::getDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
 #endif
         return builder->CreateCall(sqrtF, {argsV[0]}, "sqrttmp");
     }
@@ -665,13 +669,17 @@ void CodeGen::writeObject(const std::string& filename) {
     std::string targetTripleStr = targetWasm ? "wasm32-unknown-unknown" : llvm::sys::getDefaultTargetTriple();
     llvm::Triple targetTriple(targetTripleStr);
     #if LLVM_VERSION_MAJOR >= 18
-    module->setTargetTriple(targetTriple.str());
-#else
     module->setTargetTriple(targetTriple);
+#else
+    module->setTargetTriple(targetTriple.str());
 #endif
 
     std::string error;
+    #if LLVM_VERSION_MAJOR >= 18
+    auto target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
+#else
     auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error);
+#endif
 
     if (!target) {
         throw std::runtime_error(error);
@@ -681,11 +689,15 @@ void CodeGen::writeObject(const std::string& filename) {
     auto features = "";
 
     llvm::TargetOptions opt;
+    #if LLVM_VERSION_MAJOR >= 16
     std::optional<llvm::Reloc::Model> rm;
-    #if LLVM_VERSION_MAJOR >= 18
-    auto theTargetMachine = target->createTargetMachine(targetTriple.str(), cpu, features, opt, rm);
 #else
+    llvm::Optional<llvm::Reloc::Model> rm;
+#endif
+    #if LLVM_VERSION_MAJOR >= 18
     auto theTargetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, rm);
+#else
+    auto theTargetMachine = target->createTargetMachine(targetTriple.str(), cpu, features, opt, rm);
 #endif
 
     module->setDataLayout(theTargetMachine->createDataLayout());
@@ -698,7 +710,11 @@ void CodeGen::writeObject(const std::string& filename) {
     }
 
     llvm::legacy::PassManager pass;
+    #if LLVM_VERSION_MAJOR >= 18
     auto fileType = llvm::CodeGenFileType::ObjectFile;
+#else
+    auto fileType = llvm::CGFT_ObjectFile;
+#endif
 
     if (theTargetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
         throw std::runtime_error("लक्ष्य-यन्त्रम् एतादृशं सञ्चिकां निर्गन्तुं न शक्नोति");
