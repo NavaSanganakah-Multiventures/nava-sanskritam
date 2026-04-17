@@ -43,6 +43,7 @@ jobs:
         
     - name: Upload NVC Binary
       uses: actions/upload-artifact@v4
+      continue-on-error: true
       with:
         name: nvc-binary
         path: |
@@ -78,6 +79,7 @@ jobs:
         
     - name: Upload Installer
       uses: actions/upload-artifact@v4
+      continue-on-error: true
       with:
         name: nava-studio-installer
         path: nava-studio/dist/*.exe
