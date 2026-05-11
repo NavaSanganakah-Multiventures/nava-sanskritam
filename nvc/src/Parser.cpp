@@ -18,14 +18,32 @@ std::string Parser::stripVibhakti(std::string id, std::string* role, int* vachan
     
     if (role) {
         switch (meta.vibhakti) {
-            case Grammar::Vibhakti::PRATHAMA: *role = "Karta"; break;
-            case Grammar::Vibhakti::DWITIYA: *role = "Karma"; break;
-            case Grammar::Vibhakti::TRITIYA: *role = "Karana"; break;
-            case Grammar::Vibhakti::CHATURTHI: *role = "Sampradana"; break;
-            case Grammar::Vibhakti::PANCHAMI: *role = "Apadaana"; break;
-            case Grammar::Vibhakti::SHASHTI: *role = "Shashti"; break;
-            case Grammar::Vibhakti::SAPTAMI: *role = "Adhikarana"; break;
-            default: *role = "None"; break;
+            case Grammar::Vibhakti::PRATHAMA:
+                // Prathama is usually Karta in Kartrivachya (Active), but Karma in Karmavachya (Passive)
+                *role = "Karta";
+                break;
+            case Grammar::Vibhakti::DWITIYA:
+                *role = "Karma";
+                break;
+            case Grammar::Vibhakti::TRITIYA:
+                // Tritiya is Karana (Instrument), but also Karta in Karmavachya (Passive Voice)
+                *role = "Karana/Karta(Passive)";
+                break;
+            case Grammar::Vibhakti::CHATURTHI:
+                *role = "Sampradana";
+                break;
+            case Grammar::Vibhakti::PANCHAMI:
+                *role = "Apadaana";
+                break;
+            case Grammar::Vibhakti::SHASHTI:
+                *role = "Sambandha";
+                break;
+            case Grammar::Vibhakti::SAPTAMI:
+                *role = "Adhikarana";
+                break;
+            default:
+                *role = "None";
+                break;
         }
     }
     
