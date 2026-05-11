@@ -261,7 +261,7 @@ termInput.addEventListener('keydown', (e) => {
         const cmd = termInput.value.trim().toLowerCase();
         const output = document.getElementById('terminal-output');
         output.innerText += '\n🚩 > ' + termInput.value;
-        if (cmd === 'चलाओ' || cmd === 'run') { document.getElementById('run-btn').click(); }
+        if (cmd === 'चालय' || cmd === 'run') { document.getElementById('run-btn').click(); }
         else if (cmd === 'संग्रहः' || cmd === 'save') { document.getElementById('save-btn').click(); }
         else if (cmd === 'साफ' || cmd === 'clear') { output.innerText = 'नव-सङ्गणक-शालायां स्वागतम्...'; }
         else { output.innerText += '\nत्रुटिः: अमान्या आज्ञा'; }

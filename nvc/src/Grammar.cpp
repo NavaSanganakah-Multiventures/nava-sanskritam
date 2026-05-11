@@ -16,20 +16,40 @@ Grammar::VerbMeta Grammar::analyzeTinanta(const std::u32string& word) {
 
     struct TinMap { std::u32string suffix; Lakara l; int p; int v; Pada pada; };
     static const std::vector<TinMap> tinSuffixes = {
-        // Parasmaipada (Lat - Standard)
+        // Parasmaipada (Lat - Present Tense)
         { U"तः", Lakara::LAT, 1, 2, Pada::PARASMAIPADA },
         { U"न्ति", Lakara::LAT, 1, 3, Pada::PARASMAIPADA },
         { U"ति", Lakara::LAT, 1, 1, Pada::PARASMAIPADA },
-        // Parasmaipada (Lrt - Async)
+        { U"थः", Lakara::LAT, 2, 2, Pada::PARASMAIPADA },
+        { U"थ", Lakara::LAT, 2, 3, Pada::PARASMAIPADA },
+        { U"सि", Lakara::LAT, 2, 1, Pada::PARASMAIPADA },
+        { U"वः", Lakara::LAT, 3, 2, Pada::PARASMAIPADA },
+        { U"मः", Lakara::LAT, 3, 3, Pada::PARASMAIPADA },
+        { U"मि", Lakara::LAT, 3, 1, Pada::PARASMAIPADA },
+
+        // Parasmaipada (Lrt - Future Tense)
+        { U"ष्यति", Lakara::LRT, 1, 1, Pada::PARASMAIPADA },
+        { U"ष्यतः", Lakara::LRT, 1, 2, Pada::PARASMAIPADA },
+        { U"ष्यन्ति", Lakara::LRT, 1, 3, Pada::PARASMAIPADA },
         { U"इष्यति", Lakara::LRT, 1, 1, Pada::PARASMAIPADA },
         { U"इष्यतः", Lakara::LRT, 1, 2, Pada::PARASMAIPADA },
         { U"इष्यन्ति", Lakara::LRT, 1, 3, Pada::PARASMAIPADA },
+
         // Lot (Imperative)
+        { U"ताम्", Lakara::LOT, 1, 2, Pada::PARASMAIPADA },
+        { U"अन्तु", Lakara::LOT, 1, 3, Pada::PARASMAIPADA },
         { U"तु", Lakara::LOT, 1, 1, Pada::PARASMAIPADA },
-        // Lang (Past)
+
+        // Lang (Past Tense)
+        { U"ताम्", Lakara::LANG, 1, 2, Pada::PARASMAIPADA },
+        { U"अन्", Lakara::LANG, 1, 3, Pada::PARASMAIPADA },
         { U"त्", Lakara::LANG, 1, 1, Pada::PARASMAIPADA },
-        // Atmanepada (Local/Private)
-        { U"ते", Lakara::LAT, 1, 1, Pada::ATMANEPADA }
+
+        // Atmanepada (Local/Private - Karma/Passive focus)
+        { U"ते", Lakara::LAT, 1, 1, Pada::ATMANEPADA },
+        { U"इते", Lakara::LAT, 1, 2, Pada::ATMANEPADA },
+        { U"अन्ते", Lakara::LAT, 1, 3, Pada::ATMANEPADA },
+        { U"यते", Lakara::LAT, 1, 1, Pada::ATMANEPADA } // For Karmavachya (Passive Voice - यक् विकरण)
     };
 
     for (const auto& s : tinSuffixes) {
@@ -329,37 +349,52 @@ Grammar::WordMeta Grammar::analyzeSubanta(const std::u32string& word) {
     // Ordered list of Pada-Siddhi transformations (v12.0 Table)
     struct SuffixMap { std::u32string transformed; Vibhakti v; SupPratyaya p; int n; Ling l; };
     static const std::vector<SuffixMap> suffixes = {
-        // Prathama (Karta)
+        // Prathama (Karta / Subject in Kartrivachya, Object in Karmavachya)
         { U"ः", Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::PULLINGA },
         { U"औ", Vibhakti::PRATHAMA, SupPratyaya::AU, 2, Ling::PULLINGA },
         { U"आः", Vibhakti::PRATHAMA, SupPratyaya::JAS, 3, Ling::PULLINGA },
         { U"आ", Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::STRILINGA },
         { U"ई", Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::STRILINGA },
         { U"अम्", Vibhakti::PRATHAMA, SupPratyaya::SU, 1, Ling::NAPUNSAKA },
-        // Dwitiya (Karma)
+
+        // Dwitiya (Karma / Object in Kartrivachya)
         { U"म्", Vibhakti::DWITIYA, SupPratyaya::AM, 1, Ling::NAPUNSAKA },
+        { U"अम्", Vibhakti::DWITIYA, SupPratyaya::AM, 1, Ling::PULLINGA },
         { U"औ", Vibhakti::DWITIYA, SupPratyaya::AUT, 2, Ling::PULLINGA },
         { U"आन्", Vibhakti::DWITIYA, SupPratyaya::SHAS, 3, Ling::PULLINGA },
-        // Tritiya (Karana)
+
+        // Tritiya (Karana / Instrumental - also used for Karta in Karmavachya/Passive Voice)
+        { U"एन", Vibhakti::TRITIYA, SupPratyaya::TA, 1, Ling::PULLINGA },
         { U"एण", Vibhakti::TRITIYA, SupPratyaya::TA, 1, Ling::PULLINGA },
+        { U"या", Vibhakti::TRITIYA, SupPratyaya::TA, 1, Ling::STRILINGA },
         { U"आभ्याम्", Vibhakti::TRITIYA, SupPratyaya::BHYAM, 2, Ling::PULLINGA },
         { U"ऐः", Vibhakti::TRITIYA, SupPratyaya::BHIS, 3, Ling::PULLINGA },
-        // Chaturthi (Sampradana)
+        { U"भिः", Vibhakti::TRITIYA, SupPratyaya::BHIS, 3, Ling::STRILINGA },
+
+        // Chaturthi (Sampradana / Dative)
         { U"आय", Vibhakti::CHATURTHI, SupPratyaya::NGE, 1, Ling::PULLINGA },
+        { U"यै", Vibhakti::CHATURTHI, SupPratyaya::NGE, 1, Ling::STRILINGA },
         { U"आभ्याम्", Vibhakti::CHATURTHI, SupPratyaya::BHYAM2, 2, Ling::PULLINGA },
         { U"एभ्यः", Vibhakti::CHATURTHI, SupPratyaya::BHYAS, 3, Ling::PULLINGA },
-        // Panchami (Apadana)
+
+        // Panchami (Apadana / Ablative)
         { U"आत्", Vibhakti::PANCHAMI, SupPratyaya::NGASI, 1, Ling::PULLINGA },
+        { U"याः", Vibhakti::PANCHAMI, SupPratyaya::NGASI, 1, Ling::STRILINGA },
         { U"आभ्याम्", Vibhakti::PANCHAMI, SupPratyaya::BHYAM3, 2, Ling::PULLINGA },
         { U"एभ्यः", Vibhakti::PANCHAMI, SupPratyaya::BHYAS2, 3, Ling::PULLINGA },
-        // Shashti (Pointer Access)
+
+        // Shashti (Sambandha / Genitive / Pointer Access)
         { U"स्य", Vibhakti::SHASHTI, SupPratyaya::NGAS, 1, Ling::PULLINGA },
+        { U"याः", Vibhakti::SHASHTI, SupPratyaya::NGAS, 1, Ling::STRILINGA },
         { U"योः", Vibhakti::SHASHTI, SupPratyaya::OS, 2, Ling::PULLINGA },
         { U"आणाम्", Vibhakti::SHASHTI, SupPratyaya::AM2, 3, Ling::PULLINGA },
-        // Saptami (Base Allocator)
+
+        // Saptami (Adhikarana / Locative / Base Allocator)
         { U"ए", Vibhakti::SAPTAMI, SupPratyaya::NGI, 1, Ling::PULLINGA },
+        { U"याम्", Vibhakti::SAPTAMI, SupPratyaya::NGI, 1, Ling::STRILINGA },
         { U"योः", Vibhakti::SAPTAMI, SupPratyaya::OS2, 2, Ling::PULLINGA },
-        { U"एषु", Vibhakti::SAPTAMI, SupPratyaya::SUP, 3, Ling::PULLINGA }
+        { U"एषु", Vibhakti::SAPTAMI, SupPratyaya::SUP, 3, Ling::PULLINGA },
+        { U"आसु", Vibhakti::SAPTAMI, SupPratyaya::SUP, 3, Ling::STRILINGA }
     };
 
     for (const auto& s : suffixes) {

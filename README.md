@@ -115,3 +115,14 @@ Proprietary software of **NavaSanganakah Multiventures**. All Rights Reserved.
 ## 🙏 रचयिता (The Creator)
 
 नव संस्कृतम् भाषा का निर्माण **आचार्य पण्डित धीरेन्द्र त्रिपाठी** जी द्वारा किया गया है, जो **NavaSanganakah Multiventures Company** के संस्थापक हैं। उनका उद्देश्य प्राचीन वैदिक ज्ञान और आधुनिक तकनीकी क्षमताओं का समन्वय कर एक विश्वस्तरीय प्लेटफार्म प्रदान करना है।
+
+
+### 📜 पाणिनीय व्याकरण (Paninian Grammar in Code)
+NVC Compiler intrinsically supports Panini's grammar logic:
+- **सुप् प्रत्यय (21 Sup Pratyayas)**: The language strips suffixes like `ः` (Prathama/Subject), `म्` (Dwitiya/Object), and `स्य` (Shashti/Pointer) to map them to the root variable in memory.
+- **तिङ् प्रत्यय (9 Ting Pratyayas) & Lakaras**:
+  - `लट् लकार` (Lat) for Synchronous flows (e.g., `गच्छति`).
+  - `लृट् लकार` (Lrt) for Asynchronous/Future flows (e.g., `गमिष्यति`).
+  - `लोट् लकार` (Lot) for Triggers/Commands (e.g., `चालय` - Run).
+- **कर्ता-कर्म परिवर्तन (Active/Passive Voice)**: Converts Active Voice (`रामः पुस्तकं पठति`) to Passive Voice (`रामेण पुस्तकं पठ्यते`) dynamically, resolving dependencies via Atmanepada suffixes (`यते`, `ते`).
+- **संधि (Sandhi) & समास (Samas)**: Automatic resolution of joined keywords to their constituent operators.
