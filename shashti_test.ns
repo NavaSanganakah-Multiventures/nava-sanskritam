@@ -1,0 +1,17 @@
+// SUL v10.0 Shashti (Genitive) Property Access Test
+नित्य रामः = { 
+    आयुः: २५, 
+    स्थानम्: "अयोध्या", 
+    पदम्: "युवराजः" 
+}
+
+वद("परिचयः (Introduction):")
+रामस्य पदम् वद
+
+वद("स्थानम् (Location):")
+रामस्य स्थानम् वद
+
+// Testing complex expression with Shashti
+अस्ति आयुर्वृद्धिः = रामस्य आयुः + ५
+वद("५ वर्ष बाद आयु (Age after 5 years):")
+वद(आयुर्वृद्धिः)

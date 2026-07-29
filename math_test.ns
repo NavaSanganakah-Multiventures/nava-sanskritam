@@ -1,0 +1,19 @@
+// SUL v14.0 - Samhita (Standard Library) Verification
+// Testing Mathematics and Logic Assertions
+
+// 1. Math Test: Rule of Three (Trairashikam)
+// If 2 books cost 10 rupees, 10 books cost X? (10 * 10 / 2 = 50)
+अस्ति मूल्यम् = त्रैराशिकम्(२, १०, १०);
+वद(मूल्यम्);
+
+// 2. Logic Test: Niyamah (Assertion)
+नियमः(मूल्यम् == ५०, "गणितम् शुद्धम् अस्ति"); // Should PASS
+नियमः(मूल्यम् < ३०, "त्रैराशिक-भङ्गः!");     // Should FAIL and TRAP (Native Crash)
+
+// 3. System Test: Sampradana (Chaturthi) for Returns
+विधिः गणना(अ) {
+    अस्ति फलम् = वर्गः(अ);
+    वद(फलम्); // Standard output
+}
+
+गणना(५); // Outputs 25

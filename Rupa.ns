@@ -1,0 +1,9 @@
+// SUL Rupa-Samhita (Visual Standard Library) v16.0
+// Standard Colors and UI Tokens
+
+अस्ति रक्तवर्णः = "Red";
+अस्ति नीलवर्णः = "Blue";
+अस्ति श्वेतवर्णः = "White";
+अस्ति हरितवर्णः = "Green";
+अस्ति पीतवर्णः = "Yellow";
+अस्ति कृष्णवर्णः = "Black";

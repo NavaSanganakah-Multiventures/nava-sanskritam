@@ -1,0 +1,53 @@
+{
+  "name": "nava-studio",
+  "version": "1.0.0",
+  "description": "Integrated Desktop Environment for Nava Sanskritam Programming",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder -w"
+  },
+  "keywords": [
+    "Sanskrit",
+    "Compiler",
+    "IDE"
+  ],
+  "author": "Nava Sanganakah",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "com.nava.studio",
+    "productName": "Nava Studio",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "public/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "extraResources": [
+      {
+        "from": "bin/",
+        "to": "bin/",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "lib/",
+        "to": "lib/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  }
+}

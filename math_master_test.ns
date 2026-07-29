@@ -1,0 +1,23 @@
+// SUL v18.0 - Gaṇita-Samhita Master Test
+// Testing Native Intrinsics, Exponentiation, and Vedic Math Sūtras
+
+वद("🚩 Nava Sanskritam: Math Master Test (v18.0) 🚩");
+
+// 1. Testing Exponentiation (Power operator ^)
+अस्ति ए = ३;
+अस्ति बी = ४;
+अस्ति घातफलम् = ए ^ बी; // Should be 81
+वद("१. घातांक परीक्षण (3 ^ 4): " + घातफलम्);
+
+// 2. Testing Native LLVM Intrinsics (Hardware Level)
+अस्ति मूलम् = वर्गमूलम्(घातफलम्); // Sqrt(81) = 9
+वद("२. वर्गमूल परीक्षण (Sqrt 81): " + मूलम्);
+
+वद("३. त्रिकोणमिति परीक्षण (Sin 0): " + ज्या(०));
+वद("४. त्रिकोणमिति परीक्षण (Cos 0): " + कोज्या(०));
+
+// 3. Testing Library Sūtras (Samhita.ns)
+वद("५. ऊर्ध्व-तिर्यग्भ्याम् (१२ * १३): " + ऊर्ध्व_तिर्यग्भ्याम्(१२, १३));
+वद("६. घनमूलम् (२७): " + घनमूलम्(२७));
+
+वद("🚩 Math Engine Verified Successfully! 🚩");

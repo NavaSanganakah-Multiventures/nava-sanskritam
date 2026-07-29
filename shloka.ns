@@ -1,0 +1,10 @@
+// SUL v7.0 Mahāvṛtti & Optional Punctuation Test
+अस्ति कः = १०
+अस्ति खम् = २०
+
+वद(कः + खम्)
+
+// Testing Samasa-style Keywords (if we had joined keywords like 'अस्तिसंदेशः')
+अस्तिसन्देशः = "समासः सफला!"
+वद(सन्देशः)
+सन्देशःवद

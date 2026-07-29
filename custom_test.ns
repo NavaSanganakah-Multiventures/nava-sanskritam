@@ -1,0 +1,23 @@
+// SUL v15.0 - Sarva-Nāma (Flexible Naming) Verification
+// Testing synonyms and custom identifiers
+
+// 1. Using 'क्रिया' with a custom alphanumeric name
+क्रिया nava_process_101(अ) {
+    वद("Processing: " + (अ + ५०));
+}
+
+// 2. Using 'सूत्रम्' with underscore naming
+सूत्रम् core_calculation_logic(ब) {
+    फलम् ब * १०;
+}
+
+// 3. Using 'योगः' with traditional naming
+योगः फलितम्(च) {
+    वद("Result is: " + च);
+}
+
+// --- Execution Test ---
+
+nava_process_101(५०); // Should output: Processing: 100
+अस्ति उत्तरम् = core_calculation_logic(५); 
+फलितम्(उत्तरम्); // Should output: Result is: 50

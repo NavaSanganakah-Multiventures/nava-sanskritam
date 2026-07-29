@@ -1,0 +1,76 @@
+{
+    "scopeName": "source.ns",
+    "name": "Nava Sanskritam",
+    "patterns": [
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#functions"
+        }
+    ],
+    "repository": {
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.ns",
+                    "match": "\\b(अस्ति|वद|यदि|तर्हि|चक्र|नित्य|फलम्|दर्शनम्|दृश्यम्|मंजूषा|सूची|चित्त्रम्|प्रविष्टिः|सन्धिः|विभक्तिः|नियमः)\\b"
+                },
+                {
+                    "name": "keyword.other.ns",
+                    "match": "\\b(ज्या|कोज्या|वर्गमूलम्|ऊर्ध्व_तिर्यग्भ्याम्|घनमूलम्)\\b"
+                }
+            ]
+        },
+        "functions": {
+            "patterns": [
+                {
+                    "name": "entity.name.function.ns",
+                    "match": "\\b(विधिः|क्रिया|सूत्रम्|योगः)\\s+([a-zA-Z\\u0900-\\u097F_][a-zA-Z0-9\\u0900-\\u097F_]*)"
+                }
+            ]
+        },
+        "strings": {
+            "name": "string.quoted.double.ns",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+                {
+                    "name": "constant.character.escape.ns",
+                    "match": "\\\\."
+                }
+            ]
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "name": "constant.numeric.ns",
+                    "match": "\\b([0-9]+(\\.[0-9]+)?|[\\u0966-\\u096F]+(\\.[\\u0966-\\u096F]+)?)\\b"
+                }
+            ]
+        },
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.ns",
+                    "begin": "//",
+                    "end": "$"
+                },
+                {
+                    "name": "comment.block.ns",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>🚩 नव-सङ्गणक-शाला (Nava Studio) v2.0</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --border: #334155;
+      --sidebar-bg: #0b1120;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-dark);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+    }
+    .layout {
+      display: grid;
+      grid-template-rows: 50px 1fr 200px 25px;
+      grid-template-columns: 250px 1fr;
+      height: 100vh;
+    }
+    header {
+      grid-column: 1 / -1;
+      background-color: var(--bg-card);
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      color: var(--accent);
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    button {
+      background-color: var(--accent);
+      color: var(--bg-dark);
+      border: none;
+      padding: 6px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    #sidebar {
+      grid-row: 2 / 4;
+      background-color: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      padding: 10px;
+      overflow-y: auto;
+    }
+    .sidebar-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .file-item {
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-item:hover {
+      background-color: #1e293b;
+    }
+    .file-item.active {
+      background-color: #334155;
+      color: var(--accent);
+    }
+    #editor-container {
+      grid-row: 2 / 3;
+      grid-column: 2;
+    }
+    #terminal-container {
+      grid-row: 3 / 4;
+      grid-column: 2;
+      background-color: #000;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+    .terminal-header {
+      background-color: #111;
+      font-size: 11px;
+      padding: 4px 15px;
+      color: #94a3b8;
+      border-bottom: 1px solid #222;
+    }
+    #terminal-output {
+      flex: 1;
+      padding: 10px 15px;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      color: #10b981;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .terminal-input-wrapper {
+      display: flex;
+      padding: 5px 15px;
+      background-color: #050505;
+      border-top: 1px solid #111;
+      align-items: center;
+    }
+    .terminal-prompt {
+      color: var(--accent);
+      margin-right: 10px;
+      font-weight: bold;
+    }
+    #terminal-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: 'Fira Code', monospace;
+      font-size: 13px;
+      width: 100%;
+      outline: none;
+    }
+    .status-bar {
+      grid-column: 1 / -1;
+      background-color: var(--bg-card);
+      padding: 0 20px;
+      font-size: 11px;
+      color: #94a3b8;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Fira+Code&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="layout">
+    <header>
+      <div class="logo">🚩 नव-सङ्गणक-शाला</div>
+      <div class="toolbar">
+        <div class="toggle-container">
+          <label>संस्कृति-लेखनम्:</label>
+          <input type="checkbox" id="keyboard-toggle" checked />
+        </div>
+        <button id="run-btn">चालनम्</button>
+        <button id="save-btn" style="background: #e11d48; color: white;">संग्रहः</button>
+      </div>
+    </header>
+    
+    <nav id="sidebar">
+      <div class="sidebar-title">सञ्चिका-प्रबन्धकः</div>
+      <div id="file-list">
+        <!-- Files populated by JS -->
+      </div>
+    </nav>
+
+    <div id="editor-container"></div>
+
+    <div id="terminal-container">
+      <div class="terminal-header">निर्गम-पटलम्</div>
+      <div id="terminal-output">नव-सङ्गणक-शालायां स्वागतम्...</div>
+      <div class="terminal-input-wrapper">
+        <span class="terminal-prompt">🚩 वदतु:</span>
+        <input type="text" id="terminal-input" placeholder="आज्ञां लिखतु... (उदा. चलाओ, संग्रहः)" />
+      </div>
+    </div>
+
+    <div class="status-bar">
+      स्थितिः: सिद्धम् | सत्रम्: सक्रियम्
+    </div>
+  </div>
+
+  <script>
+    if (typeof require !== 'undefined') {
+      window.nodeRequire = require;
+      delete window.require;
+      delete window.exports;
+      delete window.module;
+    }
+    window.electronProcess = window.process;
+    window.process = undefined;
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.min.js"></script>
+  <script>
+    window.process = window.electronProcess;
+  </script>
+  <script src="nvc.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

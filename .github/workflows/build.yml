@@ -1,0 +1,88 @@
+name: NVC Build & Artifacts
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  build-native:
+    name: Native NVC (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup LLVM (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y llvm-18 llvm-18-dev clang libffi-dev libtinfo-dev libzstd-dev cmake ninja-build
+
+      - name: Setup LLVM (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-llvm
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+          update: true
+
+      - name: Configure & Build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cmake -S nvc -B nvc/build -DCMAKE_BUILD_TYPE=Release -G Ninja
+          cmake --build nvc/build
+
+      - name: Configure & Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          cd nvc && mkdir -p build && cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+          ninja
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvc-${{ matrix.os }}
+          path: |
+            nvc/build/nvc
+            nvc/build/nvc.exe
+            nvc/build/*.dll
+          retention-days: 30
+
+  build-wasm:
+    name: WebAssembly (WASM)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.53
+
+      - name: Configure & Build WASM
+        run: |
+          mkdir -p nvc/build-wasm
+          cd nvc/build-wasm
+          emcmake cmake .. -DEMSCRIPTEN=ON -DCMAKE_BUILD_TYPE=Release
+          emmake make -j4
+
+      - name: Upload WASM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvc-wasm
+          path: |
+            nvc/build-wasm/nvc.js
+            nvc/build-wasm/nvc.wasm
+          retention-days: 30
