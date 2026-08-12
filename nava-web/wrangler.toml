@@ -1,0 +1,8 @@
+name = "nava-sanskritam-web"
+main = "worker.js"
+compatibility_date = "2026-08-12"
+
+[assets]
+directory = "."
+binding = "ASSETS"
+not_found_handling = "single-page-application"
