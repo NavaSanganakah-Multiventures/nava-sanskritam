@@ -16,7 +16,7 @@
   "license": "ISC",
   "devDependencies": {
     "electron": "^41.2.0",
-    "electron-builder": "^26.8.1"
+    "electron-builder": "^26.15.3"
   },
   "build": {
     "appId": "com.nava.studio",
