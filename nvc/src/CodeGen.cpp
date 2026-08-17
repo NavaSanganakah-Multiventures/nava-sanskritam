@@ -41,11 +41,11 @@ llvm::AllocaInst* CodeGen::createEntryBlockAlloca(llvm::Function* theFunction, c
 void CodeGen::generate(Program* program) {
     // Builtin declarations
     llvm::FunctionType* timeFT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), false);
-    llvm::Function::Create(timeFT, llvm::Function::ExternalLinkage, "समय", module.get());
+    llvm::Function::Create(timeFT, llvm::Function::ExternalLinkage, "à¤¸à¤®à¤¯", module.get());
 
     std::vector<llvm::Type*> mathArgs(2, llvm::Type::getDoubleTy(*context));
     llvm::FunctionType* mathFT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), mathArgs, false);
-    llvm::Function::Create(mathFT, llvm::Function::ExternalLinkage, "गणन", module.get());
+    llvm::Function::Create(mathFT, llvm::Function::ExternalLinkage, "à¤à¤£à¤¨", module.get());
 
     llvm::FunctionType* mainType = llvm::FunctionType::get(builder->getInt32Ty(), false);
     llvm::Function* mainFunc = llvm::Function::Create(mainType, llvm::Function::ExternalLinkage, "main", module.get());
@@ -117,7 +117,7 @@ llvm::Value* CodeGen::generateNode(ASTNode* node) {
         case ASTNodeType::DarshanamBlock:
             return generateDarshanamBlock(static_cast<DarshanamBlock*>(node));
         default:
-            throw std::runtime_error("अज्ञात-ग्रन्थि-प्रकारः");
+            throw std::runtime_error("à¤à¤à¥à¤à¤¾à¤¤-à¤à¥à¤°à¤¨à¥à¤¥à¤¿-à¤ªà¥à¤°à¤à¤¾à¤°à¤");
     }
 }
 
@@ -316,7 +316,7 @@ llvm::Value* CodeGen::generateBinaryExpression(BinaryExpression* node) {
         return builder->CreateCall(powF, {L, R}, "powtmp");
     }
 
-    throw std::runtime_error("अमान्य-द्विचक्रीय-प्रचालकः");
+    throw std::runtime_error("à¤à¤®à¤¾à¤¨à¥à¤¯-à¤¦à¥à¤µà¤¿à¤à¤à¥à¤°à¥à¤¯-à¤ªà¥à¤°à¤à¤¾à¤²à¤à¤");
 }
 
 llvm::Value* CodeGen::generateAssignment(Assignment* node) {
@@ -349,7 +349,7 @@ llvm::Value* CodeGen::generateIdentifier(Identifier* node) {
     }
 
     // SUL v12.0: Karaka-to-LLVM Semantic Dispatch
-    // SAPTAMI (Adhikarana) -> Return Address (The Base Pointer - आधारः)
+    // SAPTAMI (Adhikarana) -> Return Address (The Base Pointer - à¤à¤§à¤¾à¤°à¤)
     if (node->role == "Adhikarana") {
         return A; // Return the pointer itself instead of loading value
     }
@@ -377,15 +377,15 @@ llvm::Value* CodeGen::generateObjectLiteral(ObjectLiteral* node) {
 }
 
 llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
-    // SUL v13.0 Native Tiṅ Call Logic
+    // SUL v13.0 Native Tiá¹ Call Logic
     std::string mangledName = node->callee->name;
     // Map call attempt to available mangled functions (e.g., yoga -> nava_yoga_lat)
     llvm::Function* calleeF = module->getFunction("nava_" + mangledName + "_lat");
     if (!calleeF) calleeF = module->getFunction("nava_" + mangledName + "_lrt");
     if (!calleeF) calleeF = module->getFunction(mangledName); // Fallback to raw
 
-    if (!calleeF && mangledName != "नियमः" && mangledName != "niyamah" && mangledName != "ज्या" && mangledName != "jya" && mangledName != "कोज्या" && mangledName != "kojya" && mangledName != "वर्गमूलम्" && mangledName != "vargamulam" && mangledName != "त्रैराशिकम्" && mangledName != "गणनम्" && mangledName != "वर्गः") {
-        throw std::runtime_error("अज्ञात-क्रिया-नाम: " + mangledName);
+    if (!calleeF && mangledName != "à¤¨à¤¿à¤¯à¤®à¤" && mangledName != "niyamah" && mangledName != "à¤à¥à¤¯à¤¾" && mangledName != "jya" && mangledName != "à¤à¥à¤à¥à¤¯à¤¾" && mangledName != "kojya" && mangledName != "à¤µà¤°à¥à¤à¤®à¥à¤²à¤®à¥" && mangledName != "vargamulam" && mangledName != "à¤¤à¥à¤°à¥à¤°à¤¾à¤¶à¤¿à¤à¤®à¥" && mangledName != "à¤à¤£à¤¨à¤®à¥" && mangledName != "à¤µà¤°à¥à¤à¤") {
+        throw std::runtime_error("à¤à¤à¥à¤à¤¾à¤¤-à¤à¥à¤°à¤¿à¤¯à¤¾-à¤¨à¤¾à¤®: " + mangledName);
     }
 
     std::vector<llvm::Value*> argsV;
@@ -394,7 +394,7 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
         if (!argsV.back()) return nullptr;
     }
 
-    // Lṛṭ (Async) Dispatch
+    // Lá¹á¹­ (Async) Dispatch
     if (node->lakara == "Lrt") {
         // Placeholder for Async/Promise spawn
         // In a real runtime, this would call libns_async_spawn(calleeF, argsV)
@@ -411,7 +411,7 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
     }
 
     // SUL v14.0: Native Niyamah (Assertion) Handler
-    if (mangledName == "नियमः" || mangledName == "niyamah") {
+    if (mangledName == "à¤¨à¤¿à¤¯à¤®à¤" || mangledName == "niyamah") {
         llvm::Value* cond = argsV[0];
         if (cond->getType()->isDoubleTy()) {
             cond = builder->CreateFCmpONE(cond, llvm::ConstantFP::get(*context, llvm::APFloat(0.0)), "assertcond");
@@ -434,23 +434,23 @@ llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
     }
 
     // SUL v18.0: Native Math Intrinsics (Jya, Kojya, Vargamulam)
-    if (mangledName == "ज्या" || mangledName == "jya") {
+    if (mangledName == "à¤à¥à¤¯à¤¾" || mangledName == "jya") {
         llvm::Function* sinF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
         return builder->CreateCall(sinF, {argsV[0]}, "sintmp");
     }
-    if (mangledName == "कोज्या" || mangledName == "kojya") {
+    if (mangledName == "à¤à¥à¤à¥à¤¯à¤¾" || mangledName == "kojya") {
         llvm::Function* cosF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
         return builder->CreateCall(cosF, {argsV[0]}, "costmp");
     }
-    if (mangledName == "वर्गमूलम्" || mangledName == "vargamulam") {
+    if (mangledName == "à¤µà¤°à¥à¤à¤®à¥à¤²à¤®à¥" || mangledName == "vargamulam") {
         llvm::Function* sqrtF = llvm::Intrinsic::getOrInsertDeclaration(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
         return builder->CreateCall(sqrtF, {argsV[0]}, "sqrttmp");
     }
-    if (mangledName == "त्रैराशिकम्" || mangledName == "गणनम्" || mangledName == "वर्गः") {
+    if (mangledName == "à¤¤à¥à¤°à¥à¤°à¤¾à¤¶à¤¿à¤à¤®à¥" || mangledName == "à¤à¤£à¤¨à¤®à¥" || mangledName == "à¤µà¤°à¥à¤à¤") {
         llvm::FunctionType* FT;
-        if (mangledName == "त्रैराशिकम्") {
+        if (mangledName == "à¤¤à¥à¤°à¥à¤°à¤¾à¤¶à¤¿à¤à¤®à¥") {
             FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), {llvm::Type::getDoubleTy(*context), llvm::Type::getDoubleTy(*context), llvm::Type::getDoubleTy(*context)}, false);
-        } else if (mangledName == "गणनम्") {
+        } else if (mangledName == "à¤à¤£à¤¨à¤®à¥") {
             FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), {llvm::Type::getDoubleTy(*context), llvm::Type::getDoubleTy(*context)}, false);
         } else {
             FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), {llvm::Type::getDoubleTy(*context)}, false);
@@ -610,8 +610,7 @@ void CodeGen::writeObject(const std::string& filename) {
     llvm::InitializeAllAsmPrinters();
 
     std::string targetTripleStr = targetWasm ? "wasm32-unknown-unknown" : llvm::sys::getDefaultTargetTriple();
-    llvm::Triple targetTriple(targetTripleStr);
-    module->setTargetTriple(targetTriple);
+    module->setTargetTriple(targetTripleStr);
 
     std::string error;
     auto target = llvm::TargetRegistry::lookupTarget(targetTripleStr, error);
@@ -625,7 +624,7 @@ void CodeGen::writeObject(const std::string& filename) {
 
     llvm::TargetOptions opt;
     std::optional<llvm::Reloc::Model> rm;
-    auto theTargetMachine = target->createTargetMachine(targetTriple, cpu, features, opt, rm);
+    auto theTargetMachine = target->createTargetMachine(targetTripleStr, cpu, features, opt, rm);
 
     module->setDataLayout(theTargetMachine->createDataLayout());
 
@@ -633,14 +632,18 @@ void CodeGen::writeObject(const std::string& filename) {
     llvm::raw_fd_ostream dest(filename, ec, llvm::sys::fs::OF_None);
 
     if (ec) {
-        throw std::runtime_error("सञ्चिका उद्घाटयितुम् अशक्तः: " + ec.message());
+        throw std::runtime_error("à¤¸à¤à¥à¤à¤¿à¤à¤¾ à¤à¤¦à¥à¤à¤¾à¤à¤¯à¤¿à¤¤à¥à¤®à¥ à¤à¤¶à¤à¥à¤¤à¤: " + ec.message());
     }
 
     llvm::legacy::PassManager pass;
+#if LLVM_VERSION_MAJOR >= 18
     auto fileType = llvm::CodeGenFileType::ObjectFile;
+#else
+    auto fileType = llvm::CGFT_ObjectFile;
+#endif
 
     if (theTargetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
-        throw std::runtime_error("लक्ष्य-यन्त्रम् एतादृशं सञ्चिकां निर्गन्तुं न शक्नोति");
+        throw std::runtime_error("à¤²à¤à¥à¤·à¥à¤¯-à¤¯à¤¨à¥à¤¤à¥à¤°à¤®à¥ à¤à¤¤à¤¾à¤¦à¥à¤¶à¤ à¤¸à¤à¥à¤à¤¿à¤à¤¾à¤ à¤¨à¤¿à¤°à¥à¤à¤¨à¥à¤¤à¥à¤ à¤¨ à¤¶à¤à¥à¤¨à¥à¤¤à¤¿");
     }
 
     pass.run(*module);
