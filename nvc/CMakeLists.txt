@@ -30,6 +30,7 @@ if (NOT EMSCRIPTEN)
         Passes
         Target
         X86
+        native
         AsmParser
         AsmPrinter
         CodeGen
@@ -43,6 +44,7 @@ if (NOT EMSCRIPTEN)
         ProfileData
         TargetParser
         BinaryFormat
+        all
     )
 endif()
 
