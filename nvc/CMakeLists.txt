@@ -17,7 +17,8 @@ if (NOT EMSCRIPTEN)
     message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
     include_directories(${LLVM_INCLUDE_DIRS})
-    add_definitions(${LLVM_DEFINITIONS})
+    separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
+    add_definitions(${LLVM_DEFINITIONS_LIST})
 
     # Map the LLVM components NVC actually exercises. Keep the list
     # conservative so it works with standard distro packages and MSYS2.
@@ -44,7 +45,6 @@ if (NOT EMSCRIPTEN)
         ProfileData
         TargetParser
         BinaryFormat
-        all
     )
 endif()
 
