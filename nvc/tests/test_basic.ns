@@ -1,0 +1,4 @@
+// Basic arithmetic and output test (interpreter mode)
+अस्ति क = ५;
+अस्ति ख = १०;
+वद(क + ख);
