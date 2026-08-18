@@ -1,0 +1,38 @@
+name: Deploy nava-web to Cloudflare Workers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nava-web/**'
+      - 'nvc/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build WASM & Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.53
+
+      - name: Configure & Build WASM
+        run: |
+          mkdir -p build-wasm
+          cd build-wasm
+          emcmake cmake ../nvc -DEMSCRIPTEN=ON -DCMAKE_BUILD_TYPE=Release
+          emmake make -j4
+          cp nvc.js ../nava-web/nvc.js
+          cp nvc.wasm ../nava-web/nvc.wasm
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: nava-web
+          command: deploy
