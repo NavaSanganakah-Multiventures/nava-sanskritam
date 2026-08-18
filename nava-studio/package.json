@@ -5,7 +5,10 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder -w"
+    "build": "electron-builder",
+    "build:win": "electron-builder -w",
+    "build:mac": "electron-builder -m",
+    "build:linux": "electron-builder -l"
   },
   "keywords": [
     "Sanskrit",
@@ -18,20 +21,53 @@
     "electron": "^41.2.0",
     "electron-builder": "^26.15.3"
   },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
   "build": {
     "appId": "com.nava.studio",
     "productName": "Nava Studio",
     "directories": {
       "output": "dist"
     },
+    "publish": {
+      "provider": "github",
+      "owner": "NavaSanganakah-Multiventures",
+      "repo": "nava-sanskritam",
+      "releaseType": "release"
+    },
     "win": {
-      "target": "nsis",
+      "target": [
+        "nsis"
+      ],
       "icon": "public/favicon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "public/favicon.ico",
+      "category": "public.app-category.developer-tools"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "public/favicon.ico",
+      "category": "Development"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true
+      "createDesktopShortcut": true,
+      "artifactName": "Nava-Studio-Setup-${version}.exe"
+    },
+    "dmg": {
+      "artifactName": "Nava-Studio-${version}.dmg"
+    },
+    "appImage": {
+      "artifactName": "Nava-Studio-${version}.AppImage"
     },
     "extraResources": [
       {
