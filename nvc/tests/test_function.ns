@@ -1,0 +1,5 @@
+// Function definition and call test
+विधिः योग(क, ख) {
+    फलम् क + ख;
+}
+वद(योग(५, १०));
