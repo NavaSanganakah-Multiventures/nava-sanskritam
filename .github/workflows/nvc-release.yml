@@ -1,0 +1,119 @@
+name: Release NVC
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-native:
+    name: Build NVC (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_name: nvc-linux-x64
+            exe_name: nvc
+          - os: windows-latest
+            asset_name: nvc-windows-x64
+            exe_name: nvc.exe
+          - os: macos-latest
+            asset_name: nvc-macos-x64
+            exe_name: nvc
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup LLVM (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y llvm-18 llvm-18-dev clang libffi-dev libtinfo-dev libzstd-dev cmake ninja-build
+
+      - name: Setup LLVM (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install llvm@18 cmake ninja
+          echo "LLVM_DIR=$(brew --prefix llvm@18)/lib/cmake/llvm" >> $GITHUB_ENV
+          echo "$(brew --prefix llvm@18)/bin" >> $GITHUB_PATH
+
+      - name: Setup LLVM (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-llvm
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            zip
+          update: true
+
+      - name: Configure & Build (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          cmake -S nvc -B nvc/build -DCMAKE_BUILD_TYPE=Release -G Ninja
+          cmake --build nvc/build
+
+      - name: Configure & Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          cd nvc && mkdir -p build && cd build
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+          ninja
+
+      - name: Package binary (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          mkdir -p dist/${{ matrix.asset_name }}
+          cp nvc/build/${{ matrix.exe_name }} dist/${{ matrix.asset_name }}/
+          chmod +x dist/${{ matrix.asset_name }}/${{ matrix.exe_name }}
+          cd dist && tar -czf ${{ matrix.asset_name }}.tar.gz ${{ matrix.asset_name }}
+
+      - name: Package binary (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          mkdir -p dist/${{ matrix.asset_name }}
+          cp nvc/build/${{ matrix.exe_name }} dist/${{ matrix.asset_name }}/
+          # Copy required MinGW DLLs so the binary is portable
+          ldd nvc/build/${{ matrix.exe_name }} | grep '/mingw64/bin/' | awk '{ print $3 }' | xargs -I '{}' cp '{}' dist/${{ matrix.asset_name }}/
+          cd dist && zip -r ${{ matrix.asset_name }}.zip ${{ matrix.asset_name }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/${{ matrix.asset_name }}.*
+          retention-days: 5
+
+  release:
+    name: Create GitHub Release
+    needs: build-native
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List release files
+        run: ls -lah artifacts/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
