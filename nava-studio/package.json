@@ -40,21 +40,14 @@
       "target": [
         "nsis"
       ],
-      "icon": "public/favicon.ico",
-      "certificateFile": "build/certificate.pfx",
-      "certificatePassword": "",
-      "verifyUpdateCodeSignature": false
+      "icon": "public/favicon.ico"
     },
     "mac": {
       "target": [
         "dmg"
       ],
       "icon": "public/favicon.ico",
-      "category": "public.app-category.developer-tools",
-      "hardenedRuntime": true,
-      "gatekeeperAssess": false,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
+      "category": "public.app-category.developer-tools"
     },
     "linux": {
       "target": [
