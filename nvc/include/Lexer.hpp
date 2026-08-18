@@ -47,7 +47,6 @@ private:
     bool isOperatorChar(const std::string& charStr);
     bool isDigit(const std::string& charStr);
     bool isDevanagariDigit(const std::string& charStr);
-    bool isIdentifierStart(const std::string& charStr);
     bool isIdentifierChar(const std::string& charStr);
 
     std::string readOperator();
