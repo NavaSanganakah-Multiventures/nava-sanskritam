@@ -1,0 +1,28 @@
+name: NVC Interpreter Tests
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  run-tests:
+    name: Run NVC Interpreter Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup LLVM
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y llvm-18 llvm-18-dev clang libffi-dev libtinfo-dev libzstd-dev cmake ninja-build
+
+      - name: Configure & Build NVC
+        run: |
+          cmake -S nvc -B nvc/build -DCMAKE_BUILD_TYPE=Release -G Ninja
+          cmake --build nvc/build
+
+      - name: Run interpreter tests
+        run: |
+          python3 nvc/tests/run_tests.py
