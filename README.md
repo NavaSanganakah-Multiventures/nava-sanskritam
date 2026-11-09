@@ -34,8 +34,8 @@ NVC requires `CMake` and `LLVM 18+`. On Windows, we highly recommend using **MSY
 
 ```bash
 # Clone repository
-git clone https://github.com/navasanganakah/ns-language-own.git
-cd ns-language-own/nvc
+git clone https://github.com/NavaSanganakah-Multiventures/nava-sanskritam.git
+cd nava-sanskritam/nvc
 
 # Configure & Build LLVM Compiler
 mkdir build && cd build
