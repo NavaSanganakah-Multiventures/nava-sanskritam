@@ -1,0 +1,5 @@
+/* Block comments must be skipped by the lexer.
+   They may span several lines and contain // or * characters. */
+वद("टिप्पणी"); // trailing line comment
+/* एकपङ्क्ति-टिप्पणी */ अस्ति क = ३;
+वद(क + १);

@@ -17,6 +17,7 @@ private:
 
     bool isAtEnd() const;
     Token peek() const;
+    Token peekNext() const;
     Token previous() const;
     bool check(TokenType type, const std::string& value = "") const;
     bool match(TokenType type, const std::string& value = "");
@@ -38,6 +39,10 @@ private:
     
     std::unique_ptr<DarshanamBlock> parseDarshanamBlock();
     std::unique_ptr<DrishyamElement> parseDrishyamElement(std::string enforcedType = "");
+    void parseDrishyamAttribute(DrishyamElement* element);
+    std::string parseDrishyamValue();
+    bool atDrishyamAttribute() const;
+    std::string parseHyphenatedName();
     std::unique_ptr<DrishyamElement> parseManjushaElement();
     std::unique_ptr<DrishyamElement> parseSuchiElement();
     std::unique_ptr<DrishyamElement> parseChittramElement();
