@@ -73,9 +73,12 @@ jobs:
         npm install
         
     - name: Build Installer
+      # The electron-builder config declares a GitHub publish target. In CI we
+      # only want the installer as a workflow artifact, so publishing is
+      # disabled explicitly instead of failing on a missing GH_TOKEN.
       run: |
         cd nava-studio
-        npm run build
+        npx electron-builder --publish never
         
     - name: Upload Installer
       uses: actions/upload-artifact@v4
