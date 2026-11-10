@@ -1,0 +1,15 @@
+// Darshanam UI: nested containers, keyword element types, attributes written
+// inside the braces, and hyphenated view names.
+दर्शनम् मुख्य-पटलम् {
+    मंजूषा शीर्षक-खण्डः {
+        दृश्यम् चित्त्रम्() {
+            स्रोतस: "logo.png";
+            नाम: "चित्रम्";
+        }
+        दृश्यम् पाठः() {
+            नाम: "नव-संस्कृतम्";
+            रङ्गः: नीलवर्णः;
+        }
+        प्रविष्टिः नाम-प्रविष्टिः();
+    }
+}

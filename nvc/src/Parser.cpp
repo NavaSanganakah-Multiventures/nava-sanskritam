@@ -417,11 +417,14 @@ std::unique_ptr<Expression> Parser::parsePrimary() {
 }
 
 std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
-    Token idToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: दर्शन-नाम अपेक्षितम् ");
+    if (!check(TokenType::IDENTIFIER)) {
+        throw std::runtime_error("व्याकरण-त्रुटिः: दर्शन-नाम अपेक्षितम्  - प्राप्तम् '" + peek().value + "' - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
+    }
+    std::string viewName = parseHyphenatedName();
     consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: दर्शन-नामनः पश्चात् '{' अपेक्षितम् ", "{");
     
     auto block = std::make_unique<DarshanamBlock>();
-    block->id = idToken.value;
+    block->id = viewName;
 
     while (!check(TokenType::PUNCTUATION, "}")) {
         if (match(TokenType::KEYWORD, "दृश्यम्")) {
@@ -434,57 +437,126 @@ std::unique_ptr<DarshanamBlock> Parser::parseDarshanamBlock() {
             block->elements.push_back(parseChittramElement());
         } else if (match(TokenType::KEYWORD, "प्रविष्टिः")) {
             block->elements.push_back(parsePrashtihElement());
-        } else if (match(TokenType::IDENTIFIER, "पाठः")) {
+        } else if (check(TokenType::IDENTIFIER, "पाठः")) {
+            advance();
             block->elements.push_back(parseDrishyamElement("Text"));
-        } else if (match(TokenType::IDENTIFIER, "बटनम्")) {
+        } else if (check(TokenType::IDENTIFIER, "बटनम्")) {
+            advance();
             block->elements.push_back(parseDrishyamElement("Button"));
         } else if (match(TokenType::PUNCTUATION, ";")) {
             continue; // Skip extra semicolons
+        } else if (isAtEnd()) {
+            throw std::runtime_error("व्याकरण-त्रुटिः: अपूर्णः दर्शन-खण्डः ('}' अपेक्षितम्)  - पङ्क्तिः " + std::to_string(peek().line));
         } else {
-            advance(); // Skip unknown
+            throw std::runtime_error("व्याकरण-त्रुटिः: दर्शन-खण्डे अनुचितः शब्दः '" + peek().value + "'  - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
         }
     }
     consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: '}' अपेक्षितम् ", "}");
     return block;
 }
 
+std::string Parser::parseDrishyamValue() {
+    if (check(TokenType::STRING) || check(TokenType::IDENTIFIER) ||
+        check(TokenType::KEYWORD) || check(TokenType::NUMBER)) {
+        return advance().value;
+    }
+    parseExpression(); // Unsupported value shape: consume it so parsing continues.
+    return "";
+}
+
+// Canonical element types, so exported darshanam.json is consistent whether the
+// program used the Sanskrit or the English name for a component.
+static std::string canonicalDrishyamType(const std::string& raw) {
+    if (raw == "पाठः" || raw == "Text") return "Text";
+    if (raw == "बटनम्" || raw == "Button") return "Button";
+    if (raw == "मंजूषा" || raw == "Box") return "Box";
+    if (raw == "सूची" || raw == "List") return "List";
+    if (raw == "चित्त्रम्" || raw == "Image") return "Image";
+    if (raw == "प्रविष्टिः" || raw == "Input") return "Input";
+    return raw;
+}
+
+// Reads a name that may contain hyphens, e.g. मुख्य-सूची or मुख्य-पटल. The lexer
+// splits on '-', so glue the pieces back together for UI and view names.
+std::string Parser::parseHyphenatedName() {
+    std::string name = advance().value;
+    while (check(TokenType::OPERATOR, "-") &&
+           (peekNext().type == TokenType::IDENTIFIER || peekNext().type == TokenType::KEYWORD)) {
+        advance();
+        name += "-" + advance().value;
+    }
+    return name;
+}
+
+// True when the cursor sits on `key :` inside an element's attribute list.
+bool Parser::atDrishyamAttribute() const {
+    if (!(check(TokenType::IDENTIFIER) || check(TokenType::KEYWORD))) return false;
+    Token next = peekNext();
+    return next.type == TokenType::PUNCTUATION && next.value == ":";
+}
+
+void Parser::parseDrishyamAttribute(DrishyamElement* element) {
+    Token key = advance();
+    consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: गुण-नामनः पश्चात् ':' अपेक्षितम् ", ":");
+    const std::string& k = key.value;
+    if (k == "नाम" || k == "label") {
+        element->label = parseDrishyamValue();
+    } else if (k == "रङ्गः" || k == "रंग" || k == "color") {
+        element->color = parseDrishyamValue();
+    } else if (k == "स्रोतस" || k == "स्रोतसः" || k == "source") {
+        element->source = parseDrishyamValue();
+    } else {
+        parseDrishyamValue(); // Unknown attribute: consume and ignore.
+    }
+}
+
 std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforcedType) {
     auto element = std::make_unique<DrishyamElement>();
-    
+
     if (enforcedType.empty()) {
-        Token typeToken = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: वस्तु-प्रकारः अपेक्षितम् ");
-        element->type = typeToken.value;
+        // The element type may be a plain identifier (पाठः, बटनम्) or one of the
+        // reserved UI keywords (चित्त्रम्, सूची, प्रविष्टिः), which the lexer
+        // emits as KEYWORD tokens. Accept both.
+        if (check(TokenType::IDENTIFIER) || check(TokenType::KEYWORD)) {
+            element->type = canonicalDrishyamType(advance().value);
+        } else {
+            throw std::runtime_error("व्याकरण-त्रुटिः: वस्तु-प्रकारः अपेक्षितम्  - प्राप्तम् '" + peek().value + "' - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
+        }
     } else {
-        element->type = enforcedType;
+        element->type = canonicalDrishyamType(enforcedType);
+    }
+
+    // Optional element name: मंजूषा शीर्षक् { ... }
+    if (check(TokenType::IDENTIFIER) && !atDrishyamAttribute()) {
+        element->label = parseHyphenatedName();
     }
 
     if (match(TokenType::PUNCTUATION, "(")) {
         while (!check(TokenType::PUNCTUATION, ")")) {
-            Token key = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: गुण-नाम अपेक्षितम् ");
-            if (match(TokenType::PUNCTUATION, ":")) {
-                if (key.value == "नाम" || key.value == "label") {
-                    element->label = consume(TokenType::STRING, "व्याकरण-त्रुटिः: पाठ्य-नाम अपेक्षितम् ").value;
-                } else if (key.value == "रङ्गः" || key.value == "रंग" || key.value == "color") {
-                    if (check(TokenType::STRING)) {
-                         element->color = consume(TokenType::STRING, "").value;
-                    } else {
-                         element->color = consume(TokenType::IDENTIFIER, "व्याकरण-त्रुटिः: रङ्ग-नाम अपेक्षितम् ").value;
-                    }
-                } else if (key.value == "स्रोतस" || key.value == "source") {
-                    element->source = consume(TokenType::STRING, "व्याकरण-त्रुटिः: स्रोतस-लिङ्क अपेक्षितम् ").value;
-                } else {
-                    parseExpression(); // Handle unknown attributes generically
-                }
-            } else {
-                // If it isn't a key:value pair, fallback for coordinates
+            if (isAtEnd()) {
+                throw std::runtime_error("व्याकरण-त्रुटिः: अपूर्णः गुण-सूची ('(' तः ')' यावत्)  - पङ्क्तिः " + std::to_string(peek().line));
             }
-            if (match(TokenType::PUNCTUATION, ",")) continue;
+            // Positional coordinates: दृश्यम् बटनम्(५०, १००)
+            if (check(TokenType::NUMBER)) {
+                element->pos.push_back(parseExpression());
+                match(TokenType::PUNCTUATION, ",");
+                continue;
+            }
+            if (atDrishyamAttribute()) {
+                parseDrishyamAttribute(element.get());
+            } else {
+                advance(); // Stray token in the attribute list.
+            }
+            match(TokenType::PUNCTUATION, ",");
         }
         consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: गुणानां पश्चात् ')' अपेक्षितम् ", ")");
     }
 
     if (match(TokenType::PUNCTUATION, "{")) {
         while (!check(TokenType::PUNCTUATION, "}")) {
+            if (isAtEnd()) {
+                throw std::runtime_error("व्याकरण-त्रुटिः: अपूर्णः दृश्य-खण्डः ('}' अपेक्षितम्)  - पङ्क्तिः " + std::to_string(peek().line));
+            }
             if (match(TokenType::KEYWORD, "दृश्यम्")) {
                 element->children.push_back(parseDrishyamElement());
             } else if (match(TokenType::KEYWORD, "मंजूषा")) {
@@ -495,14 +567,18 @@ std::unique_ptr<DrishyamElement> Parser::parseDrishyamElement(std::string enforc
                 element->children.push_back(parseChittramElement());
             } else if (match(TokenType::KEYWORD, "प्रविष्टिः")) {
                 element->children.push_back(parsePrashtihElement());
-            } else if (match(TokenType::IDENTIFIER, "पाठः")) {
+            } else if (check(TokenType::IDENTIFIER, "पाठः")) {
+                advance();
                 element->children.push_back(parseDrishyamElement("Text"));
-            } else if (match(TokenType::IDENTIFIER, "बटनम्")) {
+            } else if (check(TokenType::IDENTIFIER, "बटनम्")) {
+                advance();
                 element->children.push_back(parseDrishyamElement("Button"));
+            } else if (atDrishyamAttribute()) {
+                parseDrishyamAttribute(element.get());
             } else if (match(TokenType::PUNCTUATION, ";")) {
                 continue; // Skip extra semicolons
             } else {
-                advance(); // Skip unknown
+                throw std::runtime_error("व्याकरण-त्रुटिः: दृश्य-खण्डे अनुचितः शब्दः '" + peek().value + "'  - पङ्क्तिः " + std::to_string(peek().line) + ", स्तम्भः " + std::to_string(peek().col));
             }
         }
         consume(TokenType::PUNCTUATION, "व्याकरण-त्रुटिः: बाल-वस्तूनां पश्चात् '}' अपेक्षितम् ", "}");
@@ -536,6 +612,11 @@ bool Parser::isAtEnd() const {
 Token Parser::peek() const {
     if (pos >= tokens.size()) return tokens.back();
     return tokens[pos];
+}
+
+Token Parser::peekNext() const {
+    if (pos + 1 >= tokens.size()) return tokens.back();
+    return tokens[pos + 1];
 }
 
 Token Parser::previous() const {
