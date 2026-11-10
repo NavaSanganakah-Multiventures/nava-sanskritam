@@ -1,6 +1,34 @@
 #include "Interpreter.hpp"
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
+#include <cstdio>
+
+// Formats a double the way a language user expects: whole numbers print
+// without a fractional part (15, not 15.000000) and fractions keep up to six
+// significant decimals with trailing zeros trimmed (2.5, 0.333333).
+static std::string numToString(double v) {
+    if (std::isnan(v)) return "NaN";
+    if (std::isinf(v)) return v < 0 ? "-Infinity" : "Infinity";
+    if (std::fabs(v) < 1e15 && v == std::floor(v)) {
+        return std::to_string(static_cast<long long>(v));
+    }
+    char buf[64];
+    std::snprintf(buf, sizeof(buf), "%.6f", v);
+    std::string s(buf);
+    size_t dot = s.find('.');
+    if (dot != std::string::npos) {
+        size_t last = s.find_last_not_of('0');
+        s.erase(last + 1);
+        if (!s.empty() && s.back() == '.') s.pop_back();
+    }
+    // Very small magnitudes round to "0" above; keep the significant digits.
+    if (s == "0" || s == "-0") {
+        std::snprintf(buf, sizeof(buf), "%g", v);
+        s = buf;
+    }
+    return s;
+}
 
 static bool isNumeric(const std::string& str, double& out) {
     if (str.empty()) return false;
@@ -142,10 +170,10 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
         
         double l, r;
         if (isNumeric(leftStr, l) && isNumeric(rightStr, r)) {
-            if (bin->op == "+") return std::to_string(l + r);
-            if (bin->op == "-") return std::to_string(l - r);
-            if (bin->op == "*") return std::to_string(l * r);
-            if (bin->op == "/") return std::to_string(l / r);
+            if (bin->op == "+") return numToString(l + r);
+            if (bin->op == "-") return numToString(l - r);
+            if (bin->op == "*") return numToString(l * r);
+            if (bin->op == "/") return numToString(l / r);
             
             // Relational Operators
             if (bin->op == ">") return (l > r) ? "1" : "0";
@@ -192,7 +220,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                 std::string cStr = evaluateExpression(call->arguments[2].get());
                 double a, b, c;
                 if (isNumeric(aStr, a) && isNumeric(bStr, b) && isNumeric(cStr, c) && a != 0) {
-                    return std::to_string((b * c) / a);
+                    return numToString((b * c) / a);
                 }
             }
             return "0";
@@ -222,7 +250,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                 std::string rStr = evaluateExpression(call->arguments[1].get());
                 double l, r;
                 if (isNumeric(lStr, l) && isNumeric(rStr, r)) {
-                    return std::to_string(l + r);
+                    return numToString(l + r);
                 } else {
                     return lStr + rStr;
                 }
@@ -233,7 +261,7 @@ std::string Interpreter::evaluateExpression(Expression* expr) {
                 std::string aStr = evaluateExpression(call->arguments[0].get());
                 double a;
                 if (isNumeric(aStr, a)) {
-                    return std::to_string(a * a);
+                    return numToString(a * a);
                 }
             }
             return "0";

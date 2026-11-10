@@ -179,6 +179,22 @@ std::vector<Token> Lexer::tokenize() {
                 }
                 continue;
             }
+            if (op.rfind("/*", 0) == 0) {
+                int commentLine = line;
+                bool closed = false;
+                while (pos < input.length()) {
+                    if (currentChar() == "*" && input.compare(pos + 1, 1, "/") == 0) {
+                        advance(2);
+                        closed = true;
+                        break;
+                    }
+                    advance(currentChar().length());
+                }
+                if (!closed) {
+                    throw std::runtime_error("पद-सङ्केत-त्रुटिः: अपूर्णः टिप्पणी-खण्डः ('/*' तः '*/' यावत्)  - पङ्क्तिः " + std::to_string(commentLine));
+                }
+                continue;
+            }
             tokens.push_back({TokenType::OPERATOR, op, line, col});
             continue;
         }

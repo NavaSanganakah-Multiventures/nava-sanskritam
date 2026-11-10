@@ -1,0 +1,7 @@
+// Number formatting: whole numbers print without a fractional part,
+// fractions keep the digits that matter.
+वद(१० + ५);
+वद(५ / २);
+वद(१० / ४);
+वद(७ * ३);
+वद(वर्गः(४));
