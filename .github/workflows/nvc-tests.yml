@@ -26,3 +26,7 @@ jobs:
       - name: Run interpreter tests
         run: |
           python3 nvc/tests/run_tests.py
+
+      - name: Run example programs
+        run: |
+          python3 examples/run_examples.py
