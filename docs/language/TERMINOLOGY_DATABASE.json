@@ -1,0 +1,124 @@
+{
+  "schema_version": "0.1",
+  "language_policy": {
+    "primary_profile": "laukika",
+    "future_profiles": [
+      "vaidika"
+    ],
+    "default_profile": "laukika"
+  },
+  "terms": [
+    {
+      "concept": "variable_declaration",
+      "technical_definition": "Introduces a named binding in the current scope.",
+      "candidate": "अस्ति",
+      "transliteration": "asti",
+      "part_of_speech": null,
+      "gender": null,
+      "stem_or_form": null,
+      "derivation": null,
+      "dhatu": null,
+      "pratyaya_or_formation": null,
+      "attestation_status": "unknown",
+      "language_profile": "undetermined",
+      "sources": [],
+      "rationale": null,
+      "alternatives_considered": [],
+      "review_status": "under_review",
+      "reviewer": null,
+      "compiler_impact": "keyword",
+      "compatibility_aliases": []
+    },
+    {
+      "concept": "function_declaration",
+      "technical_definition": "Declares a callable unit with parameters and a body.",
+      "candidate": "विधिः",
+      "transliteration": "vidhiḥ",
+      "part_of_speech": null,
+      "gender": null,
+      "stem_or_form": null,
+      "derivation": null,
+      "dhatu": null,
+      "pratyaya_or_formation": null,
+      "attestation_status": "unknown",
+      "language_profile": "undetermined",
+      "sources": [],
+      "rationale": null,
+      "alternatives_considered": [
+        "क्रिया",
+        "प्रक्रिया"
+      ],
+      "review_status": "under_review",
+      "reviewer": null,
+      "compiler_impact": "keyword",
+      "compatibility_aliases": []
+    },
+    {
+      "concept": "return_value",
+      "technical_definition": "Terminates the current function and yields a value to its caller.",
+      "candidate": "फलम्",
+      "transliteration": "phalam",
+      "part_of_speech": null,
+      "gender": null,
+      "stem_or_form": null,
+      "derivation": null,
+      "dhatu": null,
+      "pratyaya_or_formation": null,
+      "attestation_status": "unknown",
+      "language_profile": "undetermined",
+      "sources": [],
+      "rationale": null,
+      "alternatives_considered": [],
+      "review_status": "under_review",
+      "reviewer": null,
+      "compiler_impact": "keyword",
+      "compatibility_aliases": []
+    },
+    {
+      "concept": "print_output",
+      "technical_definition": "Writes a value to the program's standard output stream.",
+      "candidate": "वद",
+      "transliteration": "vada",
+      "part_of_speech": null,
+      "gender": null,
+      "stem_or_form": null,
+      "derivation": null,
+      "dhatu": null,
+      "pratyaya_or_formation": null,
+      "attestation_status": "unknown",
+      "language_profile": "undetermined",
+      "sources": [],
+      "rationale": null,
+      "alternatives_considered": [],
+      "review_status": "under_review",
+      "reviewer": null,
+      "compiler_impact": "builtin",
+      "compatibility_aliases": []
+    },
+    {
+      "concept": "arithmetic_addition",
+      "technical_definition": "Returns the sum of two numeric operands.",
+      "candidate": "गणनम्",
+      "transliteration": "gaṇanam",
+      "part_of_speech": null,
+      "gender": null,
+      "stem_or_form": null,
+      "derivation": null,
+      "dhatu": null,
+      "pratyaya_or_formation": null,
+      "attestation_status": "unknown",
+      "language_profile": "undetermined",
+      "sources": [],
+      "rationale": "Candidate only; verify whether this denotes the intended operation rather than the broader act/process of calculation.",
+      "alternatives_considered": [
+        "योगः"
+      ],
+      "review_status": "under_review",
+      "reviewer": null,
+      "compiler_impact": "builtin",
+      "compatibility_aliases": [
+        "गणन"
+      ]
+    }
+  ]
+}
