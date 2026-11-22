@@ -19,8 +19,8 @@ namespace Keywords {
 
 // Nitya builtins (standard library)
 inline constexpr const char* SAMAYA = "समय";            // samaya  - wall clock
-inline constexpr const char* GANANA = "गणन";            // ganana  - 2-arg arithmetic
-inline constexpr const char* GANANAM = "गणनम्";          // gananam - alias of the above
+inline constexpr const char* GANANA = "गणनम्";          // ganana  - 2-arg arithmetic; matches runtime.cpp
+inline constexpr const char* GANANAM = "गणनम्";          // legacy spelling alias
 inline constexpr const char* NIYAMAH = "नियमः";          // niyamah - assertion
 inline constexpr const char* JYA = "ज्या";               // jya     - sine
 inline constexpr const char* KOJYA = "कोज्या";            // kojya   - cosine
@@ -46,8 +46,7 @@ enum class BuiltinId {
 // the names that were already usable in ASCII, the Latin alias.
 inline BuiltinId builtinId(const std::string& name) {
     if (name == Keywords::SAMAYA || name == "samaya") return BuiltinId::Samaya;
-    if (name == Keywords::GANANA || name == Keywords::GANANAM ||
-        name == "ganana" || name == "gananam") return BuiltinId::Ganana;
+    if (name == Keywords::GANANA || name == "गणन" || name == "ganana" || name == "gananam") return BuiltinId::Ganana;
     if (name == Keywords::NIYAMAH || name == "niyamah") return BuiltinId::Niyama;
     if (name == Keywords::JYA || name == "jya") return BuiltinId::Jya;
     if (name == Keywords::KOJYA || name == "kojya") return BuiltinId::Kojya;
