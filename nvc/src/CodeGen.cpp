@@ -1,4 +1,6 @@
 #include "CodeGen.hpp"
+#include "Diagnostics.hpp"
+#include "Keywords.hpp"
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/MC/TargetRegistry.h>
 #include <llvm/Target/TargetMachine.h>
@@ -52,11 +54,11 @@ llvm::AllocaInst* CodeGen::createEntryBlockAlloca(llvm::Function* theFunction, c
 void CodeGen::generate(Program* program) {
     // Builtin declarations
     llvm::FunctionType* timeFT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), false);
-    llvm::Function::Create(timeFT, llvm::Function::ExternalLinkage, "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¸ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯", module.get());
+    llvm::Function::Create(timeFT, llvm::Function::ExternalLinkage, Keywords::SAMAYA, module.get());
 
     std::vector<llvm::Type*> mathArgs(2, llvm::Type::getDoubleTy(*context));
     llvm::FunctionType* mathFT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), mathArgs, false);
-    llvm::Function::Create(mathFT, llvm::Function::ExternalLinkage, "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ£ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨", module.get());
+    llvm::Function::Create(mathFT, llvm::Function::ExternalLinkage, Keywords::GANANA, module.get());
 
     llvm::FunctionType* mainType = llvm::FunctionType::get(builder->getInt32Ty(), false);
     llvm::Function* mainFunc = llvm::Function::Create(mainType, llvm::Function::ExternalLinkage, "main", module.get());
@@ -128,7 +130,7 @@ llvm::Value* CodeGen::generateNode(ASTNode* node) {
         case ASTNodeType::DarshanamBlock:
             return generateDarshanamBlock(static_cast<DarshanamBlock*>(node));
         default:
-            throw std::runtime_error("ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤-ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¥ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿-ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂªÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ");
+            throw CompileError("अज्ञात-ग्रन्थि-प्रकारः (unknown AST node type): " + std::to_string(static_cast<int>(node->getType())));
     }
 }
 
@@ -159,10 +161,15 @@ llvm::Value* CodeGen::generateVariableDeclaration(VariableDeclaration* node) {
     }
 
     if (node->init) {
+        if (allocType != llvm::Type::getDoubleTy(*context)) {
+            // Storing a single value into a द्विवचन/बहुवचन slot used to emit
+            // invalid IR (type mismatch on store). Refuse clearly until the
+            // collection model is designed.
+            throw CompileError("असमर्थित-आरम्भः (dual/plural initialisation is not implemented yet): '" +
+                               node->id + "' - declare it without an initialiser for now");
+        }
         llvm::Value* initVal = generateNode(node->init.get());
         if (!initVal) return nullptr;
-        
-        // Handle vector/complex initialization later
         builder->CreateStore(initVal, alloca);
     }
 
@@ -327,7 +334,7 @@ llvm::Value* CodeGen::generateBinaryExpression(BinaryExpression* node) {
         return builder->CreateCall(powF, {L, R}, "powtmp");
     }
 
-    throw std::runtime_error("ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯-ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¦ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂµÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯-ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂªÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ²ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ");
+    throw CompileError("अमान्य-द्विचक्रीय-प्रचालकः (unsupported binary operator): " + node->op);
 }
 
 llvm::Value* CodeGen::generateAssignment(Assignment* node) {
@@ -354,13 +361,16 @@ llvm::Value* CodeGen::generateLiteral(Literal* node) {
 }
 
 llvm::Value* CodeGen::generateIdentifier(Identifier* node) {
-    llvm::AllocaInst* A = namedValues[node->name];
-    if (!A) {
-        return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
+    auto it = namedValues.find(node->name);
+    if (it == namedValues.end()) {
+        // Used to return a silent 0.0 here, which turned typos into wrong
+        // programs instead of errors.
+        throw CompileError("अपरिभाषित-चरः (undefined variable): '" + node->name + "'");
     }
+    llvm::AllocaInst* A = it->second;
 
     // SUL v12.0: Karaka-to-LLVM Semantic Dispatch
-    // SAPTAMI (Adhikarana) -> Return Address (The Base Pointer - ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ§ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ)
+    // SAPTAMI (Adhikarana) -> Return Address (The Base Pointer - आधारः)
     if (node->role == "Adhikarana") {
         return A; // Return the pointer itself instead of loading value
     }
@@ -372,105 +382,161 @@ llvm::Value* CodeGen::generateIdentifier(Identifier* node) {
 llvm::Value* CodeGen::generateMemberAccess(MemberAccess* node) {
     // SUL v11.0 Native Semantic Property Access
     // Logic: Look for mangled name 'object_property'
-    std::string objName = static_cast<Identifier*>(node->object.get())->name;
-    std::string mangledName = objName + "_" + node->property;
-    
-    llvm::AllocaInst* A = namedValues[mangledName];
-    if (!A) {
-        return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
+    auto* obj = dynamic_cast<Identifier*>(node->object.get());
+    if (!obj) {
+        throw CompileError("अमान्य-गुण-अभिगमः (property access on a non-name expression)");
     }
+
+    std::string mangledName = obj->name + "_" + node->property;
+    auto it = namedValues.find(mangledName);
+    if (it == namedValues.end()) {
+        throw CompileError("अपरिभाषित-गुणः (undefined property): '" + mangledName + "'");
+    }
+    llvm::AllocaInst* A = it->second;
     return builder->CreateLoad(A->getAllocatedType(), A, mangledName.c_str());
 }
 
 llvm::Value* CodeGen::generateObjectLiteral(ObjectLiteral* node) {
-    // Basic implementation: generate stubs for properties
-    return llvm::Constant::getNullValue(llvm::Type::getDoubleTy(*context));
+    // Object literals are not implemented: this used to return a null double,
+    // so any program using one compiled "successfully" into meaningless code.
+    (void)node;
+    throw CompileError("असमर्थित-वस्तु-अक्षरम् (object literals are not implemented yet)");
 }
 
 llvm::Value* CodeGen::generateCallExpression(CallExpression* node) {
-    // SUL v13.0 Native TiÃÂÃÂ¡ÃÂÃÂ¹ÃÂÃÂ Call Logic
-    std::string mangledName = node->callee->name;
-    // Map call attempt to available mangled functions (e.g., yoga -> nava_yoga_lat)
-    llvm::Function* calleeF = module->getFunction("nava_" + mangledName + "_lat");
-    if (!calleeF) calleeF = module->getFunction("nava_" + mangledName + "_lrt");
-    if (!calleeF) calleeF = module->getFunction(mangledName); // Fallback to raw
+    // SUL v13.0 Native Tiṅ Call Logic
+    const std::string mangledName = node->callee->name;
 
-    if (!calleeF && mangledName != "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ" && mangledName != "niyamah" && mangledName != "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾" && mangledName != "jya" && mangledName != "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾" && mangledName != "kojya" && mangledName != "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂµÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ²ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ" && mangledName != "vargamulam" && mangledName != "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¶ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ" && mangledName != "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ£ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ" && mangledName != "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂµÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ") {
-        throw std::runtime_error("ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤-ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾-ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®: " + mangledName);
-    }
-
+    // Arguments are evaluated once and reused by every dispatch path below.
     std::vector<llvm::Value*> argsV;
+    argsV.reserve(node->arguments.size());
     for (unsigned i = 0; i < node->arguments.size(); ++i) {
         argsV.push_back(generateNode(node->arguments[i].get()));
         if (!argsV.back()) return nullptr;
     }
 
-    // LÃÂÃÂ¡ÃÂÃÂ¹ÃÂÃÂÃÂÃÂ¡ÃÂÃÂ¹ÃÂÃÂ­ (Async) Dispatch
-    if (node->lakara == "Lrt") {
-        // Placeholder for Async/Promise spawn
-        // In a real runtime, this would call libns_async_spawn(calleeF, argsV)
-        return builder->CreateCall(calleeF, argsV, "asynctmp");
-    }
-
-    // Bahuvachana (Parallel) Dispatch
-    if (node->vachana == 3) {
-        // Simple Parallel Loop simulation (execute 3 times for now)
-        for(int i=0; i<3; ++i) {
-            builder->CreateCall(calleeF, argsV, "paralleltmp");
+    auto expectArgs = [&](size_t expected) {
+        if (argsV.size() != expected) {
+            throw CompileError("अर्घता-असंगतिः (wrong number of arguments) for '" + mangledName +
+                               "': expected " + std::to_string(expected) +
+                               ", got " + std::to_string(argsV.size()));
         }
-        return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
-    }
+    };
 
-    // SUL v14.0: Native Niyamah (Assertion) Handler
-    if (mangledName == "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ" || mangledName == "niyamah") {
-        llvm::Value* cond = argsV[0];
-        if (cond->getType()->isDoubleTy()) {
-            cond = builder->CreateFCmpONE(cond, llvm::ConstantFP::get(*context, llvm::APFloat(0.0)), "assertcond");
+    // ---- 1. User-defined functions, mangled as nava_<id>_<lakara> ----------
+    llvm::Function* calleeF = module->getFunction("nava_" + mangledName + "_lat");
+    if (!calleeF) calleeF = module->getFunction("nava_" + mangledName + "_lrt");
+    if (calleeF) {
+        expectArgs(calleeF->arg_size());
+
+        // Lṛṭ (Async) Dispatch
+        // NOTE: Lṛṭ is not connected to a scheduler yet, so this is still a
+        // plain blocking call. Kept honest here instead of pretending.
+        if (node->lakara == "Lrt") {
+            return builder->CreateCall(calleeF, argsV, "asynctmp");
         }
-        
-        llvm::Function* theFunction = builder->GetInsertBlock()->getParent();
-        llvm::BasicBlock* failBB = llvm::BasicBlock::Create(*context, "assert_fail", theFunction);
-        llvm::BasicBlock* passBB = llvm::BasicBlock::Create(*context, "assert_pass", theFunction);
-        
-        builder->CreateCondBr(cond, passBB, failBB);
-        builder->SetInsertPoint(failBB);
-        
-        // Native Trap / Panic
-        llvm::Function* trap = getNvcIntrinsic(module.get(), llvm::Intrinsic::trap);
-        builder->CreateCall(trap, {});
-        builder->CreateUnreachable();
-        
-        builder->SetInsertPoint(passBB);
-        return llvm::ConstantFP::get(*context, llvm::APFloat(1.0)); // True
-    }
 
-    // SUL v18.0: Native Math Intrinsics (Jya, Kojya, Vargamulam)
-    if (mangledName == "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾" || mangledName == "jya") {
-        llvm::Function* sinF = getNvcIntrinsic(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
-        return builder->CreateCall(sinF, {argsV[0]}, "sintmp");
-    }
-    if (mangledName == "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾" || mangledName == "kojya") {
-        llvm::Function* cosF = getNvcIntrinsic(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
-        return builder->CreateCall(cosF, {argsV[0]}, "costmp");
-    }
-    if (mangledName == "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂµÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ²ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ" || mangledName == "vargamulam") {
-        llvm::Function* sqrtF = getNvcIntrinsic(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
-        return builder->CreateCall(sqrtF, {argsV[0]}, "sqrttmp");
-    }
-    if (mangledName == "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¶ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ" || mangledName == "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ£ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ" || mangledName == "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂµÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ") {
-        llvm::FunctionType* FT;
-        if (mangledName == "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¶ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ") {
-            FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), {llvm::Type::getDoubleTy(*context), llvm::Type::getDoubleTy(*context), llvm::Type::getDoubleTy(*context)}, false);
-        } else if (mangledName == "ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ£ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ") {
-            FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), {llvm::Type::getDoubleTy(*context), llvm::Type::getDoubleTy(*context)}, false);
-        } else {
-            FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context), {llvm::Type::getDoubleTy(*context)}, false);
+        // Bahuvachana (Parallel) Dispatch
+        // NOTE: sequential loop, not real parallelism. Same caveat as above.
+        if (node->vachana == 3) {
+            for (int i = 0; i < 3; ++i) {
+                builder->CreateCall(calleeF, argsV, "paralleltmp");
+            }
+            return llvm::ConstantFP::get(*context, llvm::APFloat(0.0));
         }
-        llvm::FunctionCallee extF = module->getOrInsertFunction(mangledName, FT);
-        return builder->CreateCall(extF, argsV, "calltmp");
+
+        return builder->CreateCall(calleeF, argsV, "calltmp");
     }
 
-    return builder->CreateCall(calleeF, argsV, "calltmp");
+    // ---- 2. Builtins, dispatched by id (see Keywords.hpp) ------------------
+    switch (builtinId(mangledName)) {
+        case BuiltinId::Niyama: {
+            // Native Niyamah (Assertion) Handler
+            expectArgs(1);
+            llvm::Value* cond = argsV[0];
+            if (cond->getType()->isDoubleTy()) {
+                cond = builder->CreateFCmpONE(cond, llvm::ConstantFP::get(*context, llvm::APFloat(0.0)), "assertcond");
+            }
+
+            llvm::Function* theFunction = builder->GetInsertBlock()->getParent();
+            llvm::BasicBlock* failBB = llvm::BasicBlock::Create(*context, "assert_fail", theFunction);
+            llvm::BasicBlock* passBB = llvm::BasicBlock::Create(*context, "assert_pass", theFunction);
+
+            builder->CreateCondBr(cond, passBB, failBB);
+            builder->SetInsertPoint(failBB);
+
+            // Native Trap / Panic
+            llvm::Function* trap = getNvcIntrinsic(module.get(), llvm::Intrinsic::trap);
+            builder->CreateCall(trap, {});
+            builder->CreateUnreachable();
+
+            builder->SetInsertPoint(passBB);
+            return llvm::ConstantFP::get(*context, llvm::APFloat(1.0)); // True
+        }
+
+        case BuiltinId::Jya: {
+            expectArgs(1);
+            llvm::Function* sinF = getNvcIntrinsic(module.get(), llvm::Intrinsic::sin, {argsV[0]->getType()});
+            return builder->CreateCall(sinF, {argsV[0]}, "sintmp");
+        }
+
+        case BuiltinId::Kojya: {
+            expectArgs(1);
+            llvm::Function* cosF = getNvcIntrinsic(module.get(), llvm::Intrinsic::cos, {argsV[0]->getType()});
+            return builder->CreateCall(cosF, {argsV[0]}, "costmp");
+        }
+
+        case BuiltinId::Vargamula: {
+            expectArgs(1);
+            llvm::Function* sqrtF = getNvcIntrinsic(module.get(), llvm::Intrinsic::sqrt, {argsV[0]->getType()});
+            return builder->CreateCall(sqrtF, {argsV[0]}, "sqrttmp");
+        }
+
+        case BuiltinId::Samaya: {
+            expectArgs(0);
+            llvm::Function* timeF = module->getFunction(Keywords::SAMAYA);
+            if (!timeF) {
+                throw CompileError("आन्तरिक-त्रुटिः (builtin declared but missing): समय");
+            }
+            return builder->CreateCall(timeF, {}, "timetmp");
+        }
+
+        case BuiltinId::Trairashika:
+        case BuiltinId::Ganana:
+        case BuiltinId::Varga: {
+            llvm::FunctionType* FT;
+            const char* name;
+            if (builtinId(mangledName) == BuiltinId::Trairashika) {
+                expectArgs(3);
+                FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context),
+                                             {llvm::Type::getDoubleTy(*context),
+                                              llvm::Type::getDoubleTy(*context),
+                                              llvm::Type::getDoubleTy(*context)},
+                                             false);
+                name = Keywords::TRAIRASHIKAM;
+            } else if (builtinId(mangledName) == BuiltinId::Ganana) {
+                expectArgs(2);
+                FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context),
+                                             {llvm::Type::getDoubleTy(*context),
+                                              llvm::Type::getDoubleTy(*context)},
+                                             false);
+                name = Keywords::GANANA;
+            } else {
+                expectArgs(1);
+                FT = llvm::FunctionType::get(llvm::Type::getDoubleTy(*context),
+                                             {llvm::Type::getDoubleTy(*context)},
+                                             false);
+                name = Keywords::VARGAH;
+            }
+            llvm::FunctionCallee extF = module->getOrInsertFunction(name, FT);
+            return builder->CreateCall(extF, argsV, "calltmp");
+        }
+
+        case BuiltinId::Unknown:
+            break;
+    }
+
+    throw CompileError("अज्ञात-क्रिया-नाम (unknown function): '" + mangledName + "'");
 }
 
 llvm::Value* CodeGen::generateFunctionDeclaration(FunctionDeclaration* node) {
@@ -661,7 +727,7 @@ void CodeGen::writeObject(const std::string& filename) {
     llvm::raw_fd_ostream dest(filename, ec, llvm::sys::fs::OF_None);
 
     if (ec) {
-        throw std::runtime_error("ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¸ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¦ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¶ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ: " + ec.message());
+        throw CompileError(std::string("सञ्चिका उद्घाटयितुम् अशक्तः (cannot open output file): ") + ec.message());
     }
 
     llvm::legacy::PassManager pass;
@@ -672,7 +738,7 @@ void CodeGen::writeObject(const std::string& filename) {
 #endif
 
     if (theTargetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
-        throw std::runtime_error("ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ²ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ·ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯-ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¯ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ®ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂ ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¦ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¶ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¸ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¾ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ°ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¶ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¨ÃÂÃÂ ÃÂÃÂ¥ÃÂÃÂÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¤ÃÂÃÂ ÃÂÃÂ¤ÃÂÃÂ¿");
+        throw CompileError("लक्ष्य-यन्त्रम् एतादृशं सञ्चिकां निर्गन्तुं न शक्नोति (target cannot emit object file)");
     }
 
     pass.run(*module);

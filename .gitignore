@@ -9,3 +9,7 @@ test_parser_c*
 time_test*
 vibhakti_test*
 nvc/src/runtime.c
+
+# Compiler build output
+nvc/build/
+web_output/
